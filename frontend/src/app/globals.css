@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+ body {
+ @apply bg-ink-900 text-ink-50 antialiased min-h-screen font-sans;
+ }
+}
+
+/* Custom clean UI helpers */
+.glass-card {
+  @apply bg-ink-950 border border-ink-800;
+}
+
+.gradient-text {
+  @apply text-white font-bold;
+}
