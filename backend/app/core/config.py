@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     # Razorpay Settings (Test Mode)
     RAZORPAY_KEY_ID: str = "rzp_test_internvision123"
     RAZORPAY_KEY_SECRET: str = "secret_internvision_key_456"
+
+    # Google OAuth (Identity Services)
+    GOOGLE_CLIENT_ID: str = ""  # Set this in .env — e.g. "xxxxx.apps.googleusercontent.com"
+
     
     # CORS Origins
     CORS_ORIGINS: Union[List[str], str] = [

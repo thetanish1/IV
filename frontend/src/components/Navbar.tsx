@@ -1,10 +1,10 @@
 "use client";
 
-import Link from"next/link";
-import Image from"next/image";
-import { usePathname } from"next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Sparkles, BookOpen, GraduationCap, Phone, Shield, Menu, X, Home } from"lucide-react";
+import { Sparkles, BookOpen, GraduationCap, Phone, Shield, Menu, X, Home, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -28,14 +28,14 @@ export default function Navbar() {
  className="sticky top-0 z-50 glass-card border-b border-ink-800"
  >
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
- <Link href="/"className="flex items-center gap-3 font-bold text-xl tracking-tight">
+ <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
  <div className="bg-white p-1 rounded-md flex items-center justify-center">
  <Image src="/logo.jpg" alt="InternVision Logo" width={160} height={40} className="h-7 w-auto object-contain" />
  </div>
  <span className="text-white tracking-wide">InternVision <span className="text-brand-400">Tech</span></span>
  </Link>
 
- <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+ <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
  <Link
  href="/"
  className={`flex items-center gap-1.5 transition-colors ${isActive('/') ? 'text-brand-400 font-semibold' : 'text-ink-300 hover:text-white'}`}
@@ -56,6 +56,13 @@ export default function Navbar() {
  >
  <GraduationCap className="w-4 h-4"/>
  Internship
+ </Link>
+ <Link
+ href="/careers"
+ className={`flex items-center gap-1.5 transition-colors ${isActive('/careers') ? 'text-brand-400 font-semibold' : 'text-ink-300 hover:text-white'}`}
+ >
+ <Briefcase className="w-4 h-4"/>
+ Careers
  </Link>
  <Link
  href="/contact"
@@ -86,6 +93,7 @@ export default function Navbar() {
  <button 
  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
  className="md:hidden p-2 text-ink-300 hover:text-white transition"
+ aria-label="Toggle mobile menu"
  >
  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
  </button>
@@ -99,7 +107,7 @@ export default function Navbar() {
  animate={{ opacity: 1, y: 0 }}
  exit={{ opacity: 0, y: -20 }}
  transition={{ duration: 0.2 }}
- className="md:hidden absolute top-16 left-0 w-full bg-ink-950 border-b border-ink-800 shadow-2xl p-4 flex flex-col gap-4"
+ className="md:hidden absolute top-16 left-0 w-full bg-ink-950 border-b border-ink-800 shadow-2xl p-4 flex flex-col gap-3"
  >
  <Link
  href="/"
@@ -125,6 +133,14 @@ export default function Navbar() {
  Internship
  </Link>
  <Link
+ href="/careers"
+ onClick={() => setIsMobileMenuOpen(false)}
+ className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${isActive('/careers') ? 'bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20' : 'bg-ink-900 text-ink-300 hover:text-white'}`}
+ >
+ <Briefcase className="w-4 h-4"/>
+ Careers
+ </Link>
+ <Link
  href="/contact"
  onClick={() => setIsMobileMenuOpen(false)}
  className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${isActive('/contact') ? 'bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20' : 'bg-ink-900 text-ink-300 hover:text-white'}`}
@@ -132,7 +148,7 @@ export default function Navbar() {
  <Phone className="w-4 h-4"/>
  Contact
  </Link>
- <div className="grid grid-cols-2 gap-3 pt-2">
+ <div className="grid grid-cols-2 gap-3 pt-1">
  <Link
  href="/admin/login"
  onClick={() => setIsMobileMenuOpen(false)}
