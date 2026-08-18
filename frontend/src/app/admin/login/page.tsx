@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Lock, Mail, ArrowRight, Loader2, Chrome } from "lucide-react";
+import { Shield, Lock, Mail, ArrowRight, Loader2, Globe2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -201,7 +201,7 @@ export default function AdminLoginPage() {
             ) : (
               /* Placeholder shown when no client ID is configured */
               <div className="w-full py-3 flex items-center justify-center gap-2 bg-ink-800 border border-ink-700 text-ink-400 text-sm cursor-not-allowed opacity-60 select-none">
-                <Chrome className="w-4 h-4" />
+                <Globe2 className="w-4 h-4" />
                 Sign in with Google
                 <span className="ml-2 text-[10px] text-red-400">(GOOGLE_CLIENT_ID not set)</span>
               </div>
