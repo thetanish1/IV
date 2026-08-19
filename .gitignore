@@ -18,3 +18,7 @@ frontend/out/
 .env.local
 .vscode/
 .idea/
+
+# Uploads
+backend/uploads/resumes/*
+!backend/uploads/resumes/.gitkeep

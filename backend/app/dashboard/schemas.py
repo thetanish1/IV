@@ -7,3 +7,4 @@ class DashboardStats(BaseModel):
     total_payments: int
     successful_payments: int
     pending_applications: int
+    total_users: int = 0

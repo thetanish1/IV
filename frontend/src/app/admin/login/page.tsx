@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "admin@internvision.tech",
+      email: "tanishdewase222@gmail.com",
       password: "Admin@123456",
     },
   });
@@ -110,6 +110,15 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       localStorage.setItem("token", data.access_token);
+      // Decode or retrieve email
+      try {
+        const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+        if (payload.sub) localStorage.setItem("admin_email", payload.sub);
+      } catch {
+        localStorage.setItem("admin_email", "tanishdewase222@gmail.com");
+      }
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("user-auth-change"));
       router.push("/admin/dashboard");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";
@@ -142,6 +151,9 @@ export default function AdminLoginPage() {
 
       const responseData = await res.json();
       localStorage.setItem("token", responseData.access_token);
+      localStorage.setItem("admin_email", data.email);
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("user-auth-change"));
       router.push("/admin/dashboard");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Invalid credentials. Please try again.";
@@ -250,8 +262,8 @@ export default function AdminLoginPage() {
 
             {/* Default credentials hint box */}
             <div className="p-3 bg-ink-900/60 border border-ink-800 text-[11px] text-ink-400 space-y-1">
-              <p className="font-semibold text-ink-300">Default Credentials:</p>
-              <p>Email: <span className="font-mono text-brand-400">admin@internvision.tech</span></p>
+              <p className="font-semibold text-ink-300">Admin Account Credentials:</p>
+              <p>Super Admin: <span className="font-mono text-brand-400">tanishdewase222@gmail.com</span></p>
               <p>Password: <span className="font-mono text-brand-400">Admin@123456</span></p>
               <p className="pt-1 border-t border-ink-800 mt-1">
                 Google users: password = <span className="font-mono text-brand-400">your.google@email.com</span>

@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.middleware import LoggingAndRequestIDMiddleware
 from app.auth.models import Admin
+from app.auth.user_models import SiteUser  # ensures site_users table is created
+
 from app.shared.security import get_password_hash
 from app.shared.database import Base, engine, get_db, SessionLocal
 from app.auth.router import router as auth_router
@@ -28,15 +30,21 @@ app = FastAPI(
 def startup_event():
     db = SessionLocal()
     try:
-        admin = db.query(Admin).filter(Admin.email == "admin@internvision.tech").first()
-        if not admin:
-            new_admin = Admin(
-                email="admin@internvision.tech",
-                hashed_password=get_password_hash("Admin@123456"),
-                full_name="InternVision Admin"
-            )
-            db.add(new_admin)
-            db.commit()
+        admins_to_seed = [
+            ("tanishdewase222@gmail.com", "Tanish Dewase (Admin)"),
+            ("admin@internvision.tech", "InternVision Admin")
+        ]
+        for email, name in admins_to_seed:
+            admin = db.query(Admin).filter(Admin.email == email).first()
+            if not admin:
+                new_admin = Admin(
+                    email=email,
+                    hashed_password=get_password_hash("Admin@123456"),
+                    full_name=name,
+                    is_active=True
+                )
+                db.add(new_admin)
+        db.commit()
     finally:
         db.close()
 

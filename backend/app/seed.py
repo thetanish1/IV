@@ -9,17 +9,21 @@ def seed_db():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        admin_email = "admin@internvision.tech"
-        existing_admin = db.query(Admin).filter(Admin.email == admin_email).first()
-        if not existing_admin:
-            admin = Admin(
-                email=admin_email,
-                hashed_password=get_password_hash("Admin@123456"),
-                full_name="InternVision Admin",
-                is_active=True
-            )
-            db.add(admin)
-            print(f"[SEED] Created default Admin: {admin_email} / Admin@123456")
+        admins_to_seed = [
+            ("tanishdewase222@gmail.com", "Tanish Dewase (Admin)"),
+            ("admin@internvision.tech", "InternVision Admin")
+        ]
+        for admin_email, name in admins_to_seed:
+            existing_admin = db.query(Admin).filter(Admin.email == admin_email).first()
+            if not existing_admin:
+                admin = Admin(
+                    email=admin_email,
+                    hashed_password=get_password_hash("Admin@123456"),
+                    full_name=name,
+                    is_active=True
+                )
+                db.add(admin)
+                print(f"[SEED] Created Admin: {admin_email} / Admin@123456")
 
         if db.query(Course).count() == 0:
             sample_courses = [
