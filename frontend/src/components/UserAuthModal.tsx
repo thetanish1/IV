@@ -127,11 +127,14 @@ export default function UserAuthModal({
     }
   };
 
-  const handleMockGoogleLogin = () => {
-    const inputEmail = prompt("Enter your Google Account email:", "student@gmail.com");
-    if (!inputEmail) return;
-    const name = inputEmail.split("@")[0];
-    setEmail(inputEmail);
+  const handleGoogleEmailProceed = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError("");
+    const name = fullName || email.split("@")[0];
     setFullName(name);
     setGoogleCredential("mock_credential_" + Date.now());
     setAuthStep("password_step");
@@ -243,7 +246,7 @@ export default function UserAuthModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-md bg-ink-950 border-2 border-brand-500/50 p-8 shadow-[12px_12px_0px_#000000] z-10 space-y-6"
+          className="relative w-full max-w-md bg-ink-950 border-2 border-brand-500/50 p-6 sm:p-8 shadow-[12px_12px_0px_#000000] z-10 space-y-6"
         >
           {/* Close button */}
           <button
@@ -254,18 +257,21 @@ export default function UserAuthModal({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Header */}
+          {/* Header with InternVision Tech branding */}
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" /> Required Applicant Sign-In
+            <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" /> InternVision Tech
+              </div>
+              <span className="text-xs text-ink-400 font-semibold">Portal Sign-In</span>
             </div>
             <h2 className="text-2xl font-black text-white tracking-tight">
-              {authStep === "password_step" ? "Enter Account Password" : title}
+              {authStep === "password_step" ? "Account Security Verification" : "Applicant Sign-In"}
             </h2>
             <p className="text-xs text-ink-400 leading-relaxed">
               {authStep === "password_step"
-                ? "Enter your password to link your Google profile before applying."
-                : subtitle}
+                ? "Enter your password to verify your account with InternVision Tech."
+                : "Sign in with your email to unlock and submit your internship application."}
             </p>
           </div>
 
@@ -302,34 +308,59 @@ export default function UserAuthModal({
 
               {tab === "google" ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-ink-900/60 border border-ink-800 text-xs text-ink-300 space-y-1">
+                  <div className="p-3 bg-ink-900/60 border border-ink-800 text-xs text-ink-300 space-y-1">
                     <div className="font-semibold text-white flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-brand-400" /> Fast 2-Step Verification:
+                      <ShieldCheck className="w-4 h-4 text-brand-400" /> InternVision Tech Verification:
                     </div>
                     <p className="text-ink-400 text-[11px] leading-relaxed">
-                      1. Sign in with your Google Account.<br />
-                      2. Enter your password to complete registration & unlock the application form.
+                      Enter your Google Account email below, then verify with your password to proceed.
                     </p>
                   </div>
 
-                  <div className="relative">
-                    {googleLoading && (
-                      <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink-950/80">
-                        <Loader2 className="w-5 h-5 animate-spin text-brand-400" />
-                      </div>
-                    )}
-                    {googleClientId && !googleClientId.includes("<your") ? (
+                  {/* Official Google One-Tap/Button if client ID is configured */}
+                  {googleClientId && !googleClientId.includes("<your") && (
+                    <div className="relative">
+                      {googleLoading && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink-950/80">
+                          <Loader2 className="w-5 h-5 animate-spin text-brand-400" />
+                        </div>
+                      )}
                       <div ref={googleBtnRef} className="w-full flex justify-center min-h-[44px]" />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleMockGoogleLogin}
-                        className="w-full py-3.5 px-4 bg-ink-900 border-2 border-brand-500/50 hover:border-brand-400 text-white text-sm font-bold flex items-center justify-center gap-2.5 transition transform hover:-translate-y-0.5 shadow-[4px_4px_0px_#1a1915]"
-                      >
-                        <Globe2 className="w-4 h-4 text-brand-400" /> Sign In with Google Account
-                      </button>
-                    )}
-                  </div>
+                      <div className="flex items-center gap-3 my-2">
+                        <div className="flex-1 h-px bg-ink-800" />
+                        <span className="text-[10px] text-ink-500 font-medium uppercase tracking-widest">or enter email</span>
+                        <div className="flex-1 h-px bg-ink-800" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* In-UI Email Input (No Browser Prompt) */}
+                  <form onSubmit={handleGoogleEmailProceed} className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-brand-400" /> Google Account Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="e.g. yourname@gmail.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-500 text-sm"
+                        autoFocus
+                      />
+                      <p className="text-[11px] text-ink-500">
+                        💡 Hint: Enter your active Google or university email ID.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold flex items-center justify-center gap-2.5 transition transform hover:-translate-y-0.5 shadow-[4px_4px_0px_#1a1915]"
+                    >
+                      <Globe2 className="w-4 h-4 text-white" /> Continue with Google <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </form>
                 </div>
               ) : (
                 <form onSubmit={handleDirectEmailSubmit} className="space-y-4 text-sm">
@@ -339,7 +370,7 @@ export default function UserAuthModal({
                     </label>
                     <input
                       type="text"
-                      placeholder="Aarav Sharma"
+                      placeholder="e.g. Aarav Sharma"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"
@@ -353,7 +384,7 @@ export default function UserAuthModal({
                     <input
                       type="email"
                       required
-                      placeholder="student@example.com"
+                      placeholder="e.g. yourname@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"
@@ -394,7 +425,7 @@ export default function UserAuthModal({
             </div>
           )}
 
-          {/* STEP 2: PASSWORD ENTRY AFTER GOOGLE SIGN-IN */}
+          {/* STEP 2: PASSWORD ENTRY AFTER GOOGLE EMAIL IS ENTERED */}
           {authStep === "password_step" && (
             <form onSubmit={handleCompleteGoogleAuth} className="space-y-4 text-sm">
               <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded flex items-center justify-between gap-3">
@@ -403,20 +434,20 @@ export default function UserAuthModal({
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Google Account Connected</div>
+                    <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">InternVision Tech Verification</div>
                     <div className="text-xs font-bold text-white truncate">{fullName || email.split("@")[0]}</div>
                   </div>
                 </div>
                 <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold rounded">
-                  Verified
+                  Active
                 </span>
               </div>
 
-              {/* Automatically Fetched Email Address */}
+              {/* Automatically Displayed Email Address */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                    <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address (Auto-Fetched)
+                    <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address
                   </label>
                   <span className="text-[10px] text-brand-400 font-medium flex items-center gap-1">
                     <Lock className="w-2.5 h-2.5" /> Locked
@@ -430,10 +461,10 @@ export default function UserAuthModal({
                 />
               </div>
 
-              {/* ONLY PASSWORD ENTRY REQUIRED */}
-              <div className="space-y-1">
+              {/* PASSWORD ENTRY */}
+              <div className="space-y-1.5">
                 <label className="text-xs text-brand-400 font-bold flex items-center gap-1.5">
-                  <Key className="w-3.5 h-3.5 text-brand-400" /> Enter Google Password *
+                  <Key className="w-3.5 h-3.5 text-brand-400" /> Enter Account Password *
                 </label>
                 <input
                   type="password"
@@ -444,6 +475,9 @@ export default function UserAuthModal({
                   className="w-full bg-ink-900 border-2 border-brand-500/80 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-400 text-sm shadow-[0_0_10px_rgba(255,107,0,0.15)]"
                   autoFocus
                 />
+                <p className="text-[11px] text-ink-500">
+                  💡 Hint: Enter your password to complete verification with InternVision Tech.
+                </p>
               </div>
 
               <div className="flex gap-2 pt-2">
@@ -465,7 +499,7 @@ export default function UserAuthModal({
                     </>
                   ) : (
                     <>
-                      Login & Proceed to Apply <ArrowRight className="w-4 h-4" />
+                      Login to InternVision Tech <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
