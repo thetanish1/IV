@@ -397,57 +397,55 @@ export default function UserAuthModal({
           {/* STEP 2: PASSWORD ENTRY AFTER GOOGLE SIGN-IN */}
           {authStep === "password_step" && (
             <form onSubmit={handleCompleteGoogleAuth} className="space-y-4 text-sm">
-              <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand-600/30 border border-brand-500 flex items-center justify-center text-brand-400 font-bold shrink-0">
-                  <CheckCircle2 className="w-5 h-5" />
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Google Account Connected</div>
+                    <div className="text-xs font-bold text-white truncate">{fullName || email.split("@")[0]}</div>
+                  </div>
                 </div>
-                <div className="overflow-hidden">
-                  <div className="text-[11px] text-brand-400 font-bold uppercase">Google Verified</div>
-                  <div className="text-xs font-semibold text-white truncate">{email}</div>
-                </div>
+                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold rounded">
+                  Verified
+                </span>
               </div>
 
+              {/* Automatically Fetched Email Address */}
               <div className="space-y-1">
-                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-brand-400" /> Default Username / Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address (Default) *
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address (Auto-Fetched)
+                  </label>
+                  <span className="text-[10px] text-brand-400 font-medium flex items-center gap-1">
+                    <Lock className="w-2.5 h-2.5" /> Locked
+                  </span>
+                </div>
                 <input
                   type="email"
-                  required
+                  readOnly
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full bg-ink-900/60 border border-ink-800 px-3.5 py-2 text-ink-200 text-sm cursor-not-allowed select-none font-medium focus:outline-none"
                 />
               </div>
 
+              {/* ONLY PASSWORD ENTRY REQUIRED */}
               <div className="space-y-1">
-                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                  <Key className="w-3.5 h-3.5 text-brand-400" /> Enter Your Password *
+                <label className="text-xs text-brand-400 font-bold flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-brand-400" /> Enter Google Password *
                 </label>
                 <input
                   type="password"
                   required
-                  placeholder="Enter a secure password"
+                  placeholder="Enter your account password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"
+                  className="w-full bg-ink-900 border-2 border-brand-500/80 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-400 text-sm shadow-[0_0_10px_rgba(255,107,0,0.15)]"
                   autoFocus
                 />
                 <p className="text-[11px] text-ink-400">
-                  Password will be linked with your account for application tracking and admin review.
+                  Enter your password to link your Google credentials before applying.
                 </p>
               </div>
 
@@ -466,11 +464,11 @@ export default function UserAuthModal({
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Finalizing...
+                      <Loader2 className="w-4 h-4 animate-spin" /> Logging In...
                     </>
                   ) : (
                     <>
-                      Confirm & Start Application <ArrowRight className="w-4 h-4" />
+                      Login & Proceed to Apply <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
