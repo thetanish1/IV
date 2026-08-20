@@ -780,11 +780,12 @@ export default function InternshipApplyPage() {
 
                   <div className="space-y-1.5">
                     <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-brand-400" /> Current City / State
+                      <MapPin className="w-3.5 h-3.5 text-brand-400" /> Current City / Workplace Location *
                     </label>
                     <input
                       type="text"
-                      placeholder="Pune, Maharashtra"
+                      required
+                      placeholder="Hyderabad, Bangalore, or Pune"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
@@ -1034,9 +1035,14 @@ export default function InternshipApplyPage() {
 
               {/* SECTION 6: TRACK & DURATION PREFERENCE */}
               <div className="space-y-5 pt-6 border-t border-ink-800/80">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
-                  <Clock className="w-4 h-4" /> 6. Internship Track & Duration
-                </h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-ink-800 pb-2">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 flex items-center gap-2">
+                    <Clock className="w-4 h-4" /> 6. Internship Track & Workplace Preference
+                  </h3>
+                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
+                    In-Office: Hyderabad / Bangalore / Pune (No Remote)
+                  </span>
+                </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1.5">

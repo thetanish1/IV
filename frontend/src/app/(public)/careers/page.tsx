@@ -26,26 +26,27 @@ const jobs = [
     badgeStyle: "bg-brand-500 text-white",
     title: "Software Engineering Intern",
     type: "Paid · 3 Months",
-    location: "Remote / Hybrid",
+    location: "Hyderabad / Bangalore / Pune (In-Office)",
     posted: "Open Now",
     summary:
-      "Kick-start your engineering career by working on real client projects alongside senior developers. You will contribute to both frontend and backend features of our EdTech platform.",
+      "Kick-start your engineering career by working on real client projects alongside senior developers in our engineering hubs in Hyderabad, Bangalore, and Pune. You will contribute to both frontend and backend features of our EdTech platform.",
     responsibilities: [
       "Build and ship production features in React / Next.js",
       "Write REST API consumers and integrate FastAPI endpoints",
-      "Participate in daily standups, code reviews, and sprint planning",
+      "Participate in daily in-person standups, code reviews, and sprint planning",
       "Write unit tests and document your code",
       "Learn Git-based CI/CD workflows on real deployments",
     ],
     requirements: [
+      "Must be willing to work on-site at Hyderabad, Bangalore, or Pune offices (No remote work)",
       "Currently pursuing or recently completed a B.Tech / BCA / MCA in CS/IT",
       "Familiarity with HTML, CSS, JavaScript, and Python",
       "Basic understanding of React or any frontend framework",
-      "Strong willingness to learn and take feedback",
+      "Strong willingness to learn in-office with 1:1 senior developer mentorship",
       "Good communication in English",
     ],
     techStack: ["React", "Next.js", "Python", "FastAPI", "PostgreSQL", "Git"],
-    perks: ["Paid stipend", "Certificate of completion", "LinkedIn recommendation", "Fast-track hiring consideration"],
+    perks: ["Paid stipend", "On-site mentorship", "Certificate of completion", "Fast-track full-time hiring consideration"],
     color: "border-brand-500",
     accentBg: "bg-brand-500/10",
   },
@@ -56,28 +57,28 @@ const jobs = [
     badgeStyle: "bg-white text-black",
     title: "Frontend Developer (React)",
     type: "Full-Time · Permanent",
-    location: "Remote",
+    location: "Hyderabad / Bangalore / Pune (In-Office)",
     posted: "Open Now",
     summary:
-      "We are looking for a passionate Frontend Developer to design and build high-performance, accessible user interfaces for our rapidly growing EdTech platform used by 5,000+ students.",
+      "We are looking for a passionate Frontend Developer to design and build high-performance, accessible user interfaces for our rapidly growing EdTech platform used by 5,000+ students across our Hyderabad, Bangalore, and Pune development centers.",
     responsibilities: [
       "Develop pixel-perfect, responsive UIs from Figma designs",
       "Build reusable component libraries using React 18+ and Next.js 15",
       "Own the performance budget — Core Web Vitals, bundle size, lazy loading",
       "Integrate with FastAPI REST endpoints and Razorpay payment flows",
       "Champion accessibility (WCAG 2.1) and cross-browser compatibility",
-      "Collaborate with design, backend, and product teams",
+      "Collaborate with design, backend, and product teams on-site",
     ],
     requirements: [
-      "2+ years of production experience with React.js",
+      "Must be available for full-time on-site work at Hyderabad, Bangalore, or Pune (Strictly no remote options)",
+      "2+ years of production experience with React.js & Next.js",
       "Proficiency in TypeScript and modern ES2022+ JavaScript",
-      "Experience with Next.js App Router and Server Components",
       "Strong understanding of CSS, Tailwind CSS, and responsive design",
       "Familiarity with REST APIs, SWR/React Query, and state management",
       "Experience with testing (Jest, React Testing Library)",
     ],
     techStack: ["React 18+", "Next.js 15", "TypeScript", "Tailwind CSS", "Framer Motion", "Jest"],
-    perks: ["Competitive salary", "Equity options", "Fully remote", "Learning budget ₹30k/yr", "Health insurance"],
+    perks: ["Competitive salary", "Equity options", "Modern office infrastructure", "Learning budget ₹30k/yr", "Health insurance"],
     color: "border-white",
     accentBg: "bg-white/5",
   },
@@ -88,10 +89,10 @@ const jobs = [
     badgeStyle: "bg-ink-700 text-white border border-ink-600",
     title: "Backend Developer (Spring Boot & Java)",
     type: "Full-Time · Permanent",
-    location: "Remote / Bengaluru",
+    location: "Hyderabad / Bangalore / Pune (In-Office)",
     posted: "Open Now",
     summary:
-      "Join our engineering team as a Backend Developer to architect scalable microservices, build high-throughput APIs, and own the data layer of InternVision Tech's core platform.",
+      "Join our engineering team as a Backend Developer to architect scalable microservices, build high-throughput APIs, and own the data layer of InternVision Tech's core platform at our Hyderabad, Bangalore, or Pune offices.",
     responsibilities: [
       "Design and develop RESTful APIs using Spring Boot 3 and Java 17+",
       "Build and maintain microservices with clean, testable code (SOLID / DDD)",
@@ -101,6 +102,7 @@ const jobs = [
       "Instrument services with logging, metrics (Prometheus/Grafana), and tracing",
     ],
     requirements: [
+      "Must be willing to work on-site at Hyderabad, Bangalore, or Pune engineering centers (No remote work)",
       "3+ years of backend experience with Java and Spring Boot",
       "Strong understanding of REST API design patterns and HTTP semantics",
       "Hands-on experience with JPA/Hibernate and PostgreSQL",
@@ -109,7 +111,7 @@ const jobs = [
       "Experience writing unit and integration tests (JUnit 5, Mockito)",
     ],
     techStack: ["Java 17", "Spring Boot 3", "Spring Security", "PostgreSQL", "Docker", "Kubernetes", "JUnit 5"],
-    perks: ["Competitive salary", "Equity options", "Relocation support", "Home office budget", "Paid leaves"],
+    perks: ["Competitive salary", "Equity options", "Relocation assistance to Hyd/Blr/Pune", "Modern campus perks", "Paid leaves"],
     color: "border-ink-600",
     accentBg: "bg-ink-800/40",
   },
@@ -132,8 +134,8 @@ export default function CareersPage() {
               <span className="text-brand-400">With Us.</span>
             </h1>
             <p className="text-lg sm:text-xl text-ink-300 max-w-2xl leading-relaxed border-l-2 border-brand-500 pl-6">
-              InternVision Tech is on a mission to bridge the gap between academic learning and
-              production engineering. Join a small, ambitious team that ships fast and cares about craft.
+              InternVision Tech is hiring for full-time in-office engineering roles across our development hubs in{" "}
+              <strong className="text-white font-bold">Hyderabad, Bangalore, and Pune</strong>. (Strictly no remote roles available).
             </p>
           </FadeIn>
 
@@ -143,10 +145,10 @@ export default function CareersPage() {
                 { label: "Open Positions", value: "3" },
                 { label: "Team Size", value: "12" },
                 { label: "Students Impacted", value: "5k+" },
-                { label: "Work Mode", value: "Remote" },
+                { label: "Work Mode", value: "In-Office (No Remote)" },
               ].map((stat) => (
                 <div key={stat.label} className="bg-ink-900 border border-ink-800 px-6 py-4">
-                  <div className="text-3xl font-black text-white">{stat.value}</div>
+                  <div className="text-2xl sm:text-3xl font-black text-white">{stat.value}</div>
                   <div className="text-xs text-ink-400 font-bold uppercase tracking-wide mt-1">{stat.label}</div>
                 </div>
               ))}
