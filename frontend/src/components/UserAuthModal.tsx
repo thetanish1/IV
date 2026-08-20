@@ -444,9 +444,6 @@ export default function UserAuthModal({
                   className="w-full bg-ink-900 border-2 border-brand-500/80 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-400 text-sm shadow-[0_0_10px_rgba(255,107,0,0.15)]"
                   autoFocus
                 />
-                <p className="text-[11px] text-ink-400">
-                  Enter your password to link your Google credentials before applying.
-                </p>
               </div>
 
               <div className="flex gap-2 pt-2">

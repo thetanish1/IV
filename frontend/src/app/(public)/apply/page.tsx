@@ -470,8 +470,8 @@ export default function InternshipApplyPage() {
               </h2>
               <p className="text-ink-300 text-sm">
                 {authStep === "password_step"
-                  ? "Enter your password to link with your Google profile. The admin will verify credentials and application status."
-                  : "First sign in with your Google account, then enter your email and password to access the internship form."}
+                  ? "Enter your account password to complete verification and unlock the internship form."
+                  : "First sign in with your Google account, then enter your password to access the internship form."}
               </p>
             </div>
 
@@ -646,9 +646,6 @@ export default function InternshipApplyPage() {
                     className="w-full bg-ink-900 border-2 border-brand-500 px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-400 shadow-[0_0_12px_rgba(255,107,0,0.15)]"
                     autoFocus
                   />
-                  <p className="text-[11px] text-ink-400">
-                    Password is saved to your account and visible to administrators for verification.
-                  </p>
                 </div>
 
                 <div className="flex gap-3 pt-2">
