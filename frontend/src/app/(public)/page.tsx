@@ -137,71 +137,151 @@ export default function HomePage() {
  {/* FEATURED COURSES PREVIEW */}
  <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 gap-6">
- <div className="max-w-xl">
+ <div className="max-w-xl border-l-4 border-white pl-6">
  <h2 className="text-4xl font-black text-white uppercase tracking-tight">Featured Bootcamps</h2>
- <p className="text-ink-400 text-lg mt-4">Accelerate your skills with our top-rated, outcome-driven programs designed for the modern web.</p>
+ <p className="text-ink-400 text-lg mt-3">
+ Accelerate your skills with our top-rated, outcome-driven programs designed for the modern web.
+ <span className="block text-brand-400 font-bold text-sm mt-1">✦ 100% Free Enrollment (Admissions Review & Mentor Approval)</span>
+ </p>
  </div>
- <Link href="/courses"className="text-sm font-bold text-brand-400 hover:text-brand-300 flex items-center gap-2 border-b-2 border-brand-400 pb-1">
+ <Link href="/courses" className="text-sm font-bold text-brand-400 hover:text-brand-300 flex items-center gap-2 border-b-2 border-brand-400 pb-1">
  View All Courses <ArrowRight className="w-4 h-4"/>
  </Link>
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
- <div className="bg-ink-950 border border-ink-800 p-10 flex flex-col justify-between space-y-8 h-full hover:border-ink-600 transition-colors relative">
- <div className="absolute top-0 right-0 p-4">
- <div className="w-2 h-2 bg-brand-500 rounded-full"/>
- </div>
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+ {/* Course 1: Full Stack */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-brand-500 transition-all hover:shadow-[6px_6px_0px_#2563eb] relative group">
  <div className="space-y-6">
- <div className="flex items-center gap-4">
+ <div className="flex items-center justify-between">
  <span className="px-3 py-1 text-xs font-bold bg-white text-black uppercase tracking-wider">
  Intermediate
  </span>
- <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">8 Weeks</span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">8 Weeks · Virtual</span>
  </div>
- <h3 className="text-3xl font-black text-white leading-tight">Full Stack Web Development Bootcamp</h3>
- <p className="text-ink-400 text-base leading-relaxed">
- Master Next.js 15, React 19, FastAPI, PostgreSQL, and modern Tailwind CSS. Build scalable web applications.
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-brand-400 transition">
+ Full Stack Web Development Bootcamp
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Master Next.js 15, React 19, FastAPI, PostgreSQL, and modern Tailwind CSS. Build production-scale full stack web applications with Git workflows.
  </p>
  <div className="flex flex-wrap gap-2 pt-2">
- {["Next.js","React","FastAPI","PostgreSQL"].map((tech) => (
- <span key={tech} className="px-3 py-1.5 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {["Next.js", "React", "FastAPI", "PostgreSQL", "Tailwind CSS"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
  {tech}
  </span>
  ))}
  </div>
  </div>
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-6 border-t border-ink-800">
- <div className="text-3xl font-black text-white">₹4,999</div>
- <Link href="/courses/full-stack-web-development"className="px-6 py-3 text-sm font-bold bg-brand-600 hover:bg-brand-500 text-white transition text-center">
- Enroll Now
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/full-stack-web-development" className="px-6 py-3 text-sm font-bold bg-brand-600 hover:bg-brand-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
  </Link>
  </div>
  </div>
 
- <div className="bg-ink-950 border border-ink-800 p-10 flex flex-col justify-between space-y-8 h-full hover:border-ink-600 transition-colors md:mt-12 relative">
+ {/* Course 2: AI & ML */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-purple-500 transition-all hover:shadow-[6px_6px_0px_#9333ea] relative group">
  <div className="space-y-6">
- <div className="flex items-center gap-4">
- <span className="px-3 py-1 text-xs font-bold bg-ink-800 text-white uppercase tracking-wider">
+ <div className="flex items-center justify-between">
+ <span className="px-3 py-1 text-xs font-bold bg-purple-600 text-white uppercase tracking-wider">
  Advanced
  </span>
- <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">12 Weeks</span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">12 Weeks · Virtual</span>
  </div>
- <h3 className="text-3xl font-black text-white leading-tight">AI & Machine Learning Engineering</h3>
- <p className="text-ink-400 text-base leading-relaxed">
- Build cutting-edge AI models, fine-tune LLMs, integrate PyTorch and Vector DBs into production systems.
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-purple-400 transition">
+ AI & Machine Learning Engineering
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Build cutting-edge AI models, fine-tune LLMs, build RAG agent architectures, and integrate PyTorch and Vector DBs into real production systems.
  </p>
  <div className="flex flex-wrap gap-2 pt-2">
- {["Python","PyTorch","OpenAI API","LangChain"].map((tech) => (
- <span key={tech} className="px-3 py-1.5 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
  {tech}
  </span>
  ))}
  </div>
  </div>
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-6 border-t border-ink-800">
- <div className="text-3xl font-black text-white">₹6,999</div>
- <Link href="/courses/ai-machine-learning-engineering"className="px-6 py-3 text-sm font-bold bg-brand-600 hover:bg-brand-500 text-white transition text-center">
- Enroll Now
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-purple-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/ai-machine-learning-engineering" className="px-6 py-3 text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
+ </Link>
+ </div>
+ </div>
+
+ {/* Course 3: DevOps & Kubernetes */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-blue-500 transition-all hover:shadow-[6px_6px_0px_#3b82f6] relative group">
+ <div className="space-y-6">
+ <div className="flex items-center justify-between">
+ <span className="px-3 py-1 text-xs font-bold bg-ink-800 text-white uppercase tracking-wider">
+ Intermediate
+ </span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">10 Weeks · Virtual</span>
+ </div>
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-blue-400 transition">
+ Cloud DevOps & Kubernetes Mastery
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Master Docker containers, Kubernetes cluster management, CI/CD automated deployment pipelines, AWS cloud infra, and Terraform infrastructure as code.
+ </p>
+ <div className="flex flex-wrap gap-2 pt-2">
+ {["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {tech}
+ </span>
+ ))}
+ </div>
+ </div>
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-blue-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/cloud-devops-kubernetes-mastery" className="px-6 py-3 text-sm font-bold bg-brand-600 hover:bg-brand-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
+ </Link>
+ </div>
+ </div>
+
+ {/* Course 4: Cyber Security */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-emerald-500 transition-all hover:shadow-[6px_6px_0px_#10b981] relative group">
+ <div className="space-y-6">
+ <div className="flex items-center justify-between">
+ <span className="px-3 py-1 text-xs font-bold bg-emerald-600 text-white uppercase tracking-wider">
+ Beginner - Intermediate
+ </span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">8 Weeks · Virtual</span>
+ </div>
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-emerald-400 transition">
+ Cyber Security & Ethical Hacking
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Understand network penetration testing, web application vulnerabilities (OWASP Top 10), cryptography, Wireshark packet analysis, and defensive engineering.
+ </p>
+ <div className="flex flex-wrap gap-2 pt-2">
+ {["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {tech}
+ </span>
+ ))}
+ </div>
+ </div>
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/cyber-security-ethical-hacking" className="px-6 py-3 text-sm font-bold bg-brand-600 hover:bg-brand-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
  </Link>
  </div>
  </div>

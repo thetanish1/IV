@@ -44,6 +44,54 @@ def startup_event():
                     is_active=True
                 )
                 db.add(new_admin)
+
+        # Seed sample courses if none exist
+        from app.courses.models import Course
+        if db.query(Course).count() == 0:
+            sample_courses = [
+                Course(
+                    title="Full Stack Web Development Bootcamp",
+                    slug="full-stack-web-development",
+                    description="Master modern web development using Next.js 15, React 19, TypeScript, FastAPI, and PostgreSQL. Build production applications from scratch.",
+                    price_inr=0,
+                    duration="8 Weeks",
+                    level="Intermediate",
+                    technologies=["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL"],
+                    is_published=True
+                ),
+                Course(
+                    title="AI & Machine Learning Engineering",
+                    slug="ai-machine-learning-engineering",
+                    description="Deep dive into Machine Learning, Neural Networks, PyTorch, Large Language Models (LLMs), LangChain, and AI Agent development.",
+                    price_inr=0,
+                    duration="12 Weeks",
+                    level="Advanced",
+                    technologies=["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"],
+                    is_published=True
+                ),
+                Course(
+                    title="Cloud DevOps & Kubernetes Mastery",
+                    slug="cloud-devops-kubernetes-mastery",
+                    description="Learn Docker, Kubernetes, CI/CD pipelines, AWS deployment, Terraform, and monitoring tools like Prometheus and Grafana.",
+                    price_inr=0,
+                    duration="10 Weeks",
+                    level="Intermediate",
+                    technologies=["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"],
+                    is_published=True
+                ),
+                Course(
+                    title="Cyber Security & Ethical Hacking",
+                    slug="cyber-security-ethical-hacking",
+                    description="Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.",
+                    price_inr=0,
+                    duration="8 Weeks",
+                    level="Beginner",
+                    technologies=["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
+                    is_published=True
+                )
+            ]
+            db.add_all(sample_courses)
+
         db.commit()
     finally:
         db.close()

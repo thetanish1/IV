@@ -95,3 +95,16 @@ export interface PaymentItem {
   student_email: string;
   created_at: string;
 }
+
+export interface CourseRegistrationItem {
+  id: number;
+  course_id: number;
+  course_title?: string;
+  course_slug?: string;
+  student_name: string;
+  student_email: string;
+  student_phone: string;
+  status: string;
+  created_at: string;
+}
+

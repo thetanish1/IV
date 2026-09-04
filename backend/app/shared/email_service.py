@@ -247,3 +247,183 @@ def send_internship_application_email(
     """
 
     return _send_smtp_email(user_email, subject, html_content, text_content)
+
+
+def send_course_enrollment_request_received_email(
+    student_email: str,
+    student_name: str,
+    course_title: str
+):
+    """
+    Sends confirmation to student when they submit a free course enrollment request.
+    """
+    display_name = student_name or student_email.split("@")[0]
+    subject = f"Enrollment Request Received: {course_title} | InternVision Tech"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d0c0a; color: #e5e5e5; margin: 0; padding: 20px; }}
+        .card {{ max-width: 600px; margin: 0 auto; background: #171614; border: 1px solid #2e2c28; border-radius: 8px; overflow: hidden; }}
+        .header {{ background: #2563eb; padding: 24px; text-align: left; }}
+        .header h1 {{ color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; }}
+        .badge {{ display: inline-block; background: #1d4ed8; color: #ffffff; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; }}
+        .content {{ padding: 32px 24px; line-height: 1.6; color: #d4d4d8; font-size: 15px; }}
+        .highlight {{ color: #60a5fa; font-weight: bold; }}
+        .info-box {{ background: #1e1d1a; border-left: 4px solid #2563eb; padding: 16px; margin: 20px 0; border-radius: 4px; }}
+        .footer {{ padding: 20px 24px; background: #12110f; font-size: 12px; color: #71717a; border-top: 1px solid #2e2c28; text-align: center; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <span class="badge">Bootcamp Enrollment</span>
+          <h1>Enrollment Request Submitted</h1>
+        </div>
+        <div class="content">
+          <p>Hello <strong style="color:#ffffff;">{display_name}</strong>,</p>
+          <p>We have received your free enrollment request for <strong class="highlight">{course_title}</strong> at InternVision Tech.</p>
+          
+          <div class="info-box">
+            <strong style="color:#ffffff;">Bootcamp Application Status:</strong><br>
+            • Course: <span style="color:#60a5fa; font-weight:bold;">{course_title}</span><br>
+            • Tuition: <span style="color:#34d399; font-weight:bold;">100% Free (Sponsored Scholarship)</span><br>
+            • Status: <span style="color:#fbbf24; font-weight:bold;">Under Admissions Review</span>
+          </div>
+
+          <p>Our academic coordinators review applications to ensure small cohort sizes with dedicated 1:1 mentor bandwidth. Once your enrollment request is approved by the admin, you will receive an acceptance email with your access credentials and Discord / GitHub cohort invites.</p>
+
+          <p style="font-size: 13px; color: #a1a1aa; margin-top: 24px;">
+            Questions regarding this bootcamp? Reach out anytime at <a href="mailto:internvisiontechhr@gmail.com" style="color:#60a5fa;">internvisiontechhr@gmail.com</a>.
+          </p>
+        </div>
+        <div class="footer">
+          <p>© 2026 InternVision Tech Inc. Headquarters: Nagpur, Maharashtra, India.</p>
+          <p>Outcome-driven engineering bootcamps & virtual mentorship.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Hello {display_name},
+
+    Your free enrollment request for '{course_title}' has been received by InternVision Tech.
+    
+    Status: Under Admissions Review (100% Free Scholarship Track).
+    
+    Once accepted by the admin, you will receive an official approval email with cohort access instructions.
+    
+    Best regards,
+    InternVision Tech Admissions
+    internvisiontechhr@gmail.com
+    """
+
+    return _send_smtp_email(student_email, subject, html_content, text_content)
+
+
+def send_course_enrollment_acceptance_email(
+    student_email: str,
+    student_name: str,
+    course_title: str,
+    course_duration: str = "8 Weeks"
+):
+    """
+    Sends official acceptance and welcome email when the admin approves a course enrollment.
+    """
+    display_name = student_name or student_email.split("@")[0]
+    subject = f"🎉 Congratulations! You are Enrolled in {course_title} | InternVision Tech"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d0c0a; color: #e5e5e5; margin: 0; padding: 20px; }}
+        .card {{ max-width: 620px; margin: 0 auto; background: #171614; border: 1px solid #2e2c28; border-radius: 8px; overflow: hidden; }}
+        .header {{ background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 28px; text-align: left; }}
+        .header h1 {{ color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; }}
+        .badge {{ display: inline-block; background: #ffffff; color: #059669; padding: 4px 10px; font-size: 11px; font-weight: 800; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; }}
+        .content {{ padding: 32px 24px; line-height: 1.6; color: #d4d4d8; font-size: 15px; }}
+        .highlight {{ color: #34d399; font-weight: bold; }}
+        .summary-card {{ background: #1e1d1a; border: 1px solid #059669; padding: 18px; margin: 20px 0; border-radius: 6px; }}
+        .timeline-step {{ padding: 10px 0; border-bottom: 1px solid #2e2c28; }}
+        .timeline-step:last-child {{ border-bottom: none; }}
+        .step-num {{ display: inline-block; width: 22px; height: 22px; line-height: 22px; background: #10b981; color: #000; text-align: center; border-radius: 50%; font-size: 12px; font-weight: bold; margin-right: 8px; }}
+        .btn {{ display: inline-block; background: #059669; color: #ffffff !important; padding: 14px 28px; text-decoration: none; font-weight: bold; border-radius: 4px; margin-top: 16px; text-align: center; }}
+        .footer {{ padding: 20px 24px; background: #12110f; font-size: 12px; color: #71717a; border-top: 1px solid #2e2c28; text-align: center; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <span class="badge">Enrollment Approved</span>
+          <h1>Welcome to the Bootcamp!</h1>
+        </div>
+        <div class="content">
+          <p>Dear <strong style="color:#ffffff;">{display_name}</strong>,</p>
+          <p>We are thrilled to inform you that your enrollment request for <strong class="highlight">{course_title}</strong> has been <span style="color:#34d399; font-weight:bold;">OFFICIALLY ACCEPTED</span> by the InternVision Tech admissions team!</p>
+          
+          <div class="summary-card">
+            <h3 style="color:#ffffff; margin-top:0; font-size:16px; border-bottom:1px solid #2e2c28; padding-bottom:8px;">Bootcamp Enrollment Details</h3>
+            <p style="margin:6px 0;">• <strong>Program:</strong> <span style="color:#60a5fa; font-weight:bold;">{course_title}</span></p>
+            <p style="margin:6px 0;">• <strong>Duration:</strong> <span style="color:#ffffff;">{course_duration}</span></p>
+            <p style="margin:6px 0;">• <strong>Tuition Status:</strong> <span style="color:#34d399; font-weight:bold;">Fully Approved (Scholarship Sponsored)</span></p>
+            <p style="margin:6px 0;">• <strong>Mode:</strong> 100% Virtual with Live Mentorship & Code Reviews</p>
+          </div>
+
+          <h3 style="color:#ffffff; font-size:16px;">Next Steps for Onboarding:</h3>
+          <div style="background:#1e1d1a; padding:14px; border-radius:6px; margin-bottom:20px;">
+            <div class="timeline-step">
+              <span class="step-num">1</span> <strong>Curriculum & GitHub Workspace:</strong> Your mentor will grant you access to the private repository and project assignments.
+            </div>
+            <div class="timeline-step">
+              <span class="step-num">2</span> <strong>Cohort Discord / Slack:</strong> Join daily technical Q&A, peer code reviews, and live architectural workshops.
+            </div>
+            <div class="timeline-step">
+              <span class="step-num">3</span> <strong>Capstone Delivery:</strong> Build, deploy, and showcase your production project to hiring partners.
+            </div>
+          </div>
+
+          <p style="text-align: center;">
+            <a href="https://internvision.tech/courses" class="btn">View Bootcamp Materials & Hub →</a>
+          </p>
+
+          <p style="font-size:14px; color:#a1a1aa; margin-top:24px;">
+            If you need any guidance getting set up, reply directly to this email or reach us at <a href="mailto:internvisiontechhr@gmail.com" style="color:#60a5fa;">internvisiontechhr@gmail.com</a>.
+          </p>
+        </div>
+        <div class="footer">
+          <p>© 2026 InternVision Tech Inc. Headquarters: Nagpur, Maharashtra, India.</p>
+          <p>Transforming passionate students into production-ready software engineers.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Dear {display_name},
+
+    Congratulations! Your enrollment request for '{course_title}' has been APPROVED by InternVision Tech!
+    
+    Program Details:
+    - Course: {course_title}
+    - Duration: {course_duration}
+    - Tuition: 100% Free Scholarship Approved
+    - Work Mode: 100% Virtual / Remote
+    
+    You will receive your repository access and cohort mentor assignment shortly.
+    
+    Best regards,
+    Admissions & Engineering Faculty | InternVision Tech
+    Nagpur, Maharashtra, India
+    internvisiontechhr@gmail.com
+    """
+
+    return _send_smtp_email(student_email, subject, html_content, text_content)

@@ -42,6 +42,7 @@ import {
   InternshipApplicationResponse,
   PaymentItem,
   SiteUserItem,
+  CourseRegistrationItem,
 } from "@/types";
 import { apiRequest } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
@@ -50,7 +51,7 @@ import AuthGuard from "@/components/AuthGuard";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "applications" | "users" | "payments">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "applications" | "users" | "enrollments" | "payments">("overview");
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
@@ -86,6 +87,20 @@ export default function AdminDashboardPage() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [revealedPasswords, setRevealedPasswords] = useState<Record<number, boolean>>({});
 
+  // Course Registrations / Free Enrollments State
+  const [registrationsData, setRegistrationsData] = useState<PaginatedResult<CourseRegistrationItem>>({
+    total: 0,
+    page: 1,
+    limit: 10,
+    total_pages: 1,
+    items: [],
+  });
+  const [regSearch, setRegSearch] = useState("");
+  const [regStatus, setRegStatus] = useState("all");
+  const [regPage, setRegPage] = useState(1);
+  const [loadingRegs, setLoadingRegs] = useState(false);
+  const [updatingRegId, setUpdatingRegId] = useState<number | null>(null);
+
   // Payments Table State
   const [paymentsData, setPaymentsData] = useState<PaginatedResult<PaymentItem>>({
     total: 0,
@@ -116,10 +131,13 @@ export default function AdminDashboardPage() {
     if (activeTab === "users" || activeTab === "overview") {
       fetchUsers();
     }
+    if (activeTab === "enrollments" || activeTab === "overview") {
+      fetchRegistrations();
+    }
     if (activeTab === "payments" || activeTab === "overview") {
       fetchPayments();
     }
-  }, [activeTab, appsSearch, appsDuration, appsPage, usersSearch, usersProvider, usersPage, pmtSearch, pmtStatus, pmtPage]);
+  }, [activeTab, appsSearch, appsDuration, appsPage, usersSearch, usersProvider, usersPage, regSearch, regStatus, regPage, pmtSearch, pmtStatus, pmtPage]);
 
   const fetchStats = async () => {
     try {
@@ -190,6 +208,41 @@ export default function AdminDashboardPage() {
       console.error(err);
     } finally {
       setLoadingPayments(false);
+    }
+  };
+
+  const fetchRegistrations = async () => {
+    setLoadingRegs(true);
+    try {
+      const params = new URLSearchParams({
+        page: regPage.toString(),
+        limit: "10",
+      });
+      if (regSearch) params.set("q", regSearch);
+      if (regStatus !== "all") params.set("status", regStatus);
+
+      const data = await apiRequest<PaginatedResult<CourseRegistrationItem>>(`/admin/registrations?${params.toString()}`);
+      setRegistrationsData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingRegs(false);
+    }
+  };
+
+  const handleUpdateRegStatus = async (regId: number, newStatus: string) => {
+    setUpdatingRegId(regId);
+    try {
+      await apiRequest(`/admin/registrations/${regId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
+      });
+      fetchRegistrations();
+      fetchStats();
+    } catch (err) {
+      console.error("Failed to update registration status", err);
+    } finally {
+      setUpdatingRegId(null);
     }
   };
 
@@ -365,6 +418,18 @@ export default function AdminDashboardPage() {
                 {stats?.total_users || 0}
               </span>
               {activeTab === "users" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab("enrollments")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+                activeTab === "enrollments" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              Course Enrollments
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-purple-600/20 text-purple-400 border border-purple-500/30">
+                {stats?.total_registrations || 0}
+              </span>
+              {activeTab === "enrollments" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
             </button>
             <button
               onClick={() => setActiveTab("payments")}
@@ -821,10 +886,10 @@ export default function AdminDashboardPage() {
                     </table>
                   </div>
 
-                  {/* Pagination */}
+                  {/* Payments Pagination */}
                   <div className="flex items-center justify-between px-5 py-3 border-t border-ink-800 bg-ink-900/30">
                     <span className="text-xs text-ink-400">
-                      Showing {paymentsData.page} of {paymentsData.total_pages}
+                      Showing page {paymentsData.page} of {paymentsData.total_pages}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
@@ -847,6 +912,170 @@ export default function AdminDashboardPage() {
               </div>
             </FadeIn>
           )}
+
+          {/* ─────────────────── COURSE ENROLLMENTS SECTION ─────────────────── */}
+          {(activeTab === "enrollments" || activeTab === "overview") && (
+            <FadeIn delay={0.25} direction="up">
+              <div className="space-y-4 pt-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-purple-400" /> Course Enrollment Requests
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      Review free bootcamp applications. Approving an enrollment automatically dispatches the acceptance email to the candidate.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-full sm:w-64">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-ink-400" />
+                      <input
+                        type="text"
+                        placeholder="Search student or course..."
+                        value={regSearch}
+                        onChange={(e) => {
+                          setRegSearch(e.target.value);
+                          setRegPage(1);
+                        }}
+                        className="w-full bg-ink-950 border border-ink-800 rounded-lg pl-9 pr-3 py-1.5 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-purple-500 transition-colors"
+                      />
+                    </div>
+                    <select
+                      value={regStatus}
+                      onChange={(e) => {
+                        setRegStatus(e.target.value);
+                        setRegPage(1);
+                      }}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="pending">Pending Review</option>
+                      <option value="accepted">Accepted / Enrolled</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/40 shadow-xl">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-ink-900/60 text-ink-400 font-medium border-b border-ink-800 text-xs uppercase tracking-wider">
+                        <tr>
+                          <th className="px-5 py-3.5 font-medium">Candidate</th>
+                          <th className="px-5 py-3.5 font-medium">Applied Bootcamp</th>
+                          <th className="px-5 py-3.5 font-medium">Phone (WhatsApp)</th>
+                          <th className="px-5 py-3.5 font-medium">Status</th>
+                          <th className="px-5 py-3.5 font-medium">Requested On</th>
+                          <th className="px-5 py-3.5 font-medium text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-ink-800/50">
+                        {loadingRegs ? (
+                          <tr>
+                            <td colSpan={6} className="text-center py-12">
+                              <Loader2 className="w-5 h-5 animate-spin mx-auto text-purple-400" />
+                            </td>
+                          </tr>
+                        ) : registrationsData.items.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="text-center py-12 text-ink-500 text-sm">
+                              No course enrollment requests found.
+                            </td>
+                          </tr>
+                        ) : (
+                          registrationsData.items.map((reg) => (
+                            <tr key={reg.id} className="hover:bg-ink-900/30 transition-colors">
+                              <td className="px-5 py-4">
+                                <div className="font-medium text-white">{reg.student_name}</div>
+                                <div className="text-xs text-ink-400 font-mono">{reg.student_email}</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="font-medium text-brand-300">{reg.course_title || `Course #${reg.course_id}`}</div>
+                                <div className="text-[11px] text-emerald-400">✦ 100% Free Scholarship</div>
+                              </td>
+                              <td className="px-5 py-4 text-ink-300 text-xs">{reg.student_phone}</td>
+                              <td className="px-5 py-4">
+                                {reg.status === "accepted" ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+                                    <CheckCircle2 className="w-3.5 h-3.5" /> Enrolled & Accepted
+                                  </span>
+                                ) : reg.status === "rejected" ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/20">
+                                    <X className="w-3.5 h-3.5" /> Rejected
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20">
+                                    <Clock className="w-3.5 h-3.5 animate-pulse" /> Pending Review
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-5 py-4 text-ink-400 text-xs">
+                                {reg.created_at ? new Date(reg.created_at).toLocaleDateString() : "—"}
+                              </td>
+                              <td className="px-5 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  {reg.status !== "accepted" && (
+                                    <button
+                                      disabled={updatingRegId === reg.id}
+                                      onClick={() => handleUpdateRegStatus(reg.id, "accepted")}
+                                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition flex items-center gap-1 disabled:opacity-50 shadow-sm"
+                                      title="Accept candidate and send official onboarding email"
+                                    >
+                                      {updatingRegId === reg.id ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                      ) : (
+                                        <CheckCircle2 className="w-3 h-3" />
+                                      )}
+                                      Approve & Send Email
+                                    </button>
+                                  )}
+                                  {reg.status !== "rejected" && (
+                                    <button
+                                      disabled={updatingRegId === reg.id}
+                                      onClick={() => handleUpdateRegStatus(reg.id, "rejected")}
+                                      className="px-2.5 py-1.5 bg-ink-900 hover:bg-red-600/30 text-ink-400 hover:text-red-400 border border-ink-800 rounded text-xs font-medium transition disabled:opacity-50"
+                                      title="Reject request"
+                                    >
+                                      Reject
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  <div className="flex items-center justify-between px-5 py-3 border-t border-ink-800 bg-ink-900/30">
+                    <span className="text-xs text-ink-400">
+                      Showing {registrationsData.page} of {registrationsData.total_pages}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        disabled={regPage <= 1}
+                        onClick={() => setRegPage((p) => p - 1)}
+                        className="p-1.5 rounded bg-ink-900 border border-ink-800 text-ink-300 hover:text-white disabled:opacity-50 transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        disabled={regPage >= registrationsData.total_pages}
+                        onClick={() => setRegPage((p) => p + 1)}
+                        className="p-1.5 rounded bg-ink-900 border border-ink-800 text-ink-300 hover:text-white disabled:opacity-50 transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          )}
+
+
         </div>
 
         {/* ─────────────────── APPLICANT DETAIL REVIEW MODAL ─────────────────── */}

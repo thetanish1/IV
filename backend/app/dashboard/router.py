@@ -1,13 +1,14 @@
 import math
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.shared.database import get_db
 from app.shared.dependencies import get_current_admin
+from app.shared.email_service import send_course_enrollment_acceptance_email
 from app.auth.models import Admin
 from app.internship.models import InternshipApplication
-from app.courses.models import CourseRegistration
+from app.courses.models import Course, CourseRegistration
 from app.payments.models import Payment
 from app.dashboard.schemas import DashboardStats
 from app.internship.schemas import ApplicationResponse
@@ -157,6 +158,47 @@ def get_applications(
         "items": items_serialized
     }
 
+@router.patch("/registrations/{registration_id}/status")
+def update_registration_status(
+    registration_id: int,
+    body: StatusUpdateBody,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    reg = db.query(CourseRegistration).filter(CourseRegistration.id == registration_id).first()
+    if not reg:
+        raise HTTPException(status_code=404, detail="Course registration not found")
+    
+    prev_status = reg.status
+    reg.status = body.status
+    db.commit()
+    db.refresh(reg)
+
+    # When admin accepts the enrollment, send official congratulations email
+    if body.status.lower() in ("accepted", "approved") and prev_status != "accepted":
+        course = db.query(Course).filter(Course.id == reg.course_id).first()
+        course_title = course.title if course else "Engineering Bootcamp"
+        course_duration = course.duration if course else "8 Weeks"
+        
+        background_tasks.add_task(
+            send_course_enrollment_acceptance_email,
+            reg.student_email,
+            reg.student_name,
+            course_title,
+            course_duration
+        )
+
+    return {
+        "id": reg.id,
+        "course_id": reg.course_id,
+        "student_name": reg.student_name,
+        "student_email": reg.student_email,
+        "student_phone": reg.student_phone,
+        "status": reg.status,
+        "created_at": reg.created_at.isoformat() if reg.created_at else None
+    }
+
 @router.get("/registrations")
 def get_registrations(
     q: Optional[str] = None,
@@ -182,7 +224,21 @@ def get_registrations(
                  .limit(limit)\
                  .all()
 
-    items_serialized = [RegistrationResponse.model_validate(item).model_dump() for item in items]
+    items_serialized = []
+    for item in items:
+        course = db.query(Course).filter(Course.id == item.course_id).first()
+        items_serialized.append({
+            "id": item.id,
+            "course_id": item.course_id,
+            "course_title": course.title if course else f"Course #{item.course_id}",
+            "course_slug": course.slug if course else None,
+            "student_name": item.student_name,
+            "student_email": item.student_email,
+            "student_phone": item.student_phone,
+            "status": item.status,
+            "created_at": item.created_at.isoformat() if item.created_at else None,
+        })
+
     total_pages = math.ceil(total / limit) if total > 0 else 1
 
     return {
