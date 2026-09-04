@@ -96,17 +96,41 @@ def startup_event():
     finally:
         db.close()
 
+from fastapi.responses import JSONResponse, Response
+
+# Configurable CORS Policy
+origins = [
+    "https://iv-theta.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_origin_regex=r"^https?://.*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
+
 # Custom Request Logging & ID Middleware
 app.add_middleware(LoggingAndRequestIDMiddleware)
 
-# Configurable CORS Policy
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Catch-all OPTIONS preflight route
+@app.options("/{full_path:path}")
+async def preflight_handler(full_path: str):
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
 
 # Feature Routers mounted under /api and root for total path compatibility
 for r in [auth_router, courses_router, internship_router, payments_router, dashboard_router, export_router]:
