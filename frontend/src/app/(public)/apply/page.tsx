@@ -27,19 +27,21 @@ import {
   FileCheck,
   AlertCircle,
   ShieldCheck,
-  Key,
-  Globe2,
   LogOut,
 } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
 import { FadeIn } from "@/components/animations/FadeIn";
 import UserAuthModal from "@/components/UserAuthModal";
 import { UserAuthData } from "@/types";
+import {
+  signInWithGooglePopup,
+  signInWithEmail,
+  registerWithEmail,
+} from "@/lib/firebase";
 
 export default function InternshipApplyPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const inlineGoogleBtnRef = useRef<HTMLDivElement>(null);
 
   // Authentication State
   const [currentUser, setCurrentUser] = useState<UserAuthData | null>(null);
@@ -47,13 +49,11 @@ export default function InternshipApplyPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Inline Sign-In Gate State (when not signed in)
-  const [authStep, setAuthStep] = useState<"initial" | "password_step">("initial");
-  const [authTab, setAuthTab] = useState<"google" | "direct">("google");
+  const [authTab, setAuthTab] = useState<"google" | "email">("google");
+  const [emailMode, setEmailMode] = useState<"login" | "register">("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authFullName, setAuthFullName] = useState("");
-  const [googleCredential, setGoogleCredential] = useState("");
-  const [googlePicture, setGooglePicture] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -74,10 +74,10 @@ export default function InternshipApplyPage() {
     linkedin_url: "",
     github_url: "",
     portfolio_url: "",
-    skills: "React, Next.js, Python, TypeScript",
+    skills: "Python, React, Machine Learning, FastAPI, PostgreSQL",
     experience_description: "",
     cover_letter: "",
-    role_preference: "Full Stack Web Development",
+    role_preference: "AI & Machine Learning Engineering",
     duration: "3 Months",
     resume_filename: "",
     resume_original_name: "",
@@ -93,7 +93,41 @@ export default function InternshipApplyPage() {
     "http://localhost:8000/api"
   ).replace(/\/$/, "");
 
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  // Sync authenticated user with backend Supabase database
+  const syncWithBackend = async (
+    userEmail: string,
+    userName: string,
+    userPic?: string | null,
+    provider: string = "google"
+  ): Promise<UserAuthData> => {
+    try {
+      const res = await fetch(`${apiBase}/auth/user/firebase-sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: userEmail,
+          full_name: userName,
+          picture: userPic || null,
+          provider: provider,
+        }),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Backend offline fallback
+    }
+
+    return {
+      access_token: "firebase_" + Date.now(),
+      token_type: "bearer",
+      user_email: userEmail,
+      user_name: userName,
+      user_picture: userPic || undefined,
+      role: "user",
+    };
+  };
 
   // Check auth state on load
   const loadUserAuth = () => {
@@ -128,145 +162,49 @@ export default function InternshipApplyPage() {
     return () => window.removeEventListener("user-auth-change", loadUserAuth);
   }, []);
 
-  const parseJwt = (token: string) => {
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join("")
-      );
-      return JSON.parse(jsonPayload);
-    } catch {
-      return null;
-    }
-  };
-
-  // Initialize inline Google button when unauthenticated
-  useEffect(() => {
-    if (currentUser || !authChecked) return;
-    if (!googleClientId || googleClientId.includes("<your")) return;
-
-    const initGoogle = () => {
-      if (window.google && inlineGoogleBtnRef.current) {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredential,
-          auto_select: false,
-        });
-        window.google.accounts.id.renderButton(inlineGoogleBtnRef.current, {
-          theme: "filled_black",
-          size: "large",
-          text: "signin_with",
-          shape: "rectangular",
-          width: 320,
-        });
-      }
-    };
-
-    if (window.google) {
-      initGoogle();
-    } else {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initGoogle;
-      document.head.appendChild(script);
-    }
-  }, [currentUser, authChecked, authStep]);
-
-  const handleGoogleCredential = async (response: { credential: string }) => {
+  const handleGoogleSignInInline = async () => {
     setGoogleLoading(true);
     setAuthError("");
     try {
-      const payload = parseJwt(response.credential);
-      const parsedEmail = payload?.email || "";
-      const parsedName = payload?.name || parsedEmail.split("@")[0];
-      const parsedPic = payload?.picture || "";
+      const user = await signInWithGooglePopup();
+      const userEmail = user.email || "";
+      const userName = user.displayName || userEmail.split("@")[0];
+      const userPic = user.photoURL || null;
 
-      setAuthEmail(parsedEmail);
-      setAuthFullName(parsedName);
-      setGooglePicture(parsedPic);
-      setGoogleCredential(response.credential);
+      const authData = await syncWithBackend(userEmail, userName, userPic, "google");
 
-      // Move to password step
-      setAuthStep("password_step");
+      localStorage.setItem("user_token", authData.access_token);
+      localStorage.setItem("user_email", authData.user_email);
+      localStorage.setItem("user_name", authData.user_name);
+      if (authData.user_picture) localStorage.setItem("user_picture", authData.user_picture);
+
+      setCurrentUser(authData);
+      setFormData((prev) => ({
+        ...prev,
+        email: authData.user_email,
+        full_name: prev.full_name || authData.user_name,
+      }));
+
+      window.dispatchEvent(new Event("user-auth-change"));
     } catch (err: any) {
-      setAuthError(err.message || "Google sign-in failed. Please try again.");
+      if (err.code === "auth/popup-closed-by-user") {
+        setAuthError("Google sign-in popup was closed before completing.");
+      } else {
+        setAuthError(err.message || "Google sign-in failed. Please try again.");
+      }
     } finally {
       setGoogleLoading(false);
     }
   };
 
-  const handleGoogleEmailProceed = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!authEmail || !authEmail.includes("@")) {
-      setAuthError("Please enter a valid email address.");
-      return;
-    }
-    setAuthError("");
-    const name = authFullName || authEmail.split("@")[0];
-    setAuthFullName(name);
-    setGoogleCredential("mock_credential_" + Date.now());
-    setAuthStep("password_step");
-  };
-
-  const handleCompleteGoogleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!authPassword) {
-      setAuthError("Please enter your password to complete registration and apply.");
-      return;
-    }
-
-    setAuthLoading(true);
-    setAuthError("");
-
-    try {
-      const res = await fetch(`${apiBase}/auth/user/google-with-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          credential: googleCredential,
-          email: authEmail,
-          full_name: authFullName,
-          password: authPassword,
-          picture: googlePicture,
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "Authentication failed");
-      }
-
-      const data: UserAuthData = await res.json();
-      localStorage.setItem("user_token", data.access_token);
-      localStorage.setItem("user_email", data.user_email);
-      localStorage.setItem("user_name", data.user_name);
-      if (data.user_picture) localStorage.setItem("user_picture", data.user_picture);
-
-      setCurrentUser(data);
-      setFormData((prev) => ({
-        ...prev,
-        email: data.user_email,
-        full_name: prev.full_name || data.user_name,
-      }));
-
-      window.dispatchEvent(new Event("user-auth-change"));
-    } catch (err: any) {
-      setAuthError(err.message || "Failed to finalize account. Please try again.");
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleDirectAuthSubmit = async (e: React.FormEvent) => {
+  const handleEmailAuthInline = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!authEmail || !authPassword) {
-      setAuthError("Please enter both email and password.");
+      setAuthError("Please fill in both email and password.");
+      return;
+    }
+    if (emailMode === "register" && !authFullName) {
+      setAuthError("Please enter your full name.");
       return;
     }
 
@@ -274,37 +212,38 @@ export default function InternshipApplyPage() {
     setAuthError("");
 
     try {
-      const res = await fetch(`${apiBase}/auth/user/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: authEmail,
-          password: authPassword,
-          full_name: authFullName || authEmail.split("@")[0],
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "Authentication failed");
+      let firebaseUser;
+      if (emailMode === "register") {
+        firebaseUser = await registerWithEmail(authEmail, authPassword, authFullName);
+      } else {
+        firebaseUser = await signInWithEmail(authEmail, authPassword);
       }
 
-      const data: UserAuthData = await res.json();
-      localStorage.setItem("user_token", data.access_token);
-      localStorage.setItem("user_email", data.user_email);
-      localStorage.setItem("user_name", data.user_name);
-      if (data.user_picture) localStorage.setItem("user_picture", data.user_picture);
+      const userEmail = firebaseUser.email || authEmail.trim();
+      const userName = firebaseUser.displayName || authFullName || userEmail.split("@")[0];
 
-      setCurrentUser(data);
+      const authData = await syncWithBackend(userEmail, userName, null, "email");
+
+      localStorage.setItem("user_token", authData.access_token);
+      localStorage.setItem("user_email", authData.user_email);
+      localStorage.setItem("user_name", authData.user_name);
+
+      setCurrentUser(authData);
       setFormData((prev) => ({
         ...prev,
-        email: data.user_email,
-        full_name: prev.full_name || data.user_name,
+        email: authData.user_email,
+        full_name: prev.full_name || authData.user_name,
       }));
 
       window.dispatchEvent(new Event("user-auth-change"));
     } catch (err: any) {
-      setAuthError(err.message || "Authentication failed. Please verify your credentials.");
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        setAuthError("Invalid email or password. If you are new, please switch to Register.");
+      } else if (err.code === "auth/email-already-in-use") {
+        setAuthError("An account already exists with this email. Please switch to Sign In.");
+      } else {
+        setAuthError(err.message || "Authentication failed. Please verify your credentials.");
+      }
     } finally {
       setAuthLoading(false);
     }
@@ -316,7 +255,6 @@ export default function InternshipApplyPage() {
     localStorage.removeItem("user_name");
     localStorage.removeItem("user_picture");
     setCurrentUser(null);
-    setAuthStep("initial");
     window.dispatchEvent(new Event("user-auth-change"));
   };
 
@@ -324,7 +262,6 @@ export default function InternshipApplyPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setResumeUploadError("File size exceeds 10MB limit. Please upload a smaller PDF/DOC.");
       return;
@@ -403,7 +340,7 @@ export default function InternshipApplyPage() {
           college: formData.college,
           degree: formData.degree,
           year_of_study: formData.year_of_study,
-          skills: skillsArray.length > 0 ? skillsArray : ["Full Stack Development"],
+          skills: skillsArray.length > 0 ? skillsArray : ["AI & ML Engineering", "Full Stack Development"],
           duration: formData.duration,
           role_preference: formData.role_preference,
           linkedin_url: formData.linkedin_url || undefined,
@@ -428,7 +365,6 @@ export default function InternshipApplyPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
-      {/* User Auth Modal fallback */}
       <UserAuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
@@ -447,20 +383,18 @@ export default function InternshipApplyPage() {
         <div className="text-left space-y-4 max-w-3xl border-l-8 border-brand-500 pl-6 sm:pl-8">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0px_#1a1915]">
             <GraduationCap className="w-4 h-4" />
-            Pre-Hire Internship Program 2026
+            Virtual Pre-Hire Internship Program 2026
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight uppercase leading-[0.95]">
-            Apply For <span className="text-brand-400">Internship</span>
+            Apply For <span className="text-brand-400">Virtual Internship</span>
           </h1>
           <p className="text-ink-300 text-base sm:text-lg font-medium pt-2 max-w-2xl leading-relaxed">
-            Join our hands-on engineering track. Work on real production software with 1:1 senior developer mentorship, resume coaching, and verified completion credentials.
+            Join our 100% remote engineering track. Work on real production software with 1:1 senior developer mentorship, resume coaching, and verified completion credentials.
           </p>
         </div>
       </FadeIn>
 
-      {/* ─────────────────────────────────────────────────────────────
-          MANDATORY SIGN-IN GATE: If not logged in, show 2-step portal
-          ───────────────────────────────────────────────────────────── */}
+      {/* MANDATORY SIGN-IN GATE */}
       {authChecked && !currentUser && (
         <FadeIn delay={0.1} direction="up">
           <div className="bg-ink-950 border-2 border-brand-500 p-6 sm:p-10 shadow-[10px_10px_0px_#1a1915] space-y-8">
@@ -469,15 +403,13 @@ export default function InternshipApplyPage() {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" /> InternVision Tech
                 </div>
-                <span className="text-xs text-ink-400 font-semibold">Applicant Portal</span>
+                <span className="text-xs text-ink-400 font-semibold">Firebase Authentication</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {authStep === "password_step" ? "Account Security Verification" : "Sign In to Begin Application"}
+                Sign In to Begin Application
               </h2>
               <p className="text-ink-300 text-sm">
-                {authStep === "password_step"
-                  ? "Enter your account password to complete verification with InternVision Tech."
-                  : "Sign in with your email to unlock and submit your internship application."}
+                Sign in with Google (no password required) or use your Email & Password to unlock the application form.
               </p>
             </div>
 
@@ -488,233 +420,161 @@ export default function InternshipApplyPage() {
               </div>
             )}
 
-            {authStep === "initial" ? (
-              <div className="space-y-6 max-w-md mx-auto">
-                <div className="grid grid-cols-2 p-1 bg-ink-900 border border-ink-800 text-xs font-bold">
+            <div className="space-y-6 max-w-md mx-auto">
+              <div className="grid grid-cols-2 p-1 bg-ink-900 border border-ink-800 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => { setAuthTab("google"); setAuthError(""); }}
+                  className={`py-2.5 text-center transition ${
+                    authTab === "google" ? "bg-brand-600 text-white" : "text-ink-400 hover:text-white"
+                  }`}
+                >
+                  Sign in with Google
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAuthTab("email"); setAuthError(""); }}
+                  className={`py-2.5 text-center transition ${
+                    authTab === "email" ? "bg-brand-600 text-white" : "text-ink-400 hover:text-white"
+                  }`}
+                >
+                  Email & Password
+                </button>
+              </div>
+
+              {authTab === "google" ? (
+                <div className="space-y-5 text-left">
+                  <div className="p-4 bg-ink-900 border border-ink-800 text-xs text-ink-300 space-y-1.5">
+                    <div className="font-bold text-white flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-brand-400" /> 1-Click Secure Google Sign-In:
+                    </div>
+                    <p className="text-ink-400 text-xs">
+                      Sign in directly with your Google account. No separate password needed or stored.
+                    </p>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => { setAuthTab("google"); setAuthError(""); }}
-                    className={`py-2.5 text-center transition ${
-                      authTab === "google" ? "bg-brand-600 text-white" : "text-ink-400 hover:text-white"
-                    }`}
+                    onClick={handleGoogleSignInInline}
+                    disabled={googleLoading}
+                    className="w-full py-4 px-6 bg-white hover:bg-ink-100 text-black font-bold text-base flex items-center justify-center gap-3 transition transform hover:-translate-y-0.5 shadow-[4px_4px_0px_#1a1915] border border-ink-300 disabled:opacity-50"
                   >
-                    1. Google Sign-In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthTab("direct"); setAuthError(""); }}
-                    className={`py-2.5 text-center transition ${
-                      authTab === "direct" ? "bg-brand-600 text-white" : "text-ink-400 hover:text-white"
-                    }`}
-                  >
-                    Direct Email & Password
+                    {googleLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin text-black" />
+                        Signing in with Google...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                          />
+                        </svg>
+                        Continue with Google <ArrowRight className="w-5 h-5 text-black" />
+                      </>
+                    )}
                   </button>
                 </div>
-
-                {authTab === "google" ? (
-                  <div className="space-y-5 text-left">
-                    <div className="p-4 bg-ink-900 border border-ink-800 text-xs text-ink-300 space-y-1.5">
-                      <div className="font-bold text-white flex items-center gap-1.5">
-                        <ShieldCheck className="w-4 h-4 text-brand-400" /> InternVision Tech Verification:
-                      </div>
-                      <p className="text-ink-400 text-xs">
-                        Enter your Google Account email below, then verify with your password to access the application form.
-                      </p>
-                    </div>
-
-                    {/* Official Google One-Tap/Button if client ID is configured */}
-                    {googleClientId && !googleClientId.includes("<your") && (
-                      <div className="relative">
-                        {googleLoading && (
-                          <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink-950/80">
-                            <Loader2 className="w-6 h-6 animate-spin text-brand-400" />
-                          </div>
-                        )}
-                        <div ref={inlineGoogleBtnRef} className="w-full flex justify-center min-h-[44px]" />
-                        <div className="flex items-center gap-3 my-2">
-                          <div className="flex-1 h-px bg-ink-800" />
-                          <span className="text-[10px] text-ink-500 font-medium uppercase tracking-widest">or enter email</span>
-                          <div className="flex-1 h-px bg-ink-800" />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* In-UI Email Input (No Browser Prompt) */}
-                    <form onSubmit={handleGoogleEmailProceed} className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-brand-400" /> Google Account Email Address *
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="e.g. yourname@gmail.com"
-                          value={authEmail}
-                          onChange={(e) => setAuthEmail(e.target.value)}
-                          className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
-                          autoFocus
-                        />
-                        <p className="text-[11px] text-ink-500">
-                          💡 Hint: Enter your active Google or student email ID.
-                        </p>
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="w-full py-4 px-6 bg-brand-600 hover:bg-brand-500 text-white font-bold text-base flex items-center justify-center gap-3 transition transform hover:-translate-y-0.5 shadow-[4px_4px_0px_#1a1915]"
-                      >
-                        <Globe2 className="w-5 h-5 text-white" /> Continue with Google <ArrowRight className="w-5 h-5" />
-                      </button>
-                    </form>
+              ) : (
+                <form onSubmit={handleEmailAuthInline} className="space-y-4 text-left">
+                  <div className="flex justify-between items-center text-xs pb-1">
+                    <span className="text-ink-400">
+                      {emailMode === "login" ? "Don't have an account?" : "Already have an account?"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmailMode(emailMode === "login" ? "register" : "login");
+                        setAuthError("");
+                      }}
+                      className="text-brand-400 font-bold hover:underline"
+                    >
+                      {emailMode === "login" ? "Create Account" : "Sign In"}
+                    </button>
                   </div>
-                ) : (
-                  <form onSubmit={handleDirectAuthSubmit} className="space-y-4 text-left">
+
+                  {emailMode === "register" && (
                     <div className="space-y-1.5">
                       <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-brand-400" /> Full Name
+                        <User className="w-3.5 h-3.5 text-brand-400" /> Full Name *
                       </label>
                       <input
                         type="text"
+                        required
                         placeholder="e.g. Aarav Sharma"
                         value={authFullName}
                         onChange={(e) => setAuthFullName(e.target.value)}
                         className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
                       />
                     </div>
+                  )}
 
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        placeholder="e.g. yourname@example.com"
-                        value={authEmail}
-                        onChange={(e) => setAuthEmail(e.target.value)}
-                        className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5 text-brand-400" /> Password *
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        placeholder="••••••••"
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={authLoading}
-                      className="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold text-base flex items-center justify-center gap-2 transition shadow-[4px_4px_0px_#ffffff]"
-                    >
-                      {authLoading ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" /> Authenticating...
-                        </>
-                      ) : (
-                        <>
-                          Sign In & Unlock Application <ArrowRight className="w-5 h-5" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                )}
-              </div>
-            ) : (
-              <form onSubmit={handleCompleteGoogleAuth} className="space-y-5 max-w-md mx-auto text-left">
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-6 h-6" />
-                    </div>
-                    <div className="overflow-hidden">
-                      <div className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider">InternVision Tech Verification</div>
-                      <div className="text-sm font-semibold text-white truncate">{authFullName || authEmail.split("@")[0]}</div>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded">
-                    Active
-                  </span>
-                </div>
-
-                {/* Automatically Displayed Email Address */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
+                  <div className="space-y-1.5">
                     <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address
+                      <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address *
                     </label>
-                    <span className="text-[10px] text-brand-400 font-semibold flex items-center gap-1">
-                      <Lock className="w-2.5 h-2.5" /> Locked
-                    </span>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. yourname@example.com"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
+                    />
                   </div>
-                  <input
-                    type="email"
-                    readOnly
-                    value={authEmail}
-                    className="w-full bg-ink-900/60 border border-ink-800 px-4 py-2.5 text-ink-200 text-sm cursor-not-allowed select-none font-medium focus:outline-none"
-                  />
-                </div>
 
-                {/* PASSWORD ENTRY */}
-                <div className="space-y-1.5">
-                  <label className="text-xs text-brand-400 font-bold flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5 text-brand-400" /> Enter Account Password *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="Enter your account password"
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    className="w-full bg-ink-900 border-2 border-brand-500 px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-400 shadow-[0_0_12px_rgba(255,107,0,0.15)]"
-                    autoFocus
-                  />
-                  <p className="text-[11px] text-ink-500">
-                    💡 Hint: Enter your password to complete verification with InternVision Tech.
-                  </p>
-                </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-brand-400" /> Password *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
+                    />
+                  </div>
 
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setAuthStep("initial")}
-                    className="px-5 py-3.5 bg-ink-900 hover:bg-ink-800 border border-ink-700 text-ink-300 text-sm font-semibold"
-                  >
-                    Back
-                  </button>
                   <button
                     type="submit"
                     disabled={authLoading}
-                    className="flex-1 py-3.5 font-bold bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-2 transition disabled:opacity-50 shadow-[4px_4px_0px_#ffffff]"
+                    className="w-full py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold text-base flex items-center justify-center gap-2 transition shadow-[4px_4px_0px_#ffffff] disabled:opacity-50"
                   >
                     {authLoading ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" /> Logging In...
+                        <Loader2 className="w-5 h-5 animate-spin" /> Authenticating...
                       </>
                     ) : (
                       <>
-                        Login to InternVision Tech & Apply <ArrowRight className="w-5 h-5" />
+                        {emailMode === "login" ? "Sign In & Unlock Application" : "Register & Unlock Application"}{" "}
+                        <ArrowRight className="w-5 h-5" />
                       </>
                     )}
                   </button>
-                </div>
-              </form>
-            )}
+                </form>
+              )}
+            </div>
           </div>
         </FadeIn>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          VERIFIED APPLICANT STATUS BAR (Only shown when authenticated)
-          ───────────────────────────────────────────────────────────── */}
+      {/* VERIFIED APPLICANT STATUS BAR */}
       {currentUser && (
         <FadeIn delay={0.08} direction="up">
           <div className="p-4 bg-ink-900 border border-brand-500/50 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
@@ -749,404 +609,389 @@ export default function InternshipApplyPage() {
         </FadeIn>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          APPLICATION FORM (Strictly unlocked when authenticated)
-          ───────────────────────────────────────────────────────────── */}
-      {currentUser && (
-        <FadeIn delay={0.12} direction="up">
-          <div className="bg-ink-950 p-6 sm:p-12 border-2 border-ink-800 space-y-10 shadow-[12px_12px_0px_#1a1915]">
-            {errorMsg && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                {errorMsg}
+      {/* APPLICATION FORM */}
+      <div className={`relative transition-all duration-300 ${!currentUser ? "opacity-30 pointer-events-none filter blur-[1px]" : ""}`}>
+        <form onSubmit={handleSubmit} className="bg-ink-950 border border-ink-800 p-6 sm:p-10 space-y-10 shadow-2xl">
+          {errorMsg && (
+            <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              {errorMsg}
+            </div>
+          )}
+
+          {/* SECTION 1: PERSONAL DETAILS */}
+          <div className="space-y-5">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
+              <User className="w-4 h-4" /> 1. Personal Details
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-brand-400" /> Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Aarav Sharma"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="aarav.sharma@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-brand-400" /> Phone Number (WhatsApp) *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="+91 9876543210"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-brand-400" /> Current City / Location *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Nagpur, Mumbai, or Remote / Virtual"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 2: ACADEMIC BACKGROUND */}
+          <div className="space-y-5 pt-6 border-t border-ink-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
+              <Building2 className="w-4 h-4" /> 2. Academic Background
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-brand-400" /> College / University Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Indian Institute of Technology / VNIT Nagpur"
+                  value={formData.college}
+                  onChange={(e) => setFormData({ ...formData, college: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-brand-400" /> Degree & Branch *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="B.Tech Computer Science / BCA / AI & DS"
+                  value={formData.degree}
+                  onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-brand-400" /> Current Year of Study *
+                </label>
+                <select
+                  value={formData.year_of_study}
+                  onChange={(e) => setFormData({ ...formData, year_of_study: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition cursor-pointer"
+                >
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                  <option value="Graduated">Graduated / Recent Passout</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-brand-400" /> CGPA / Percentage (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="8.5 CGPA / 82%"
+                  value={formData.cgpa}
+                  onChange={(e) => setFormData({ ...formData, cgpa: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 3: PROFESSIONAL LINKS */}
+          <div className="space-y-5 pt-6 border-t border-ink-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
+              <Globe className="w-4 h-4" /> 3. Professional Profiles & Portfolio
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-brand-400" /> LinkedIn URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://linkedin.com/in/username"
+                  value={formData.linkedin_url}
+                  onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Code2 className="w-3.5 h-3.5 text-brand-400" /> GitHub URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://github.com/username"
+                  value={formData.github_url}
+                  onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-brand-400" /> Portfolio / Website URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://yourportfolio.dev"
+                  value={formData.portfolio_url}
+                  onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 4: PROFESSIONAL EXPERIENCE & SKILLS */}
+          <div className="space-y-5 pt-6 border-t border-ink-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
+              <Code className="w-4 h-4" /> 4. Professional Experience & Skills
+            </h3>
+
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Code className="w-3.5 h-3.5 text-brand-400" /> Technical Skills (Comma-separated) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Python, PyTorch, LLMs, React, Next.js, FastAPI, Docker, PostgreSQL"
+                  value={formData.skills}
+                  onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-brand-400" /> Experience & Projects Description *
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  placeholder="Describe your prior coding experience, AI/ML models built, web applications deployed, or technical problem solving..."
+                  value={formData.experience_description}
+                  onChange={(e) => setFormData({ ...formData, experience_description: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 p-4 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-400" /> Statement of Purpose / Why InternVision Tech?
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Tell us why you want to join our Virtual Internship Program and what goals you want to accomplish..."
+                  value={formData.cover_letter}
+                  onChange={(e) => setFormData({ ...formData, cover_letter: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 p-4 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 5: RESUME UPLOAD */}
+          <div className="space-y-5 pt-6 border-t border-ink-800/80">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
+              <UploadCloud className="w-4 h-4" /> 5. Resume Upload *
+            </h3>
+
+            {resumeUploadError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
+                {resumeUploadError}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-10">
-              {/* SECTION 1: PERSONAL & CONTACT */}
-              <div className="space-y-5">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
-                  <User className="w-4 h-4" /> 1. Personal & Contact Information
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-brand-400" /> Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Aarav Sharma"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
+            {formData.resume_filename ? (
+              <div className="p-4 bg-ink-900 border border-brand-500/50 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-brand-500/20 text-brand-400 rounded flex items-center justify-center">
+                    <FileCheck className="w-6 h-6" />
                   </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="aarav@example.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-brand-400" /> Phone Number (WhatsApp) *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="+91 9876543210"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-brand-400" /> Current City / Workplace Location *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Hyderabad, Bangalore, or Pune"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 2: ACADEMIC PROFILE */}
-              <div className="space-y-5 pt-6 border-t border-ink-800/80">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
-                  <Building2 className="w-4 h-4" /> 2. Academic Background
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-brand-400" /> College / University Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Indian Institute of Technology, Bombay"
-                      value={formData.college}
-                      onChange={(e) => setFormData({ ...formData, college: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-brand-400" /> Degree & Branch *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="B.Tech Computer Science / BCA"
-                      value={formData.degree}
-                      onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-brand-400" /> Current Year of Study *
-                    </label>
-                    <select
-                      value={formData.year_of_study}
-                      onChange={(e) => setFormData({ ...formData, year_of_study: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition cursor-pointer"
-                    >
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                      <option value="4th Year">4th Year</option>
-                      <option value="Graduated">Graduated / Recent Passout</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <GraduationCap className="w-3.5 h-3.5 text-brand-400" /> CGPA / Percentage (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="8.5 CGPA / 82%"
-                      value={formData.cgpa}
-                      onChange={(e) => setFormData({ ...formData, cgpa: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 3: PROFESSIONAL LINKS */}
-              <div className="space-y-5 pt-6 border-t border-ink-800/80">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
-                  <Globe className="w-4 h-4" /> 3. Professional Profiles & Portfolio
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Link2 className="w-3.5 h-3.5 text-brand-400" /> LinkedIn URL
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://linkedin.com/in/username"
-                      value={formData.linkedin_url}
-                      onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Code2 className="w-3.5 h-3.5 text-brand-400" /> GitHub URL
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://github.com/username"
-                      value={formData.github_url}
-                      onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-brand-400" /> Portfolio / Website URL
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://yourportfolio.dev"
-                      value={formData.portfolio_url}
-                      onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 4: PROFESSIONAL INFORMATION & DESCRIPTION */}
-              <div className="space-y-5 pt-6 border-t border-ink-800/80">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
-                  <Code className="w-4 h-4" /> 4. Professional Experience & Skills
-                </h3>
-
-                <div className="space-y-5">
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Code className="w-3.5 h-3.5 text-brand-400" /> Technical Skills (Comma-separated) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="React, Next.js, Python, FastAPI, Docker, PostgreSQL, Tailwind CSS"
-                      value={formData.skills}
-                      onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <FileText className="w-3.5 h-3.5 text-brand-400" /> Professional Experience & Projects Description *
-                    </label>
-                    <textarea
-                      rows={4}
-                      required
-                      placeholder="Describe your prior work experience, personal coding projects, open-source contributions, or technical problem solving you have done..."
-                      value={formData.experience_description}
-                      onChange={(e) => setFormData({ ...formData, experience_description: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 p-4 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-brand-400" /> Why should we hire you? / Statement of Purpose
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Tell us what excites you about this internship and what goals you want to accomplish during the program..."
-                      value={formData.cover_letter}
-                      onChange={(e) => setFormData({ ...formData, cover_letter: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 p-4 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 5: RESUME UPLOAD SECTION */}
-              <div className="space-y-5 pt-6 border-t border-ink-800/80">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 border-b border-ink-800 pb-2 flex items-center gap-2">
-                  <UploadCloud className="w-4 h-4" /> 5. Resume Upload *
-                </h3>
-
-                {resumeUploadError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
-                    {resumeUploadError}
-                  </div>
-                )}
-
-                {formData.resume_filename ? (
-                  <div className="p-4 bg-ink-900 border border-brand-500/50 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-brand-500/20 text-brand-400 rounded flex items-center justify-center">
-                        <FileCheck className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-white">{formData.resume_original_name || "Uploaded Resume"}</div>
-                        <div className="text-xs text-brand-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded & Ready for review
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveResume}
-                      className="p-2 text-ink-400 hover:text-red-400 transition"
-                      title="Remove and upload different resume"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition ${
-                      uploadingResume
-                        ? "border-brand-500 bg-brand-500/5"
-                        : "border-ink-700 bg-ink-900/40 hover:border-brand-500 hover:bg-ink-900"
-                    }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                      onChange={handleResumeUpload}
-                      className="hidden"
-                    />
-
-                    {uploadingResume ? (
-                      <div className="space-y-3 flex flex-col items-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-brand-400" />
-                        <p className="text-sm font-semibold text-white">Uploading resume securely...</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-ink-800 border border-ink-700 text-brand-400 flex items-center justify-center">
-                          <UploadCloud className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">Click or Drag & Drop your Resume here</p>
-                          <p className="text-xs text-ink-400 mt-1">Accepted formats: PDF, DOC, DOCX (Max 10MB)</p>
-                        </div>
-                        <span className="px-3 py-1 bg-ink-800 text-brand-400 text-xs font-semibold rounded border border-ink-700">
-                          Browse Files
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* SECTION 6: TRACK & DURATION PREFERENCE */}
-              <div className="space-y-5 pt-6 border-t border-ink-800/80">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-ink-800 pb-2">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 flex items-center gap-2">
-                    <Clock className="w-4 h-4" /> 6. Internship Track & Workplace Preference
-                  </h3>
-                  <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
-                    In-Office: Hyderabad / Bangalore / Pune (No Remote)
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Code className="w-3.5 h-3.5 text-brand-400" /> Preferred Engineering Track *
-                    </label>
-                    <select
-                      value={formData.role_preference}
-                      onChange={(e) => setFormData({ ...formData, role_preference: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition cursor-pointer"
-                    >
-                      <option value="Full Stack Web Development">Full Stack Web Development (Next.js & FastAPI)</option>
-                      <option value="AI & Machine Learning Engineering">AI & Machine Learning Engineering (PyTorch & LLMs)</option>
-                      <option value="Backend Engineering">Backend Engineering (Java / Spring Boot / Python)</option>
-                      <option value="Frontend Engineering">Frontend Engineering (React, TypeScript & Tailwind)</option>
-                      <option value="Cloud DevOps & Kubernetes">Cloud DevOps & Kubernetes</option>
-                      <option value="Cyber Security & Ethical Hacking">Cyber Security & Ethical Hacking</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-brand-400" /> Preferred Internship Duration *
-                    </label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                      {["1 Month", "3 Months", "6 Months"].map((dur) => (
-                        <div
-                          key={dur}
-                          onClick={() => setFormData({ ...formData, duration: dur })}
-                          className={`cursor-pointer p-4 border text-center transition ${
-                            formData.duration === dur
-                              ? "bg-brand-600/20 border-brand-500 text-white shadow-[2px_2px_0px_#ffffff20]"
-                              : "bg-ink-900 border-ink-800 text-ink-400 hover:border-ink-700"
-                          }`}
-                        >
-                          <div className="font-bold text-base text-white">{dur}</div>
-                          <div className="text-[11px] text-ink-400 mt-1">
-                            {dur === "1 Month" && "Foundation Bootcamp & Mentorship"}
-                            {dur === "3 Months" && "Standard Industrial Internship"}
-                            {dur === "6 Months" && "Advanced Product Co-Op Program"}
-                          </div>
-                        </div>
-                      ))}
+                  <div>
+                    <div className="text-sm font-bold text-white">{formData.resume_original_name || "Uploaded Resume"}</div>
+                    <div className="text-xs text-brand-400 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded & Ready for review
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* SUBMIT BUTTON */}
-              <div className="pt-6">
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-5 text-xl font-black bg-brand-600 hover:bg-brand-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-1 hover:shadow-[0px_0px_0px_#ffffff] flex items-center justify-center gap-3 transition-all disabled:opacity-50"
+                  type="button"
+                  onClick={handleRemoveResume}
+                  className="p-2 text-ink-400 hover:text-red-400 transition"
+                  title="Remove and upload different resume"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-6 h-6 animate-spin" /> Submitting Application...
-                    </>
-                  ) : (
-                    <>
-                      Submit Application <ArrowRight className="w-6 h-6" />
-                    </>
-                  )}
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+            ) : (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition ${
+                  uploadingResume
+                    ? "border-brand-500 bg-brand-500/5"
+                    : "border-ink-700 bg-ink-900/40 hover:border-brand-500 hover:bg-ink-900"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={handleResumeUpload}
+                  className="hidden"
+                />
+
+                {uploadingResume ? (
+                  <div className="space-y-3 flex flex-col items-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-brand-400" />
+                    <p className="text-sm font-semibold text-white">Uploading resume securely...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full bg-ink-800 border border-ink-700 text-brand-400 flex items-center justify-center">
+                      <UploadCloud className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">Click or Drag & Drop your Resume here</p>
+                      <p className="text-xs text-ink-400 mt-1">Accepted formats: PDF, DOC, DOCX (Max 10MB)</p>
+                    </div>
+                    <span className="px-3 py-1 bg-ink-800 text-brand-400 text-xs font-semibold rounded border border-ink-700">
+                      Browse Files
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </FadeIn>
-      )}
+
+          {/* SECTION 6: TRACK & DURATION PREFERENCE */}
+          <div className="space-y-5 pt-6 border-t border-ink-800/80">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-ink-800 pb-2">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-brand-400 flex items-center gap-2">
+                <Clock className="w-4 h-4" /> 6. Internship Track & Mode Preference
+              </h3>
+              <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded">
+                ✦ Virtual Internship (100% Remote)
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Code className="w-3.5 h-3.5 text-brand-400" /> Preferred Engineering Track *
+                </label>
+                <select
+                  value={formData.role_preference}
+                  onChange={(e) => setFormData({ ...formData, role_preference: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition cursor-pointer"
+                >
+                  <option value="AI & Machine Learning Engineering">AI & Machine Learning Engineering (PyTorch, LangChain & LLMs)</option>
+                  <option value="Full Stack Web Development">Full Stack Web Development (Next.js 15, React 19 & FastAPI)</option>
+                  <option value="Backend Engineering">Backend Engineering (FastAPI, Python, Spring Boot & PostgreSQL)</option>
+                  <option value="Frontend Engineering">Frontend Engineering (React, TypeScript & Tailwind CSS)</option>
+                  <option value="Cloud DevOps & Kubernetes">Cloud DevOps & Kubernetes (Docker, AWS & CI/CD)</option>
+                  <option value="Cyber Security & Ethical Hacking">Cyber Security & Ethical Hacking</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs text-ink-300 font-medium">Program Duration *</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {["1 Month", "3 Months", "6 Months"].map((dur) => (
+                    <button
+                      key={dur}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, duration: dur })}
+                      className={`py-3 px-4 text-xs font-bold transition border ${
+                        formData.duration === dur
+                          ? "bg-brand-600 text-white border-brand-500 shadow-[2px_2px_0px_#ffffff]"
+                          : "bg-ink-900 text-ink-400 border-ink-800 hover:text-white"
+                      }`}
+                    >
+                      {dur}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-4 font-black text-base uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-3 transition shadow-[6px_6px_0px_#ffffff] disabled:opacity-50"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Submitting Virtual Internship Application...
+              </>
+            ) : (
+              <>
+                Submit Virtual Internship Application <ArrowRight className="w-5 h-5" />
+              </>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

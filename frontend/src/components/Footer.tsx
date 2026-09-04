@@ -50,7 +50,7 @@ export default function Footer() {
  <a href="#"className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
  <Users className="w-4 h-4"/>
  </a>
- <a href="mailto:support@internvision.tech"className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
+ <a href="mailto:internvisiontechhr@gmail.com"className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
  <Mail className="w-4 h-4"/>
  </a>
  </div>

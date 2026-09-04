@@ -1,11 +1,12 @@
 import os
 import uuid
 from datetime import datetime
-from fastapi import APIRouter, Depends, status, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, status, UploadFile, File, Form, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.shared.database import get_db
 from app.shared.exceptions import BadRequestException
+from app.shared.email_service import send_internship_application_email
 from app.internship.models import InternshipApplication
 from app.internship.schemas import ApplicationCreate, ApplicationResponse
 
@@ -67,7 +68,7 @@ def get_resume_file(filename: str):
 
 @router.post("/applications", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/internships/apply", response_model=ApplicationResponse, status_code=status.HTTP_201_CREATED)
-def submit_internship_application(app_in: ApplicationCreate, db: Session = Depends(get_db)):
+def submit_internship_application(app_in: ApplicationCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     valid_durations = ["1 Month", "3 Months", "6 Months"]
     if app_in.duration not in valid_durations:
         raise BadRequestException(f"Invalid duration option '{app_in.duration}'. Must be one of {valid_durations}")
@@ -76,4 +77,17 @@ def submit_internship_application(app_in: ApplicationCreate, db: Session = Depen
     db.add(application)
     db.commit()
     db.refresh(application)
+
+    # Send confirmation email tailored to duration (1 Month, 3 Months, 6 Months)
+    recipient_email = application.email or application.google_email
+    if recipient_email:
+        background_tasks.add_task(
+            send_internship_application_email,
+            recipient_email,
+            application.full_name,
+            application.duration,
+            application.role_preference,
+            application.college or ""
+        )
+
     return application

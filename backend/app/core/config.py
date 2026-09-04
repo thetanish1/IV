@@ -22,6 +22,14 @@ class Settings(BaseSettings):
     # Google OAuth (Identity Services)
     GOOGLE_CLIENT_ID: str = ""  # Set this in .env — e.g. "xxxxx.apps.googleusercontent.com"
 
+    # SMTP / Email Notification Settings
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "internvisiontechhr@gmail.com"
+    SMTP_FROM_NAME: str = "InternVision Tech"
+    SMTP_TLS: bool = True
     
     # CORS Origins
     CORS_ORIGINS: Union[List[str], str] = [
@@ -30,7 +38,6 @@ class Settings(BaseSettings):
     ]
 
     @field_validator("CORS_ORIGINS", mode="before")
-    @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",") if i.strip()]

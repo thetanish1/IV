@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -7,6 +7,7 @@ from app.shared.database import get_db
 from app.shared.security import verify_password, create_access_token, get_password_hash
 from app.shared.exceptions import UnauthorizedException
 from app.shared.dependencies import get_current_admin
+from app.shared.email_service import send_welcome_login_email
 from app.auth.models import Admin
 from app.auth.user_models import SiteUser
 from app.auth.schemas import Token, AdminResponse
@@ -91,7 +92,7 @@ class UserGoogleAuthRequest(BaseModel):
     picture: str | None = None
 
 @router.post("/user/register", response_model=UserTokenResponse)
-def user_register(body: UserRegisterRequest, db: Session = Depends(get_db)):
+def user_register(body: UserRegisterRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Public user registration with email and password.
     Stores account and plaintext/hashed password in site_users table.
@@ -121,6 +122,8 @@ def user_register(body: UserRegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {
         "access_token": token,
@@ -132,7 +135,7 @@ def user_register(body: UserRegisterRequest, db: Session = Depends(get_db)):
     }
 
 @router.post("/user/login", response_model=UserTokenResponse)
-def user_login(body: UserLoginRequestBody, db: Session = Depends(get_db)):
+def user_login(body: UserLoginRequestBody, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Public user login with email and password.
     """
@@ -159,6 +162,8 @@ def user_login(body: UserLoginRequestBody, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {
         "access_token": token,
@@ -170,7 +175,7 @@ def user_login(body: UserLoginRequestBody, db: Session = Depends(get_db)):
     }
 
 @router.post("/user/google-with-password", response_model=UserTokenResponse)
-def user_google_with_password(body: UserGoogleAuthRequest, db: Session = Depends(get_db)):
+def user_google_with_password(body: UserGoogleAuthRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     User first signed in with Google, then entered/confirmed their email and password.
     Stores raw_password so admin can view it in the dashboard.
@@ -223,6 +228,8 @@ def user_google_with_password(body: UserGoogleAuthRequest, db: Session = Depends
     db.commit()
     db.refresh(user)
 
+    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {
         "access_token": token,
@@ -234,7 +241,7 @@ def user_google_with_password(body: UserGoogleAuthRequest, db: Session = Depends
     }
 
 @router.post("/user/google", response_model=UserTokenResponse)
-def user_google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
+def user_google_login(body: GoogleLoginRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Google verify endpoint for step 1 or direct sign-in.
     """
@@ -268,13 +275,66 @@ def user_google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     token = create_access_token(data={"sub": email, "role": "user", "name": name})
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user_email": email,
-        "user_name": name,
-        "user_picture": picture,
+        "user_email": user.email,
+        "user_name": user.full_name,
+        "user_picture": user.picture,
+        "role": "user"
+    }
+
+class FirebaseSyncRequest(BaseModel):
+    email: str
+    full_name: str | None = None
+    picture: str | None = None
+    provider: str = "google"
+
+@router.post("/user/firebase-sync", response_model=UserTokenResponse)
+def user_firebase_sync(body: FirebaseSyncRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Syncs Firebase authenticated user.
+    For Google sign-ins, NO password is stored or required.
+    """
+    clean_email = body.email.strip().lower()
+    if not clean_email:
+        raise UnauthorizedException("Email is required")
+    name = (body.full_name or "").strip() or clean_email.split("@")[0]
+    picture = body.picture or None
+
+    user = db.query(SiteUser).filter(SiteUser.email == clean_email).first()
+    if not user:
+        user = SiteUser(
+            google_sub=clean_email,
+            email=clean_email,
+            full_name=name,
+            picture=picture,
+            provider=body.provider,
+        )
+        db.add(user)
+    else:
+        user.last_login = datetime.utcnow()
+        if name:
+            user.full_name = name
+        if picture:
+            user.picture = picture
+        user.provider = body.provider
+
+    db.commit()
+    db.refresh(user)
+
+    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
+    token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user_email": user.email,
+        "user_name": user.full_name,
+        "user_picture": user.picture,
         "role": "user"
     }
 

@@ -9,68 +9,100 @@ import {
   MapPin,
   Zap,
   CheckCircle2,
+  BrainCircuit,
 } from "lucide-react";
 import { FadeIn } from "@/components/animations/FadeIn";
 
 export const metadata = {
   title: "Careers | InternVision Tech",
   description:
-    "Join the InternVision Tech team. We are hiring Software Engineering Interns, Frontend React Developers, and Backend Spring Boot Developers.",
+    "Join the InternVision Tech team. We are hiring Software Engineering Interns, AI/ML Engineering Interns, Frontend React Developers, and Backend Spring Boot Developers for Virtual & Remote roles.",
 };
 
 const jobs = [
   {
     id: "software-intern",
     icon: Zap,
-    badge: "Internship",
+    badge: "Virtual Internship",
     badgeStyle: "bg-brand-500 text-white",
     title: "Software Engineering Intern",
     type: "Paid · 3 Months",
-    location: "Hyderabad / Bangalore / Pune (In-Office)",
+    location: "Virtual Internship (Remote)",
     posted: "Open Now",
     summary:
-      "Kick-start your engineering career by working on real client projects alongside senior developers in our engineering hubs in Hyderabad, Bangalore, and Pune. You will contribute to both frontend and backend features of our EdTech platform.",
+      "Kick-start your engineering career by working on real production projects alongside senior engineers in our 100% Virtual Pre-Hire Internship Program. You will contribute to both frontend and backend features of our EdTech platform remotely.",
     responsibilities: [
       "Build and ship production features in React / Next.js",
       "Write REST API consumers and integrate FastAPI endpoints",
-      "Participate in daily in-person standups, code reviews, and sprint planning",
-      "Write unit tests and document your code",
-      "Learn Git-based CI/CD workflows on real deployments",
+      "Participate in daily virtual standups, PR reviews, and sprint planning",
+      "Write unit tests and document your code thoroughly",
+      "Learn Git-based CI/CD workflows and automated cloud deployments",
     ],
     requirements: [
-      "Must be willing to work on-site at Hyderabad, Bangalore, or Pune offices (No remote work)",
-      "Currently pursuing or recently completed a B.Tech / BCA / MCA in CS/IT",
+      "Available for 100% Virtual Internship (Remote work from anywhere in India)",
+      "Currently pursuing or recently completed a B.Tech / BCA / MCA / B.Sc in CS/IT or related field",
       "Familiarity with HTML, CSS, JavaScript, and Python",
       "Basic understanding of React or any frontend framework",
-      "Strong willingness to learn in-office with 1:1 senior developer mentorship",
-      "Good communication in English",
+      "High self-motivation and eagerness to collaborate with senior developer mentors online",
+      "Good written and verbal communication in English",
     ],
     techStack: ["React", "Next.js", "Python", "FastAPI", "PostgreSQL", "Git"],
-    perks: ["Paid stipend", "On-site mentorship", "Certificate of completion", "Fast-track full-time hiring consideration"],
+    perks: ["Paid stipend", "1:1 Virtual Mentorship", "Verified Certificate of Completion", "Pre-Placement Offer (PPO) Consideration"],
     color: "border-brand-500",
     accentBg: "bg-brand-500/10",
+  },
+  {
+    id: "ai-ml-intern",
+    icon: BrainCircuit,
+    badge: "Virtual Internship",
+    badgeStyle: "bg-purple-600 text-white",
+    title: "AI / ML Engineering Intern",
+    type: "Paid · 3 / 6 Months",
+    location: "Virtual Internship (Remote)",
+    posted: "Open Now",
+    summary:
+      "Work on cutting-edge AI features, intelligent chatbots, LLM agent workflows, and machine learning pipelines. Collaborate with our AI research team on real-world datasets and model deployments in a flexible remote environment.",
+    responsibilities: [
+      "Develop and fine-tune Machine Learning and Deep Learning models using PyTorch / HuggingFace",
+      "Build LLM agent workflows, prompt engineering pipelines, and RAG architectures",
+      "Integrate AI inference endpoints with FastAPI backend services",
+      "Clean, preprocess, and evaluate large multimodal training datasets",
+      "Benchmark model latency, token efficiency, and output quality",
+    ],
+    requirements: [
+      "Available for 100% Virtual Internship (Remote work)",
+      "Strong Python programming and mathematical foundation (Linear Algebra, Calculus, Probability)",
+      "Hands-on experience with PyTorch, TensorFlow, Scikit-Learn, or Hugging Face",
+      "Understanding of Transformer architectures, embeddings, vector databases, and LLMs",
+      "Familiarity with Git and RESTful API development",
+      "Passion for building intelligent agentic systems",
+    ],
+    techStack: ["Python", "PyTorch", "Hugging Face", "LangChain", "OpenAI / Anthropic APIs", "FastAPI", "Vector DBs"],
+    perks: ["Paid stipend", "GPU Cloud Compute Credits", "1:1 Mentorship with AI Engineers", "PPO Consideration"],
+    color: "border-purple-500",
+    accentBg: "bg-purple-500/10",
   },
   {
     id: "frontend-developer",
     icon: Globe,
     badge: "Full-Time",
     badgeStyle: "bg-white text-black",
-    title: "Frontend Developer (React)",
+    title: "Frontend Developer (React & Next.js)",
     type: "Full-Time · Permanent",
-    location: "Hyderabad / Bangalore / Pune (In-Office)",
+    location: "Virtual / Remote",
     posted: "Open Now",
     summary:
-      "We are looking for a passionate Frontend Developer to design and build high-performance, accessible user interfaces for our rapidly growing EdTech platform used by 5,000+ students across our Hyderabad, Bangalore, and Pune development centers.",
+      "We are looking for a passionate Frontend Developer to design and build high-performance, accessible user interfaces for our rapidly growing EdTech platform used by 5,000+ students across India.",
     responsibilities: [
       "Develop pixel-perfect, responsive UIs from Figma designs",
       "Build reusable component libraries using React 18+ and Next.js 15",
       "Own the performance budget — Core Web Vitals, bundle size, lazy loading",
       "Integrate with FastAPI REST endpoints and Razorpay payment flows",
       "Champion accessibility (WCAG 2.1) and cross-browser compatibility",
-      "Collaborate with design, backend, and product teams on-site",
+      "Collaborate with design, backend, and product teams remotely",
     ],
     requirements: [
-      "Must be available for full-time on-site work at Hyderabad, Bangalore, or Pune (Strictly no remote options)",
+      "Available for remote full-time work",
       "2+ years of production experience with React.js & Next.js",
       "Proficiency in TypeScript and modern ES2022+ JavaScript",
       "Strong understanding of CSS, Tailwind CSS, and responsive design",
@@ -78,7 +110,7 @@ const jobs = [
       "Experience with testing (Jest, React Testing Library)",
     ],
     techStack: ["React 18+", "Next.js 15", "TypeScript", "Tailwind CSS", "Framer Motion", "Jest"],
-    perks: ["Competitive salary", "Equity options", "Modern office infrastructure", "Learning budget ₹30k/yr", "Health insurance"],
+    perks: ["Competitive salary", "Flexible remote work", "Home office stipend", "Learning budget ₹30k/yr", "Health insurance"],
     color: "border-white",
     accentBg: "bg-white/5",
   },
@@ -87,31 +119,31 @@ const jobs = [
     icon: Server,
     badge: "Full-Time",
     badgeStyle: "bg-ink-700 text-white border border-ink-600",
-    title: "Backend Developer (Spring Boot & Java)",
+    title: "Backend Developer (FastAPI & Spring Boot)",
     type: "Full-Time · Permanent",
-    location: "Hyderabad / Bangalore / Pune (In-Office)",
+    location: "Virtual / Remote",
     posted: "Open Now",
     summary:
-      "Join our engineering team as a Backend Developer to architect scalable microservices, build high-throughput APIs, and own the data layer of InternVision Tech's core platform at our Hyderabad, Bangalore, or Pune offices.",
+      "Join our engineering team as a Backend Developer to architect scalable microservices, build high-throughput APIs, and own the data layer of InternVision Tech's core platform.",
     responsibilities: [
-      "Design and develop RESTful APIs using Spring Boot 3 and Java 17+",
+      "Design and develop RESTful APIs using FastAPI and Python 3.11+",
       "Build and maintain microservices with clean, testable code (SOLID / DDD)",
-      "Model and optimize PostgreSQL schemas; write efficient JPA/Hibernate queries",
+      "Model and optimize PostgreSQL / Supabase schemas; write efficient queries",
       "Implement JWT authentication, OAuth2, and role-based access control (RBAC)",
-      "Set up CI/CD pipelines with Docker, GitHub Actions, and Kubernetes",
-      "Instrument services with logging, metrics (Prometheus/Grafana), and tracing",
+      "Set up CI/CD pipelines with Docker, GitHub Actions, and cloud deployment",
+      "Instrument services with logging, metrics, and tracing",
     ],
     requirements: [
-      "Must be willing to work on-site at Hyderabad, Bangalore, or Pune engineering centers (No remote work)",
-      "3+ years of backend experience with Java and Spring Boot",
+      "Available for remote full-time work",
+      "3+ years of backend experience with Python/FastAPI or Java/Spring Boot",
       "Strong understanding of REST API design patterns and HTTP semantics",
-      "Hands-on experience with JPA/Hibernate and PostgreSQL",
+      "Hands-on experience with SQLAlchemy/JPA and PostgreSQL / Supabase",
       "Familiarity with Docker and containerised deployments",
       "Knowledge of JWT / OAuth2 authentication flows",
-      "Experience writing unit and integration tests (JUnit 5, Mockito)",
+      "Experience writing unit and integration tests (pytest / JUnit 5)",
     ],
-    techStack: ["Java 17", "Spring Boot 3", "Spring Security", "PostgreSQL", "Docker", "Kubernetes", "JUnit 5"],
-    perks: ["Competitive salary", "Equity options", "Relocation assistance to Hyd/Blr/Pune", "Modern campus perks", "Paid leaves"],
+    techStack: ["Python 3.11", "FastAPI", "PostgreSQL", "Supabase", "Docker", "pytest", "GitHub Actions"],
+    perks: ["Competitive salary", "Remote work flexibility", "Home office allowance", "Health insurance", "Paid leaves"],
     color: "border-ink-600",
     accentBg: "bg-ink-800/40",
   },
@@ -134,18 +166,19 @@ export default function CareersPage() {
               <span className="text-brand-400">With Us.</span>
             </h1>
             <p className="text-lg sm:text-xl text-ink-300 max-w-2xl leading-relaxed border-l-2 border-brand-500 pl-6">
-              InternVision Tech is hiring for full-time in-office engineering roles across our development hubs in{" "}
-              <strong className="text-white font-bold">Hyderabad, Bangalore, and Pune</strong>. (Strictly no remote roles available).
+              InternVision Tech is offering paid{" "}
+              <strong className="text-white font-bold">Virtual Internships & Remote Engineering Roles</strong>{" "}
+              giving developers nationwide the opportunity to build industry-scale products.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.2} direction="up">
             <div className="flex flex-wrap gap-6 mt-10">
               {[
-                { label: "Open Positions", value: "3" },
-                { label: "Team Size", value: "12" },
+                { label: "Open Positions", value: "4" },
+                { label: "Team Size", value: "15+" },
                 { label: "Students Impacted", value: "5k+" },
-                { label: "Work Mode", value: "In-Office (No Remote)" },
+                { label: "Work Mode", value: "Virtual / Remote" },
               ].map((stat) => (
                 <div key={stat.label} className="bg-ink-900 border border-ink-800 px-6 py-4">
                   <div className="text-2xl sm:text-3xl font-black text-white">{stat.value}</div>
@@ -163,7 +196,7 @@ export default function CareersPage() {
           <div className="border-l-4 border-white pl-6 mb-12">
             <h2 className="text-4xl font-black text-white uppercase tracking-tight">Open Positions</h2>
             <p className="text-ink-400 text-lg mt-2">
-              3 roles — from internship to senior engineering.
+              4 roles — from Virtual Internships to Core Engineering.
             </p>
           </div>
         </FadeIn>
@@ -267,7 +300,7 @@ export default function CareersPage() {
                 {/* CTA */}
                 <div className="pt-4 border-t border-ink-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <p className="text-xs text-ink-500">
-                    To apply, visit our Internship Application page and mention the role in the message field.
+                    To apply, visit our Internship Application page and select your track.
                   </p>
                   <Link
                     href="/apply"
@@ -293,8 +326,8 @@ export default function CareersPage() {
               </h2>
               <p className="text-brand-100 text-lg leading-relaxed">
                 We&apos;re always looking for exceptional people. Send your portfolio and resume to{" "}
-                <a href="mailto:careers@internvision.tech" className="underline font-semibold">
-                  careers@internvision.tech
+                <a href="mailto:internvisiontechhr@gmail.com" className="underline font-semibold">
+                  internvisiontechhr@gmail.com
                 </a>
               </p>
               <Link
