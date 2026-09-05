@@ -1,37 +1,46 @@
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api").replace(/\/$/, "");
 
 export async function apiRequest<T>(
- endpoint: string,
- options: RequestInit = {}
+  endpoint: string,
+  options: RequestInit = {},
+  timeoutMs: number = 8000
 ): Promise<T> {
- const token = typeof window !=="undefined"? localStorage.getItem("token") : null;
- const headers = new Headers(options.headers || {});
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers = new Headers(options.headers || {});
 
- if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
- headers.set("Content-Type","application/json");
- }
+  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
 
- if (token && !headers.has("Authorization")) {
- headers.set("Authorization", `Bearer ${token}`);
- }
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
- const response = await fetch(`${API_BASE_URL}${endpoint}`, {
- ...options,
- headers,
- });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
- if (!response.ok) {
- let errorMessage ="An unexpected error occurred";
- try {
- const errorData = await response.json();
- errorMessage = errorData.detail || errorMessage;
- } catch {
- errorMessage = response.statusText;
- }
- throw new Error(errorMessage);
- }
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: options.signal || controller.signal,
+    });
 
- return response.json();
+    if (!response.ok) {
+      let errorMessage = "An unexpected error occurred";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.detail || errorMessage;
+      } catch {
+        errorMessage = response.statusText || `Request failed with status ${response.status}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export function getExportUrl(type: 'applications' | 'payments', params?: Record<string, string>): string {

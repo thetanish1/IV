@@ -189,12 +189,57 @@ const COURSE_CURRICULUM: Record<
   },
 };
 
+const getDefaultCourse = (slug: string): Course | null => {
+  const fallbackTitles: Record<string, string> = {
+    "full-stack-web-development": "Full Stack Web Development Bootcamp",
+    "ai-machine-learning-engineering": "AI & Machine Learning Engineering",
+    "cloud-devops-kubernetes-mastery": "Cloud DevOps & Kubernetes Mastery",
+    "cyber-security-ethical-hacking": "Cyber Security & Ethical Hacking",
+  };
+
+  if (!fallbackTitles[slug]) return null;
+
+  return {
+    id: slug as any,
+    title: fallbackTitles[slug],
+    slug: slug,
+    description:
+      COURSE_CURRICULUM[slug]?.summary ||
+      "Production-grade engineering bootcamp designed to give you industry-ready software engineering skills.",
+    price_inr: 0,
+    duration:
+      slug === "ai-machine-learning-engineering"
+        ? "12 Weeks"
+        : slug === "cloud-devops-kubernetes-mastery"
+        ? "10 Weeks"
+        : "8 Weeks",
+    level:
+      slug === "ai-machine-learning-engineering"
+        ? "Advanced"
+        : slug === "cyber-security-ethical-hacking"
+        ? "Beginner - Intermediate"
+        : "Intermediate",
+    technologies:
+      slug === "full-stack-web-development"
+        ? ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]
+        : slug === "ai-machine-learning-engineering"
+        ? ["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"]
+        : slug === "cloud-devops-kubernetes-mastery"
+        ? ["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"]
+        : ["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
+    is_published: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+};
+
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
 
-  const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(true);
+  const defaultCourse = getDefaultCourse(resolvedParams.id);
+  const [course, setCourse] = useState<Course | null>(defaultCourse);
+  const [loading, setLoading] = useState(!defaultCourse);
 
   // Free Enrollment Modal State
   const [showEnrollModal, setShowEnrollModal] = useState(false);
@@ -228,50 +273,15 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
   const fetchCourseDetails = async () => {
     try {
-      const data = await apiRequest<Course>(`/courses/${resolvedParams.id}`);
-      setCourse(data);
+      const data = await apiRequest<Course>(`/courses/${resolvedParams.id}`, {}, 5000);
+      if (data && data.title) {
+        setCourse(data);
+      }
     } catch {
-      // Fallback if backend offline or course slug not found
-      const fallbackTitles: Record<string, string> = {
-        "full-stack-web-development": "Full Stack Web Development Bootcamp",
-        "ai-machine-learning-engineering": "AI & Machine Learning Engineering",
-        "cloud-devops-kubernetes-mastery": "Cloud DevOps & Kubernetes Mastery",
-        "cyber-security-ethical-hacking": "Cyber Security & Ethical Hacking",
-      };
-
-      if (fallbackTitles[resolvedParams.id]) {
-        setCourse({
-          id: resolvedParams.id as any,
-          title: fallbackTitles[resolvedParams.id],
-          slug: resolvedParams.id,
-          description:
-            COURSE_CURRICULUM[resolvedParams.id]?.summary ||
-            "Production-grade engineering bootcamp designed to give you industry-ready software engineering skills.",
-          price_inr: 0,
-          duration:
-            resolvedParams.id === "ai-machine-learning-engineering"
-              ? "12 Weeks"
-              : resolvedParams.id === "cloud-devops-kubernetes-mastery"
-              ? "10 Weeks"
-              : "8 Weeks",
-          level:
-            resolvedParams.id === "ai-machine-learning-engineering"
-              ? "Advanced"
-              : resolvedParams.id === "cyber-security-ethical-hacking"
-              ? "Beginner - Intermediate"
-              : "Intermediate",
-          technologies:
-            resolvedParams.id === "full-stack-web-development"
-              ? ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]
-              : resolvedParams.id === "ai-machine-learning-engineering"
-              ? ["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"]
-              : resolvedParams.id === "cloud-devops-kubernetes-mastery"
-              ? ["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"]
-              : ["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
-          is_published: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+      // If backend is waking up or offline, fallback data is already set and displayed cleanly
+      if (!course) {
+        const fallback = getDefaultCourse(resolvedParams.id);
+        if (fallback) setCourse(fallback);
       }
     } finally {
       setLoading(false);
@@ -295,9 +305,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         "http://localhost:8000/api"
       ).replace(/\/$/, "");
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
       const res = await fetch(`${apiBase}/courses/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           course_id: typeof course?.id === "number" ? course.id : undefined,
           course_slug: course?.slug || resolvedParams.id,
@@ -306,7 +320,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
           student_phone: formData.student_phone,
           college: formData.college || undefined,
         }),
-      });
+      }).finally(() => clearTimeout(timeoutId));
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
@@ -315,7 +329,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
       setSubmittedSuccess(true);
     } catch (err: any) {
-      setErrorMsg(err.message || "Something went wrong. Please try again.");
+      if (err.name === "AbortError") {
+        setErrorMsg("Server is waking up from sleep mode. Please try clicking Submit once more.");
+      } else {
+        setErrorMsg(err.message || "Failed to submit enrollment request. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
