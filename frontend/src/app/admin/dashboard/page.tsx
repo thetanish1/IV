@@ -42,6 +42,18 @@ import {
   Check,
   Eye,
   EyeOff,
+  Unlock,
+  Lock,
+  MessageSquare,
+  Send,
+  HelpCircle,
+  ToggleLeft,
+  ToggleRight,
+  Sliders,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  FolderGit2,
 } from "lucide-react";
 import {
   DashboardStats,
@@ -51,6 +63,10 @@ import {
   SiteUserItem,
   CourseRegistrationItem,
   CertificateItem,
+  SiteSettingItem,
+  SubmissionAdminItem,
+  UnlockRequestAdminItem,
+  StudentDoubtItem,
 } from "@/types";
 import { apiRequest } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
@@ -59,10 +75,43 @@ import AuthGuard from "@/components/AuthGuard";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "applications" | "users" | "enrollments" | "payments" | "certificates">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts"
+  >("overview");
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+
+  // Site Settings Feature Toggles State (Courses, Careers)
+  const [siteSettings, setSiteSettings] = useState<{ show_courses: boolean; show_careers: boolean }>({
+    show_courses: false,
+    show_careers: false,
+  });
+  const [updatingSettings, setUpdatingSettings] = useState(false);
+
+  // Submissions State
+  const [submissionsList, setSubmissionsList] = useState<SubmissionAdminItem[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [subSearch, setSubSearch] = useState("");
+  const [subStatusFilter, setSubStatusFilter] = useState("all");
+  const [selectedSub, setSelectedSub] = useState<SubmissionAdminItem | null>(null);
+  const [reviewStatus, setReviewStatus] = useState("approved");
+  const [reviewFeedback, setReviewFeedback] = useState("");
+  const [reviewUnlocked, setReviewUnlocked] = useState(true);
+  const [savingReview, setSavingReview] = useState(false);
+
+  // Unlock Requests State
+  const [unlockRequests, setUnlockRequests] = useState<UnlockRequestAdminItem[]>([]);
+  const [loadingUnlocks, setLoadingUnlocks] = useState(false);
+  const [actioningUnlockId, setActioningUnlockId] = useState<number | null>(null);
+
+  // Student Doubts Helpdesk State
+  const [doubtsList, setDoubtsList] = useState<StudentDoubtItem[]>([]);
+  const [loadingDoubts, setLoadingDoubts] = useState(false);
+  const [doubtFilter, setDoubtFilter] = useState("all");
+  const [replyingDoubt, setReplyingDoubt] = useState<StudentDoubtItem | null>(null);
+  const [doubtReplyText, setDoubtReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
 
   // Applications Table State
   const [appsData, setAppsData] = useState<PaginatedResult<InternshipApplicationResponse>>({
@@ -154,6 +203,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     fetchStats();
+    fetchSiteSettings();
   }, []);
 
   useEffect(() => {
@@ -172,7 +222,33 @@ export default function AdminDashboardPage() {
     if (activeTab === "certificates" || activeTab === "overview") {
       fetchCertificates();
     }
-  }, [activeTab, appsSearch, appsDuration, appsPage, usersSearch, usersProvider, usersPage, regSearch, regStatus, regPage, pmtSearch, pmtStatus, pmtPage, certSearch]);
+    if (activeTab === "submissions" || activeTab === "overview") {
+      fetchSubmissions();
+    }
+    if (activeTab === "unlocks" || activeTab === "overview") {
+      fetchUnlockRequests();
+    }
+    if (activeTab === "doubts" || activeTab === "overview") {
+      fetchDoubts();
+    }
+  }, [
+    activeTab,
+    appsSearch,
+    appsDuration,
+    appsPage,
+    usersSearch,
+    usersProvider,
+    usersPage,
+    regSearch,
+    regStatus,
+    regPage,
+    pmtSearch,
+    pmtStatus,
+    pmtPage,
+    certSearch,
+    subStatusFilter,
+    doubtFilter,
+  ]);
 
   const fetchStats = async () => {
     try {
@@ -387,6 +463,146 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const fetchSiteSettings = async () => {
+    try {
+      const data = await apiRequest<{ show_courses?: string; show_careers?: string }>("/admin/settings");
+      setSiteSettings({
+        show_courses: data.show_courses === "true",
+        show_careers: data.show_careers === "true",
+      });
+    } catch (err) {
+      console.error("Failed to load site settings", err);
+    }
+  };
+
+  const handleToggleSetting = async (key: "show_courses" | "show_careers") => {
+    const nextVal = !siteSettings[key];
+    setUpdatingSettings(true);
+    try {
+      await apiRequest("/admin/settings", {
+        method: "PATCH",
+        body: JSON.stringify({ [key]: nextVal ? "true" : "false" }),
+      });
+      setSiteSettings((prev) => ({ ...prev, [key]: nextVal }));
+      window.dispatchEvent(new Event("site-settings-changed"));
+    } catch (err) {
+      console.error(`Failed to toggle ${key}:`, err);
+    } finally {
+      setUpdatingSettings(false);
+    }
+  };
+
+  const fetchSubmissions = async () => {
+    setLoadingSubmissions(true);
+    try {
+      const params = new URLSearchParams();
+      if (subStatusFilter !== "all") params.set("status", subStatusFilter);
+      if (subSearch) params.set("search", subSearch);
+      const data = await apiRequest<SubmissionAdminItem[]>(`/admin/submissions?${params.toString()}`);
+      setSubmissionsList(data);
+    } catch (err) {
+      console.error("Failed to fetch submissions", err);
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
+  const handleOpenReviewModal = (sub: SubmissionAdminItem) => {
+    setSelectedSub(sub);
+    setReviewStatus(sub.status || "approved");
+    setReviewFeedback(sub.admin_feedback || "");
+    setReviewUnlocked(sub.is_unlocked ?? true);
+  };
+
+  const handleSaveReview = async () => {
+    if (!selectedSub) return;
+    setSavingReview(true);
+    try {
+      const updated = await apiRequest<SubmissionAdminItem>(`/admin/submissions/${selectedSub.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: reviewStatus,
+          admin_feedback: reviewFeedback,
+          is_unlocked: reviewUnlocked,
+        }),
+      });
+      setSubmissionsList((prev) => prev.map((s) => (s.id === selectedSub.id ? { ...s, ...updated } : s)));
+      setSelectedSub(null);
+    } catch (err) {
+      console.error("Failed to save review", err);
+    } finally {
+      setSavingReview(false);
+    }
+  };
+
+  const fetchUnlockRequests = async () => {
+    setLoadingUnlocks(true);
+    try {
+      const data = await apiRequest<UnlockRequestAdminItem[]>("/admin/unlock-requests");
+      setUnlockRequests(data);
+    } catch (err) {
+      console.error("Failed to load unlock requests", err);
+    } finally {
+      setLoadingUnlocks(false);
+    }
+  };
+
+  const handleUnlockAction = async (id: number, action: "approve" | "reject") => {
+    setActioningUnlockId(id);
+    try {
+      await apiRequest(`/admin/unlock-requests/${id}/action`, {
+        method: "POST",
+        body: JSON.stringify({ action }),
+      });
+      setUnlockRequests((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: action === "approve" ? "approved" : "rejected" } : r))
+      );
+      // Refresh submissions if an unlock occurred
+      if (action === "approve") {
+        fetchSubmissions();
+      }
+    } catch (err) {
+      console.error(`Failed to ${action} unlock request`, err);
+    } finally {
+      setActioningUnlockId(null);
+    }
+  };
+
+  const fetchDoubts = async () => {
+    setLoadingDoubts(true);
+    try {
+      const params = new URLSearchParams();
+      if (doubtFilter !== "all") params.set("status", doubtFilter);
+      const data = await apiRequest<StudentDoubtItem[]>(`/admin/doubts?${params.toString()}`);
+      setDoubtsList(data);
+    } catch (err) {
+      console.error("Failed to load doubts", err);
+    } finally {
+      setLoadingDoubts(false);
+    }
+  };
+
+  const handleSendDoubtReply = async () => {
+    if (!replyingDoubt || !doubtReplyText.trim()) return;
+    setSendingReply(true);
+    try {
+      const updated = await apiRequest<StudentDoubtItem>(`/admin/doubts/${replyingDoubt.id}/reply`, {
+        method: "POST",
+        body: JSON.stringify({
+          reply: doubtReplyText.trim(),
+          answered_by: "InternVision HR & Mentor Team",
+        }),
+      });
+      setDoubtsList((prev) => prev.map((d) => (d.id === replyingDoubt.id ? updated : d)));
+      setReplyingDoubt(null);
+      setDoubtReplyText("");
+    } catch (err) {
+      console.error("Failed to send doubt reply", err);
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   const handleExportExcel = (type: "applications" | "payments") => {
     const token = localStorage.getItem("token");
     const baseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1").replace(/\/$/, "");
@@ -424,12 +640,15 @@ export default function AdminDashboardPage() {
     router.push("/admin/login");
   };
 
+  const pendingUnlocksCount = unlockRequests.filter((u) => u.status === "pending").length;
+  const openDoubtsCount = doubtsList.filter((d) => d.status === "open").length;
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-black text-ink-50 font-sans selection:bg-brand-500/30 pb-20">
         {/* TOP BAR */}
         <header className="border-b border-ink-800 bg-ink-950/80 sticky top-0 z-40 backdrop-blur-xl">
-          <div className="max-w-[90rem] mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="max-w-[90rem] mx-auto px-6 h-16 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center text-brand-400">
                 <Shield className="w-4 h-4" />
@@ -438,6 +657,53 @@ export default function AdminDashboardPage() {
                 <h1 className="text-sm font-semibold tracking-tight text-white">Admin Dashboard</h1>
                 <div className="text-[10px] text-ink-400">Super Admin: tanishdewase222@gmail.com</div>
               </div>
+            </div>
+
+            {/* LIVE PORTAL TOGGLE SWITCHES (HOMEPAGE & NAVBAR VISIBILITY) */}
+            <div className="hidden md:flex items-center gap-3 bg-ink-900/90 border border-ink-800 px-4 py-1.5 rounded-xl shadow-inner">
+              <span className="text-[11px] font-semibold uppercase text-ink-400 tracking-wider flex items-center gap-1.5 mr-1">
+                <Sliders className="w-3.5 h-3.5 text-brand-400" /> Site Controls:
+              </span>
+
+              {/* Courses Toggle Button */}
+              <button
+                type="button"
+                disabled={updatingSettings}
+                onClick={() => handleToggleSetting("show_courses")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
+                  siteSettings.show_courses
+                    ? "bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm shadow-purple-500/10"
+                    : "bg-ink-950 text-ink-400 border-ink-800 hover:text-ink-200"
+                }`}
+                title="Toggle Courses link in navigation and homepage display"
+              >
+                {siteSettings.show_courses ? (
+                  <ToggleRight className="w-4 h-4 text-purple-400" />
+                ) : (
+                  <ToggleLeft className="w-4 h-4 text-ink-500" />
+                )}
+                <span>Courses: {siteSettings.show_courses ? "ON" : "OFF"}</span>
+              </button>
+
+              {/* Careers Toggle Button */}
+              <button
+                type="button"
+                disabled={updatingSettings}
+                onClick={() => handleToggleSetting("show_careers")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
+                  siteSettings.show_careers
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/10"
+                    : "bg-ink-950 text-ink-400 border-ink-800 hover:text-ink-200"
+                }`}
+                title="Toggle Careers portal link in navigation"
+              >
+                {siteSettings.show_careers ? (
+                  <ToggleRight className="w-4 h-4 text-emerald-400" />
+                ) : (
+                  <ToggleLeft className="w-4 h-4 text-ink-500" />
+                )}
+                <span>Careers: {siteSettings.show_careers ? "ON" : "OFF"}</span>
+              </button>
             </div>
 
             <button
@@ -506,10 +772,10 @@ export default function AdminDashboardPage() {
           </FadeIn>
 
           {/* NAVIGATION TABS */}
-          <div className="flex items-center gap-6 border-b border-ink-800">
+          <div className="flex items-center gap-6 border-b border-ink-800 overflow-x-auto pb-0.5">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`pb-3 text-sm font-medium transition-colors relative ${
+              className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap relative ${
                 activeTab === "overview" ? "text-white" : "text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -518,7 +784,7 @@ export default function AdminDashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab("applications")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
                 activeTab === "applications" ? "text-white" : "text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -529,8 +795,59 @@ export default function AdminDashboardPage() {
               {activeTab === "applications" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
             </button>
             <button
+              onClick={() => setActiveTab("submissions")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                activeTab === "submissions" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              <FolderGit2 className="w-3.5 h-3.5 text-blue-400" />
+              Submissions
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-blue-600/20 text-blue-400 border border-blue-500/30">
+                {submissionsList.length}
+              </span>
+              {activeTab === "submissions" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab("unlocks")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                activeTab === "unlocks" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              <Unlock className="w-3.5 h-3.5 text-amber-400" />
+              Unlock Requests
+              {pendingUnlocksCount > 0 ? (
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse">
+                  {pendingUnlocksCount} PENDING
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
+                  {unlockRequests.length}
+                </span>
+              )}
+              {activeTab === "unlocks" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab("doubts")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                activeTab === "doubts" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
+              Doubts Helpdesk
+              {openDoubtsCount > 0 ? (
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-pink-500/20 text-pink-400 border border-pink-500/30 animate-pulse">
+                  {openDoubtsCount} OPEN
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
+                  {doubtsList.length}
+                </span>
+              )}
+              {activeTab === "doubts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
               onClick={() => setActiveTab("users")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
                 activeTab === "users" ? "text-white" : "text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -542,7 +859,7 @@ export default function AdminDashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab("enrollments")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
                 activeTab === "enrollments" ? "text-white" : "text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -554,7 +871,7 @@ export default function AdminDashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab("payments")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
                 activeTab === "payments" ? "text-white" : "text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -566,7 +883,7 @@ export default function AdminDashboardPage() {
             </button>
             <button
               onClick={() => setActiveTab("certificates")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
                 activeTab === "certificates" ? "text-white" : "text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -1347,7 +1664,620 @@ export default function AdminDashboardPage() {
               </div>
             </FadeIn>
           )}
+
+          {/* ─────────────────── SUBMISSIONS REVIEW SECTION ─────────────────── */}
+          {(activeTab === "submissions" || activeTab === "overview") && (
+            <FadeIn delay={0.25} direction="up">
+              <div className="space-y-4 pt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <FolderGit2 className="w-5 h-5 text-blue-400" /> Student Task & Project Submissions
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      Review weekly deliverables, GitHub repositories, live deployments, and assign feedback.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-full sm:w-64">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-ink-400" />
+                      <input
+                        type="text"
+                        placeholder="Search student or task..."
+                        value={subSearch}
+                        onChange={(e) => setSubSearch(e.target.value)}
+                        className="w-full bg-ink-950 border border-ink-800 rounded-lg pl-9 pr-3 py-1.5 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                    <select
+                      value={subStatusFilter}
+                      onChange={(e) => setSubStatusFilter(e.target.value)}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="submitted">Pending Review</option>
+                      <option value="approved">Approved</option>
+                      <option value="needs_revision">Needs Revision</option>
+                    </select>
+                    <button
+                      onClick={fetchSubmissions}
+                      className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+                      title="Refresh Submissions"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/30">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-ink-900/50 text-ink-400 font-medium border-b border-ink-800">
+                        <tr>
+                          <th className="px-5 py-3 font-medium">Student</th>
+                          <th className="px-5 py-3 font-medium">Domain & Track</th>
+                          <th className="px-5 py-3 font-medium">Task / Project</th>
+                          <th className="px-5 py-3 font-medium">Work Artifacts</th>
+                          <th className="px-5 py-3 font-medium">Status</th>
+                          <th className="px-5 py-3 font-medium">Submitted</th>
+                          <th className="px-5 py-3 font-medium text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-ink-800/50">
+                        {loadingSubmissions ? (
+                          <tr>
+                            <td colSpan={7} className="text-center py-12">
+                              <Loader2 className="w-5 h-5 animate-spin mx-auto text-blue-400" />
+                            </td>
+                          </tr>
+                        ) : submissionsList.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="text-center py-12 text-ink-500 text-sm">
+                              No submissions found matching criteria.
+                            </td>
+                          </tr>
+                        ) : (
+                          submissionsList.map((sub) => (
+                            <tr key={sub.id} className="hover:bg-ink-900/30 transition-colors">
+                              <td className="px-5 py-4">
+                                <div className="font-semibold text-white">{sub.student_name}</div>
+                                <div className="text-xs text-ink-400 font-mono">{sub.student_email}</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="text-xs text-ink-200">{sub.role_preference}</div>
+                                <div className="text-[10px] text-ink-500">{sub.duration} Track</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-mono bg-ink-800 text-brand-400">
+                                    {sub.task_key}
+                                  </span>
+                                  {sub.title}
+                                </div>
+                                {sub.project_topic && (
+                                  <div className="text-[11px] text-purple-400 mt-0.5 font-medium">
+                                    Topic: {sub.project_topic}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="flex items-center gap-2">
+                                  {sub.github_url && (
+                                    <a
+                                      href={sub.github_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="px-2 py-1 bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 rounded text-xs flex items-center gap-1 transition"
+                                      title="Open GitHub Repository"
+                                    >
+                                      <Code2 className="w-3 h-3 text-blue-400" /> Code
+                                    </a>
+                                  )}
+                                  {sub.live_url && (
+                                    <a
+                                      href={sub.live_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="px-2 py-1 bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 rounded text-xs flex items-center gap-1 transition"
+                                      title="Open Live Deployment"
+                                    >
+                                      <Globe className="w-3 h-3 text-emerald-400" /> Demo
+                                    </a>
+                                  )}
+                                  {sub.documentation_url && (
+                                    <a
+                                      href={sub.documentation_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="px-2 py-1 bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 rounded text-xs flex items-center gap-1 transition"
+                                      title="Open Documentation"
+                                    >
+                                      <FileText className="w-3 h-3 text-purple-400" /> Docs
+                                    </a>
+                                  )}
+                                  {!sub.github_url && !sub.live_url && !sub.documentation_url && (
+                                    <span className="text-xs text-ink-500 italic">No links</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border ${
+                                    sub.status === "approved"
+                                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                      : sub.status === "needs_revision"
+                                      ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                                      : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                                  }`}
+                                >
+                                  {sub.status === "approved"
+                                    ? "✓ Approved"
+                                    : sub.status === "needs_revision"
+                                    ? "⚠ Needs Revision"
+                                    : "⏳ Submitted"}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 text-xs text-ink-400">
+                                {sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString() : "—"}
+                              </td>
+                              <td className="px-5 py-4 text-right">
+                                <button
+                                  onClick={() => handleOpenReviewModal(sub)}
+                                  className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded text-xs font-semibold transition"
+                                >
+                                  Review / Grade
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          )}
+
+          {/* ─────────────────── UNLOCK REQUESTS SECTION ─────────────────── */}
+          {(activeTab === "unlocks" || activeTab === "overview") && (
+            <FadeIn delay={0.28} direction="up">
+              <div className="space-y-4 pt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <Unlock className="w-5 h-5 text-amber-400" /> Student Unlock Requests
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      Fast-track students who completed prior work and requested early access to next milestone modules.
+                    </p>
+                  </div>
+                  <button
+                    onClick={fetchUnlockRequests}
+                    className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition self-start sm:self-auto"
+                    title="Refresh Unlock Requests"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/30">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-ink-900/50 text-ink-400 font-medium border-b border-ink-800">
+                        <tr>
+                          <th className="px-5 py-3 font-medium">Student</th>
+                          <th className="px-5 py-3 font-medium">Requested Module</th>
+                          <th className="px-5 py-3 font-medium">Student Reason & Justification</th>
+                          <th className="px-5 py-3 font-medium">Requested At</th>
+                          <th className="px-5 py-3 font-medium">Status</th>
+                          <th className="px-5 py-3 font-medium text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-ink-800/50">
+                        {loadingUnlocks ? (
+                          <tr>
+                            <td colSpan={6} className="text-center py-12">
+                              <Loader2 className="w-5 h-5 animate-spin mx-auto text-amber-400" />
+                            </td>
+                          </tr>
+                        ) : unlockRequests.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="text-center py-12 text-ink-500 text-sm">
+                              No unlock requests currently pending.
+                            </td>
+                          </tr>
+                        ) : (
+                          unlockRequests.map((req) => (
+                            <tr key={req.id} className="hover:bg-ink-900/30 transition-colors">
+                              <td className="px-5 py-4">
+                                <div className="font-semibold text-white">{req.student_name}</div>
+                                <div className="text-xs text-ink-400 font-mono">{req.student_email}</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-mono bg-ink-800 text-amber-400">
+                                    {req.task_key}
+                                  </span>
+                                  {req.task_title}
+                                </div>
+                              </td>
+                              <td className="px-5 py-4 max-w-xs truncate">
+                                <span className="text-xs text-ink-300 italic" title={req.reason}>
+                                  &ldquo;{req.reason}&rdquo;
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 text-xs text-ink-400">
+                                {new Date(req.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="px-5 py-4">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                    req.status === "approved"
+                                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                      : req.status === "rejected"
+                                      ? "bg-red-500/10 text-red-400 border-red-500/30"
+                                      : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                                  }`}
+                                >
+                                  {req.status}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 text-right">
+                                {req.status === "pending" ? (
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      disabled={actioningUnlockId === req.id}
+                                      onClick={() => handleUnlockAction(req.id, "approve")}
+                                      className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition disabled:opacity-50"
+                                    >
+                                      Approve & Unlock
+                                    </button>
+                                    <button
+                                      disabled={actioningUnlockId === req.id}
+                                      onClick={() => handleUnlockAction(req.id, "reject")}
+                                      className="px-3 py-1 bg-ink-800 hover:bg-red-600/80 text-ink-300 hover:text-white rounded text-xs font-medium transition disabled:opacity-50"
+                                    >
+                                      Reject
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-ink-500 font-mono">Action recorded</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          )}
+
+          {/* ─────────────────── STUDENT DOUBTS HELPDESK SECTION ─────────────────── */}
+          {(activeTab === "doubts" || activeTab === "overview") && (
+            <FadeIn delay={0.3} direction="up">
+              <div className="space-y-4 pt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-pink-400" /> Technical Doubts & Mentor Desk
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      Direct 2-way query resolution desk for student code snippets, bugs, and module doubts.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={doubtFilter}
+                      onChange={(e) => setDoubtFilter(e.target.value)}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Queries</option>
+                      <option value="open">Open / Unanswered</option>
+                      <option value="answered">Resolved / Answered</option>
+                    </select>
+                    <button
+                      onClick={fetchDoubts}
+                      className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+                      title="Refresh Doubts"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {loadingDoubts ? (
+                    <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-pink-400" />
+                    </div>
+                  ) : doubtsList.length === 0 ? (
+                    <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30 text-ink-500 text-sm">
+                      No student queries found.
+                    </div>
+                  ) : (
+                    doubtsList.map((d) => (
+                      <div
+                        key={d.id}
+                        className={`p-5 rounded-xl border transition-all ${
+                          d.status === "open"
+                            ? "bg-pink-950/10 border-pink-500/30"
+                            : "bg-ink-950/30 border-ink-800 hover:border-ink-700"
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-ink-800/60">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                  d.status === "open"
+                                    ? "bg-pink-500/20 text-pink-300 border-pink-500/40"
+                                    : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                }`}
+                              >
+                                {d.status === "open" ? "● OPEN QUERY" : "✓ RESOLVED"}
+                              </span>
+                              <span className="text-xs font-semibold text-brand-400">{d.domain_track}</span>
+                              <span className="text-xs text-ink-500">•</span>
+                              <span className="text-xs text-ink-300 font-mono">{d.module_name}</span>
+                            </div>
+                            <h3 className="text-base font-bold text-white mt-1.5">{d.subject}</h3>
+                            <div className="text-xs text-ink-400 mt-0.5">
+                              From: <strong className="text-ink-200">{d.student_name}</strong> ({d.student_email}) •{" "}
+                              {new Date(d.created_at).toLocaleString()}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              setReplyingDoubt(d);
+                              setDoubtReplyText(d.admin_reply || "");
+                            }}
+                            className="px-3.5 py-1.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition self-start whitespace-nowrap"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            {d.admin_reply ? "Edit Reply" : "Answer Query"}
+                          </button>
+                        </div>
+
+                        {/* Question body */}
+                        <p className="text-sm text-ink-200 mt-3 whitespace-pre-wrap leading-relaxed">{d.question}</p>
+
+                        {/* Code snippet if any */}
+                        {d.code_snippet && (
+                          <div className="mt-3 p-3 bg-black/70 border border-ink-800 rounded-lg font-mono text-xs text-ink-200 overflow-x-auto">
+                            <pre>{d.code_snippet}</pre>
+                          </div>
+                        )}
+
+                        {/* Reply box if answered */}
+                        {d.admin_reply && (
+                          <div className="mt-4 p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
+                            <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                              <span>✓ Mentor Resolution ({d.answered_by || "HR Team"})</span>
+                              {d.answered_at && (
+                                <span className="text-ink-500 font-normal">
+                                  {new Date(d.answered_at).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-ink-200 whitespace-pre-wrap leading-relaxed">
+                              {d.admin_reply}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </FadeIn>
+          )}
         </div>
+
+        {/* ─────────────────── REVIEW SUBMISSION MODAL ─────────────────── */}
+        {selectedSub && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-ink-950 border-2 border-ink-800 p-6 sm:p-8 shadow-2xl space-y-6 rounded-xl">
+              <button
+                onClick={() => setSelectedSub(null)}
+                className="absolute top-4 right-4 p-2 text-ink-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="border-b border-ink-800 pb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wider rounded">
+                  <FolderGit2 className="w-3.5 h-3.5" /> Grade & Review Deliverable
+                </div>
+                <h2 className="text-xl font-black text-white mt-2">
+                  {selectedSub.task_key.toUpperCase()}: {selectedSub.title}
+                </h2>
+                <div className="text-xs text-ink-400 mt-1">
+                  Candidate: <strong className="text-white">{selectedSub.student_name}</strong> (
+                  {selectedSub.student_email})
+                </div>
+              </div>
+
+              {/* Work Links */}
+              <div className="space-y-3 bg-ink-900/50 p-4 border border-ink-800 rounded-lg">
+                <h4 className="text-xs font-bold uppercase text-ink-400 tracking-wider">Submitted Links & Artifacts</h4>
+                <div className="flex flex-wrap gap-3">
+                  {selectedSub.github_url && (
+                    <a
+                      href={selectedSub.github_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-ink-950 hover:bg-ink-900 text-blue-400 border border-ink-700 rounded text-xs font-medium flex items-center gap-1.5 transition"
+                    >
+                      <Code2 className="w-3.5 h-3.5" /> GitHub Repository
+                    </a>
+                  )}
+                  {selectedSub.live_url && (
+                    <a
+                      href={selectedSub.live_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-ink-950 hover:bg-ink-900 text-emerald-400 border border-ink-700 rounded text-xs font-medium flex items-center gap-1.5 transition"
+                    >
+                      <Globe className="w-3.5 h-3.5" /> Live Production URL
+                    </a>
+                  )}
+                  {selectedSub.documentation_url && (
+                    <a
+                      href={selectedSub.documentation_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-ink-950 hover:bg-ink-900 text-purple-400 border border-ink-700 rounded text-xs font-medium flex items-center gap-1.5 transition"
+                    >
+                      <FileText className="w-3.5 h-3.5" /> Documentation
+                    </a>
+                  )}
+                </div>
+
+                {selectedSub.notes && (
+                  <div className="pt-2 border-t border-ink-800/60 text-xs text-ink-300">
+                    <strong className="text-white block mb-1">Student Notes:</strong>
+                    <p className="whitespace-pre-wrap">{selectedSub.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Review Form */}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-ink-300 uppercase">Grade / Evaluation Decision</label>
+                  <select
+                    value={reviewStatus}
+                    onChange={(e) => setReviewStatus(e.target.value)}
+                    className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="approved">Approved / Accepted (Complete)</option>
+                    <option value="needs_revision">Needs Revision (Request changes)</option>
+                    <option value="submitted">Under Review</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-ink-300 uppercase">
+                    Admin Feedback & Mentor Comments
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Provide constructive feedback, notes, code suggestions or approval remarks..."
+                    value={reviewFeedback}
+                    onChange={(e) => setReviewFeedback(e.target.value)}
+                    className="w-full bg-ink-900 border border-ink-800 rounded p-3 text-white text-sm focus:outline-none focus:border-blue-500 resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 p-3 bg-ink-900/40 border border-ink-800 rounded">
+                  <input
+                    type="checkbox"
+                    id="reviewUnlocked"
+                    checked={reviewUnlocked}
+                    onChange={(e) => setReviewUnlocked(e.target.checked)}
+                    className="w-4 h-4 rounded bg-ink-950 border-ink-700 text-blue-500 focus:ring-0"
+                  />
+                  <label htmlFor="reviewUnlocked" className="text-xs text-ink-200 cursor-pointer">
+                    Module Access Status: <strong>{reviewUnlocked ? "Unlocked for candidate" : "Locked"}</strong>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-ink-800">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSub(null)}
+                  className="px-4 py-2 bg-ink-900 hover:bg-ink-800 text-ink-300 rounded text-xs font-bold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={savingReview}
+                  onClick={handleSaveReview}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {savingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Evaluation"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────── DOUBT REPLY MODAL ─────────────────── */}
+        {replyingDoubt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-ink-950 border-2 border-ink-800 p-6 sm:p-8 shadow-2xl space-y-6 rounded-xl">
+              <button
+                onClick={() => setReplyingDoubt(null)}
+                className="absolute top-4 right-4 p-2 text-ink-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="border-b border-ink-800 pb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-bold uppercase tracking-wider rounded">
+                  <MessageSquare className="w-3.5 h-3.5" /> Answer Technical Query
+                </div>
+                <h2 className="text-xl font-black text-white mt-2">{replyingDoubt.subject}</h2>
+                <div className="text-xs text-ink-400 mt-1">
+                  Student: <strong className="text-white">{replyingDoubt.student_name}</strong> (
+                  {replyingDoubt.student_email}) • {replyingDoubt.domain_track}
+                </div>
+              </div>
+
+              {/* Question overview */}
+              <div className="space-y-2 bg-ink-900/50 p-4 border border-ink-800 rounded-lg text-xs">
+                <strong className="text-ink-400 uppercase tracking-wider block">Question:</strong>
+                <p className="text-ink-200 whitespace-pre-wrap">{replyingDoubt.question}</p>
+                {replyingDoubt.code_snippet && (
+                  <div className="mt-2 p-2 bg-black/80 border border-ink-800 rounded font-mono text-[11px] text-pink-300">
+                    <pre>{replyingDoubt.code_snippet}</pre>
+                  </div>
+                )}
+              </div>
+
+              {/* Reply field */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-ink-300 uppercase">
+                  Mentor Solution / Detailed Resolution
+                </label>
+                <textarea
+                  rows={6}
+                  placeholder="Type the solution, architectural guidance, or explanation for the student..."
+                  value={doubtReplyText}
+                  onChange={(e) => setDoubtReplyText(e.target.value)}
+                  className="w-full bg-ink-900 border border-ink-800 rounded p-3 text-white text-sm focus:outline-none focus:border-pink-500 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-ink-800">
+                <button
+                  type="button"
+                  onClick={() => setReplyingDoubt(null)}
+                  className="px-4 py-2 bg-ink-900 hover:bg-ink-800 text-ink-300 rounded text-xs font-bold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={sendingReply || !doubtReplyText.trim()}
+                  onClick={handleSendDoubtReply}
+                  className="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded text-xs font-bold transition flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {sendingReply ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Resolution to Student"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ─────────────────── ISSUE NEW CERTIFICATE MODAL ─────────────────── */}
         {showIssueModal && (

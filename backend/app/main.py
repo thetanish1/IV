@@ -18,6 +18,7 @@ from app.payments.router import router as payments_router
 from app.dashboard.router import router as dashboard_router
 from app.export.router import router as export_router
 from app.certificates.router import router as certificates_router
+from app.internship.portal_router import router as portal_router
 from app.certificates.models import Certificate
 
 Base.metadata.create_all(bind=engine)
@@ -229,7 +230,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Feature Routers mounted under /api and root for total path compatibility
-for r in [auth_router, courses_router, internship_router, payments_router, dashboard_router, export_router, certificates_router]:
+for r in [auth_router, courses_router, internship_router, portal_router, payments_router, dashboard_router, export_router, certificates_router]:
     app.include_router(r, prefix="/api")
     app.include_router(r)
 
@@ -245,6 +246,19 @@ def root():
         "docs": "/docs",
         "health": "/health"
     }
+
+@app.get("/settings")
+@app.get("/api/settings")
+def get_public_settings(db: Session = Depends(get_db)):
+    from app.shared.settings_models import SiteSetting
+    rows = db.query(SiteSetting).all()
+    settings_dict = {
+        "show_courses": False,
+        "show_careers": False,
+    }
+    for r in rows:
+        settings_dict[r.key] = r.value.lower() == "true"
+    return settings_dict
 
 @app.get("/health")
 @app.get("/api/health")

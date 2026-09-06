@@ -124,3 +124,132 @@ export interface CertificateItem {
   created_at?: string;
 }
 
+export interface SiteSettings {
+  show_courses: boolean;
+  show_careers: boolean;
+}
+
+export interface TaskSubmissionDetails {
+  id?: number;
+  project_topic?: string | null;
+  github_url?: string | null;
+  live_url?: string | null;
+  documentation_url?: string | null;
+  notes?: string | null;
+  tools_used?: string[];
+  status?: string;
+  admin_feedback?: string | null;
+  submitted_at?: string | null;
+}
+
+export interface WeeklyTaskItem {
+  week: number;
+  key: string;
+  title: string;
+  objective: string;
+  deliverables: string[];
+  required_days: number;
+  is_unlocked: boolean;
+  submission?: TaskSubmissionDetails | null;
+  unlock_request?: {
+    status: string;
+    reason: string;
+  } | null;
+}
+
+export interface MilestoneProjectItem {
+  key: string;
+  title: string;
+  objective: string;
+  is_unlocked: boolean;
+  curated_list?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    tech_stack: string[];
+  }>;
+  submission?: TaskSubmissionDetails | null;
+  unlock_request?: {
+    status: string;
+    reason: string;
+  } | null;
+}
+
+export interface StudentDoubtItem {
+  id: number;
+  application_id?: number;
+  student_email: string;
+  student_name: string;
+  domain_track: string;
+  module_name: string;
+  subject: string;
+  question: string;
+  code_snippet?: string | null;
+  status: "open" | "answered";
+  admin_reply?: string | null;
+  answered_by?: string | null;
+  answered_at?: string | null;
+  created_at: string;
+}
+
+export interface PortalData {
+  has_application: boolean;
+  is_accepted?: boolean;
+  id?: number;
+  full_name?: string;
+  email?: string;
+  role_preference?: string;
+  domain_title?: string;
+  duration?: string;
+  status?: string;
+  days_elapsed?: number;
+  start_date?: string | null;
+  message?: string;
+  weekly_tasks?: WeeklyTaskItem[];
+  month2_project?: MilestoneProjectItem | null;
+  month3_portfolio?: MilestoneProjectItem | null;
+  month4_6_capstone?: MilestoneProjectItem | null;
+  doubts?: StudentDoubtItem[];
+}
+
+export interface SubmissionAdminItem {
+  id: number;
+  application_id?: number;
+  student_email: string;
+  student_name: string;
+  role_preference: string;
+  duration: string;
+  task_key: string;
+  title: string;
+  project_topic?: string | null;
+  github_url?: string | null;
+  live_url?: string | null;
+  documentation_url?: string | null;
+  notes?: string | null;
+  tools_used: string[];
+  is_unlocked: boolean;
+  status: string;
+  admin_feedback?: string | null;
+  submitted_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface UnlockRequestAdminItem {
+  id: number;
+  application_id?: number;
+  student_email: string;
+  student_name: string;
+  task_key: string;
+  task_title: string;
+  reason: string;
+  status: string;
+  created_at: string;
+}
+
+export interface SiteSettingItem {
+  key: string;
+  value: string;
+  description?: string;
+  updated_at?: string;
+}
+

@@ -4,24 +4,42 @@ from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.shared.database import get_db
+from app.shared.dependencies import get_current_admin
 from app.shared.email_service import (
     send_course_enrollment_acceptance_email,
     send_course_enrollment_rejection_email,
     send_internship_acceptance_email,
     send_internship_rejection_email,
 )
-from app.internship.models import InternshipApplication
+from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
 from app.courses.models import Course, CourseRegistration
 from app.payments.models import Payment
+from app.shared.settings_models import SiteSetting
 from app.dashboard.schemas import DashboardStats
 from app.internship.schemas import ApplicationResponse
 from app.payments.schemas import PaymentResponse
 from app.courses.schemas import RegistrationResponse
+from app.auth.models import Admin
 
 from pydantic import BaseModel
 from app.auth.user_models import SiteUser
 
 router = APIRouter(prefix="/admin", tags=["Admin Dashboard"])
+
+class SettingsUpdateBody(BaseModel):
+    show_courses: Optional[bool] = None
+    show_careers: Optional[bool] = None
+
+class SubmissionReviewBody(BaseModel):
+    status: Optional[str] = None
+    admin_feedback: Optional[str] = None
+    is_unlocked: Optional[bool] = None
+
+class UnlockActionBody(BaseModel):
+    action: str  # 'approve' or 'reject'
+
+class DoubtReplyBody(BaseModel):
+    admin_reply: str
 
 class StatusUpdateBody(BaseModel):
     status: str
@@ -319,3 +337,303 @@ def get_payments(
         "total_pages": total_pages,
         "items": items_serialized
     }
+
+
+# ─── Site Feature Toggles (Courses & Careers visibility) ────────────────────
+
+@router.get("/settings")
+def get_site_settings(db: Session = Depends(get_db)):
+    """Public/Admin endpoint to get display settings for Courses and Careers."""
+    rows = db.query(SiteSetting).all()
+    settings_dict = {
+        "show_courses": False,
+        "show_careers": False,
+    }
+    for r in rows:
+        settings_dict[r.key] = r.value.lower() == "true"
+    return settings_dict
+
+@router.patch("/settings")
+def update_site_settings(
+    body: SettingsUpdateBody,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin endpoint to toggle display of Courses and Careers on homepage & navbar."""
+    if body.show_courses is not None:
+        setting = db.query(SiteSetting).filter(SiteSetting.key == "show_courses").first()
+        if not setting:
+            setting = SiteSetting(key="show_courses", value=str(body.show_courses).lower(), description="Toggle display of Courses section")
+            db.add(setting)
+        else:
+            setting.value = str(body.show_courses).lower()
+
+    if body.show_careers is not None:
+        setting = db.query(SiteSetting).filter(SiteSetting.key == "show_careers").first()
+        if not setting:
+            setting = SiteSetting(key="show_careers", value=str(body.show_careers).lower(), description="Toggle display of Careers link")
+            db.add(setting)
+        else:
+            setting.value = str(body.show_careers).lower()
+
+    db.commit()
+    return get_site_settings(db)
+
+
+# ─── Internship Submissions Management ──────────────────────────────────────
+
+@router.get("/submissions")
+def get_student_submissions(
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin endpoint to view all student task and project submissions."""
+    query = db.query(InternshipSubmission)
+
+    if q:
+        query = query.filter(
+            InternshipSubmission.student_email.ilike(f"%{q}%") |
+            InternshipSubmission.title.ilike(f"%{q}%") |
+            InternshipSubmission.task_key.ilike(f"%{q}%")
+        )
+    if status and status != "all":
+        query = query.filter(InternshipSubmission.status == status)
+
+    total = query.count()
+    items = query.order_by(InternshipSubmission.submitted_at.desc())\
+                 .offset((page - 1) * limit)\
+                 .limit(limit)\
+                 .all()
+
+    items_list = []
+    for item in items:
+        app = db.query(InternshipApplication).filter(InternshipApplication.email == item.student_email).first()
+        items_list.append({
+            "id": item.id,
+            "application_id": item.application_id,
+            "student_email": item.student_email,
+            "student_name": app.full_name if app else item.student_email.split("@")[0],
+            "role_preference": app.role_preference if app else "—",
+            "duration": app.duration if app else "—",
+            "task_key": item.task_key,
+            "title": item.title,
+            "project_topic": item.project_topic,
+            "github_url": item.github_url,
+            "live_url": item.live_url,
+            "documentation_url": item.documentation_url,
+            "notes": item.notes,
+            "tools_used": item.tools_used or [],
+            "is_unlocked": bool(item.is_unlocked),
+            "status": item.status,
+            "admin_feedback": item.admin_feedback,
+            "submitted_at": item.submitted_at.isoformat() if item.submitted_at else None,
+            "updated_at": item.updated_at.isoformat() if item.updated_at else None,
+        })
+
+    total_pages = math.ceil(total / limit) if total > 0 else 1
+
+    return {
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
+        "items": items_list
+    }
+
+
+@router.patch("/submissions/{submission_id}")
+def review_student_submission(
+    submission_id: int,
+    body: SubmissionReviewBody,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin reviews student submission (approves, requests changes, sets mentor feedback or unlocks)."""
+    sub = db.query(InternshipSubmission).filter(InternshipSubmission.id == submission_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
+    if body.status:
+        sub.status = body.status
+    if body.admin_feedback is not None:
+        sub.admin_feedback = body.admin_feedback
+    if body.is_unlocked is not None:
+        sub.is_unlocked = 1 if body.is_unlocked else 0
+    sub.updated_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(sub)
+    return {"success": True, "message": "Submission updated successfully", "status": sub.status}
+
+
+# ─── Task Unlock Requests Management ─────────────────────────────────────────
+
+@router.get("/unlock-requests")
+def get_unlock_requests(
+    status: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin endpoint to view student unlock requests."""
+    query = db.query(TaskUnlockRequest)
+    if status and status != "all":
+        query = query.filter(TaskUnlockRequest.status == status)
+
+    total = query.count()
+    items = query.order_by(TaskUnlockRequest.created_at.desc())\
+                 .offset((page - 1) * limit)\
+                 .limit(limit)\
+                 .all()
+
+    items_list = [
+        {
+            "id": u.id,
+            "application_id": u.application_id,
+            "student_email": u.student_email,
+            "student_name": u.student_name,
+            "task_key": u.task_key,
+            "task_title": u.task_title,
+            "reason": u.reason,
+            "status": u.status,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+        }
+        for u in items
+    ]
+
+    total_pages = math.ceil(total / limit) if total > 0 else 1
+
+    return {
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
+        "items": items_list
+    }
+
+
+@router.post("/unlock-requests/{request_id}/action")
+def handle_unlock_request(
+    request_id: int,
+    body: UnlockActionBody,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin approves (unlocks) or rejects a task unlock request."""
+    req = db.query(TaskUnlockRequest).filter(TaskUnlockRequest.id == request_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="Unlock request not found")
+
+    if body.action.lower() in ("approve", "approved", "unlock"):
+        req.status = "approved"
+        # Also ensure submission record is marked unlocked
+        sub = db.query(InternshipSubmission)\
+                .filter(InternshipSubmission.student_email == req.student_email, InternshipSubmission.task_key == req.task_key)\
+                .first()
+        if sub:
+            sub.is_unlocked = 1
+        else:
+            new_sub = InternshipSubmission(
+                application_id=req.application_id,
+                student_email=req.student_email,
+                task_key=req.task_key,
+                title=req.task_title,
+                is_unlocked=1,
+                status="unlocked"
+            )
+            db.add(new_sub)
+    else:
+        req.status = "rejected"
+
+    req.updated_at = datetime.utcnow()
+    db.commit()
+    return {"success": True, "message": f"Unlock request {req.status}"}
+
+
+# ─── Student Doubts & Query Helpdesk ─────────────────────────────────────────
+
+@router.get("/doubts")
+def get_student_doubts(
+    status: Optional[str] = None,
+    q: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin endpoint to view all student doubts and questions."""
+    query = db.query(StudentDoubt)
+    if status and status != "all":
+        query = query.filter(StudentDoubt.status == status)
+    if q:
+        query = query.filter(
+            StudentDoubt.student_email.ilike(f"%{q}%") |
+            StudentDoubt.student_name.ilike(f"%{q}%") |
+            StudentDoubt.subject.ilike(f"%{q}%") |
+            StudentDoubt.module_name.ilike(f"%{q}%")
+        )
+
+    total = query.count()
+    items = query.order_by(StudentDoubt.created_at.desc())\
+                 .offset((page - 1) * limit)\
+                 .limit(limit)\
+                 .all()
+
+    items_list = [
+        {
+            "id": d.id,
+            "application_id": d.application_id,
+            "student_email": d.student_email,
+            "student_name": d.student_name,
+            "domain_track": d.domain_track,
+            "module_name": d.module_name,
+            "subject": d.subject,
+            "question": d.question,
+            "code_snippet": d.code_snippet,
+            "status": d.status,
+            "admin_reply": d.admin_reply,
+            "answered_by": d.answered_by,
+            "answered_at": d.answered_at.isoformat() if d.answered_at else None,
+            "created_at": d.created_at.isoformat() if d.created_at else None,
+        }
+        for d in items
+    ]
+
+    total_pages = math.ceil(total / limit) if total > 0 else 1
+
+    return {
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
+        "items": items_list
+    }
+
+
+@router.post("/doubts/{doubt_id}/reply")
+def reply_to_student_doubt(
+    doubt_id: int,
+    body: DoubtReplyBody,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin writes a technical reply to a student doubt."""
+    doubt = db.query(StudentDoubt).filter(StudentDoubt.id == doubt_id).first()
+    if not doubt:
+        raise HTTPException(status_code=404, detail="Doubt not found")
+
+    doubt.admin_reply = body.admin_reply.strip()
+    doubt.answered_by = current_admin.full_name or "Senior Technical Mentor"
+    doubt.answered_at = datetime.utcnow()
+    doubt.status = "answered"
+
+    db.commit()
+    db.refresh(doubt)
+
+    return {"success": True, "message": "Reply posted successfully", "doubt_id": doubt.id}
+

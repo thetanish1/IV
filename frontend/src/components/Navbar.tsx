@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserAuthModal from "@/components/UserAuthModal";
+import { apiRequest } from "@/lib/api-client";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -16,6 +17,24 @@ export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const [settings, setSettings] = useState<{ show_courses: boolean; show_careers: boolean }>({
+    show_courses: false,
+    show_careers: false,
+  });
+
+  const fetchSettings = async () => {
+    try {
+      const data = await apiRequest<{ show_courses: boolean; show_careers: boolean }>("/settings");
+      if (data) setSettings(data);
+    } catch {
+      // fallback defaults
+    }
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, [pathname]);
 
   const checkAuth = () => {
     // Check for Admin authentication
@@ -118,14 +137,13 @@ export default function Navbar() {
           isOpen={showAuthModal}
           onClose={handleCloseAuthModal}
           title="Sign In to InternVision Tech"
-          subtitle="Sign in with Google or Email & Password to apply for Virtual Internships & access 100% free engineering bootcamps."
+          subtitle="Sign in with Google or Email & Password to apply for Virtual Internships & access your student task portal."
           onSuccess={(userData) => {
             setUserEmail(userData.user_email);
             setUserName(userData.user_name);
             setShowAuthModal(false);
-            // If user was on home page or clicked login, redirect to apply
             if (pathname === "/" || pathname === "/apply") {
-              router.push("/apply");
+              router.push("/portal");
             }
           }}
         />
@@ -157,15 +175,7 @@ export default function Navbar() {
               <Home className="w-4 h-4" />
               Home
             </Link>
-            <Link
-              href="/courses"
-              className={`flex items-center gap-1.5 transition-colors ${
-                isActive("/courses") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              Courses
-            </Link>
+
             <Link
               href="/apply"
               className={`flex items-center gap-1.5 transition-colors ${
@@ -173,17 +183,50 @@ export default function Navbar() {
               }`}
             >
               <GraduationCap className="w-4 h-4" />
-              Internship
+              Internships
             </Link>
-            <Link
-              href="/careers"
-              className={`flex items-center gap-1.5 transition-colors ${
-                isActive("/careers") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
-              }`}
-            >
-              <Briefcase className="w-4 h-4" />
-              Careers
-            </Link>
+
+            {/* Student Portal Link (Prominent when logged in) */}
+            {userEmail && (
+              <Link
+                href="/portal"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors ${
+                  isActive("/portal")
+                    ? "bg-brand-500/20 text-brand-300 font-bold border border-brand-500/40"
+                    : "text-brand-400 hover:text-brand-300 font-semibold"
+                }`}
+              >
+                <Sparkles className="w-4 h-4 text-brand-400" />
+                My Portal
+              </Link>
+            )}
+
+            {/* Courses link shown ONLY if enabled in site_settings */}
+            {settings.show_courses && (
+              <Link
+                href="/courses"
+                className={`flex items-center gap-1.5 transition-colors ${
+                  isActive("/courses") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                Courses
+              </Link>
+            )}
+
+            {/* Careers link shown ONLY if enabled in site_settings */}
+            {settings.show_careers && (
+              <Link
+                href="/careers"
+                className={`flex items-center gap-1.5 transition-colors ${
+                  isActive("/careers") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
+                }`}
+              >
+                <Briefcase className="w-4 h-4" />
+                Careers
+              </Link>
+            )}
+
             <Link
               href="/verify-certificate"
               className={`flex items-center gap-1.5 transition-colors ${
@@ -193,6 +236,7 @@ export default function Navbar() {
               <ShieldCheck className="w-4 h-4 text-brand-400" />
               Verify Certificate
             </Link>
+
             <Link
               href="/contact"
               className={`flex items-center gap-1.5 transition-colors ${
@@ -221,9 +265,9 @@ export default function Navbar() {
             {userEmail ? (
               <div className="flex items-center gap-2">
                 <Link
-                  href="/apply"
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-ink-900 hover:bg-ink-800 border border-ink-700 text-ink-300 hover:text-white text-xs font-medium transition"
-                  title="View Application / Profile"
+                  href="/portal"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-ink-900 hover:bg-ink-800 border border-ink-700 text-ink-300 hover:text-white text-xs font-medium transition rounded"
+                  title="View Student Portal"
                 >
                   <User className="w-3.5 h-3.5 text-brand-400" />
                   <span className="max-w-[120px] truncate">{userName || userEmail.split("@")[0]}</span>
@@ -231,7 +275,7 @@ export default function Navbar() {
                 <button
                   onClick={handleUserLogout}
                   title="Sign Out"
-                  className="p-1.5 bg-ink-900 hover:bg-ink-800 text-ink-400 hover:text-white border border-ink-700 transition"
+                  className="p-1.5 bg-ink-900 hover:bg-ink-800 text-ink-400 hover:text-white border border-ink-700 transition rounded"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -280,18 +324,6 @@ export default function Navbar() {
                 Home
               </Link>
               <Link
-                href="/courses"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
-                  isActive("/courses")
-                    ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
-                    : "bg-ink-900 text-ink-300 hover:text-white"
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-                Courses
-              </Link>
-              <Link
                 href="/apply"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
@@ -301,20 +333,53 @@ export default function Navbar() {
                 }`}
               >
                 <GraduationCap className="w-4 h-4" />
-                Internship
+                Internships
               </Link>
-              <Link
-                href="/careers"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
-                  isActive("/careers")
-                    ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
-                    : "bg-ink-900 text-ink-300 hover:text-white"
-                }`}
-              >
-                <Briefcase className="w-4 h-4" />
-                Careers
-              </Link>
+
+              {userEmail && (
+                <Link
+                  href="/portal"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
+                    isActive("/portal")
+                      ? "bg-brand-500/20 text-brand-300 font-bold border-brand-500/40"
+                      : "bg-ink-900 text-brand-400 font-semibold hover:text-brand-300"
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-brand-400" />
+                  My Internship Portal
+                </Link>
+              )}
+
+              {settings.show_courses && (
+                <Link
+                  href="/courses"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
+                    isActive("/courses")
+                      ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
+                      : "bg-ink-900 text-ink-300 hover:text-white"
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Courses
+                </Link>
+              )}
+
+              {settings.show_careers && (
+                <Link
+                  href="/careers"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
+                    isActive("/careers")
+                      ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
+                      : "bg-ink-900 text-ink-300 hover:text-white"
+                  }`}
+                >
+                  <Briefcase className="w-4 h-4" />
+                  Careers
+                </Link>
+              )}
               <Link
                 href="/verify-certificate"
                 onClick={() => setIsMobileMenuOpen(false)}

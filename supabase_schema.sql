@@ -277,3 +277,77 @@ VALUES
     TRUE
 )
 ON CONFLICT (certificate_id) DO NOTHING;
+
+-- 8. Site Settings & Admin Feature Toggles (Courses, Careers visibility)
+CREATE TABLE IF NOT EXISTS site_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO site_settings (key, value, description)
+VALUES 
+    ('show_courses', 'false', 'Toggle display of Courses section on homepage and navbar'),
+    ('show_careers', 'false', 'Toggle display of Careers link on navbar')
+ON CONFLICT (key) DO NOTHING;
+
+-- 9. Internship Submissions Table
+CREATE TABLE IF NOT EXISTS internship_submissions (
+    id SERIAL PRIMARY KEY,
+    application_id INTEGER REFERENCES internship_applications(id) ON DELETE CASCADE,
+    student_email VARCHAR(255) NOT NULL,
+    task_key VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    project_topic VARCHAR(255),
+    github_url VARCHAR(500),
+    live_url VARCHAR(500),
+    documentation_url VARCHAR(500),
+    notes TEXT,
+    tools_used JSONB DEFAULT '[]'::jsonb,
+    is_unlocked BOOLEAN DEFAULT FALSE,
+    status VARCHAR(50) DEFAULT 'submitted',
+    admin_feedback TEXT,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_submissions_email ON internship_submissions (student_email);
+CREATE INDEX IF NOT EXISTS idx_submissions_app_id ON internship_submissions (application_id);
+
+-- 10. Task Unlock Requests Table
+CREATE TABLE IF NOT EXISTS task_unlock_requests (
+    id SERIAL PRIMARY KEY,
+    application_id INTEGER REFERENCES internship_applications(id) ON DELETE CASCADE,
+    student_email VARCHAR(255) NOT NULL,
+    student_name VARCHAR(255) NOT NULL,
+    task_key VARCHAR(100) NOT NULL,
+    task_title VARCHAR(255) NOT NULL,
+    reason TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_unlock_requests_status ON task_unlock_requests (status);
+
+-- 11. Student Doubts & Query Helpdesk Table
+CREATE TABLE IF NOT EXISTS student_doubts (
+    id SERIAL PRIMARY KEY,
+    application_id INTEGER REFERENCES internship_applications(id) ON DELETE CASCADE,
+    student_email VARCHAR(255) NOT NULL,
+    student_name VARCHAR(255) NOT NULL,
+    domain_track VARCHAR(255) NOT NULL,
+    module_name VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    question TEXT NOT NULL,
+    code_snippet TEXT,
+    status VARCHAR(50) DEFAULT 'open',
+    admin_reply TEXT,
+    answered_by VARCHAR(255),
+    answered_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_doubts_student_email ON student_doubts (student_email);
+CREATE INDEX IF NOT EXISTS idx_doubts_status ON student_doubts (status);
