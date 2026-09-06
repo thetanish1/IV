@@ -29,8 +29,12 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "internvisiontechhr@gmail.com"
     SMTP_FROM_NAME: str = "InternVision Tech"
-    SMTP_TLS: bool = True
-    
+    # Cloudinary Object Storage Settings (for Resumes & Assets)
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+    CLOUDINARY_URL: str = ""
+
     # CORS Origins
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",

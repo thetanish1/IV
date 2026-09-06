@@ -843,7 +843,7 @@ export default function AdminDashboardPage() {
                               <td className="px-5 py-4">
                                 {app.resume_filename ? (
                                   <a
-                                    href={`${apiBase}/applications/resume/${app.resume_filename}`}
+                                    href={app.resume_filename.startsWith("http") ? app.resume_filename : `${apiBase}/applications/resume/${app.resume_filename}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-600/10 hover:bg-brand-600/20 border border-brand-500/30 text-brand-400 rounded text-xs font-semibold transition"
@@ -1717,7 +1717,7 @@ export default function AdminDashboardPage() {
 
                 {selectedApp.resume_filename ? (
                   <a
-                    href={`${apiBase}/applications/resume/${selectedApp.resume_filename}`}
+                    href={selectedApp.resume_filename.startsWith("http") ? selectedApp.resume_filename : `${apiBase}/applications/resume/${selectedApp.resume_filename}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded text-sm font-bold flex items-center gap-2 transition shadow-[2px_2px_0px_#ffffff]"

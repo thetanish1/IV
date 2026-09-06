@@ -72,23 +72,22 @@ export default function HomePage() {
  {/* STATS STRIP (TRUST BANNER) */}
  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 pb-12 mt-16 max-w-5xl mx-auto border-t border-b border-ink-800">
  <div className="space-y-2 group md:translate-y-4">
- <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">5k+</div>
+ <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">100+</div>
  <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Students Trained</div>
  </div>
  <div className="space-y-2 group">
- <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">94%</div>
- <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Placement Rate</div>
+ <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">10+</div>
+ <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Projects Done</div>
  </div>
  <div className="space-y-2 group md:-translate-y-2">
  <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">4.9</div>
  <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Satisfaction Score</div>
  </div>
  <div className="space-y-2 group md:translate-y-2">
- <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">100+</div>
- <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Hiring Partners</div>
+ <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">10+</div>
+ <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Courses Available</div>
  </div>
  </div>
-
 
  {/* WHY CHOOSE US */}
  <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
