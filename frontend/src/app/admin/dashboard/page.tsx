@@ -178,10 +178,19 @@ export default function AdminDashboardPage() {
     try {
       const data = await apiRequest<DashboardStats>("/admin/stats");
       setStats(data);
-    } catch (err) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("admin_email");
-      router.push("/admin/login");
+    } catch (err: unknown) {
+      console.error("Failed to fetch admin stats:", err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      if (
+        errMsg.includes("401") ||
+        errMsg.toLowerCase().includes("unauthorized") ||
+        errMsg.toLowerCase().includes("could not validate credentials") ||
+        errMsg.toLowerCase().includes("token expired")
+      ) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("admin_email");
+        router.push("/admin/login");
+      }
     } finally {
       setLoadingStats(false);
     }

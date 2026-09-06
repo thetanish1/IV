@@ -178,21 +178,28 @@ CREATE INDEX IF NOT EXISTS idx_course_reg_status ON course_registrations (status
 -- 6. Payments Table (Razorpay Orders & Transactions)
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
-    course_id VARCHAR(100) NOT NULL,
-    student_name VARCHAR(255) NOT NULL,
+    registration_id INTEGER REFERENCES course_registrations (id) ON DELETE SET NULL,
+    order_id VARCHAR(255) UNIQUE,
+    payment_id VARCHAR(255),
+    signature VARCHAR(500),
+    amount_inr INTEGER NOT NULL DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'created',
     student_email VARCHAR(255) NOT NULL,
-    student_phone VARCHAR(50) NOT NULL,
-    amount NUMERIC(10, 2) NOT NULL,
+    raw_response JSONB,
+    course_id VARCHAR(100),
+    student_name VARCHAR(255),
+    student_phone VARCHAR(50),
+    amount NUMERIC(10, 2),
     currency VARCHAR(10) DEFAULT 'INR',
-    razorpay_order_id VARCHAR(255) UNIQUE NOT NULL,
+    razorpay_order_id VARCHAR(255),
     razorpay_payment_id VARCHAR(255),
     razorpay_signature VARCHAR(500),
-    status VARCHAR(50) DEFAULT 'created',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments (razorpay_order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments (order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_email ON payments (student_email);
 
 -- 7. Certificates Table (Digital Credential Verification Registry)
 CREATE TABLE IF NOT EXISTS certificates (
