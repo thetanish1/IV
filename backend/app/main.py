@@ -131,14 +131,14 @@ def startup_event():
             sample_certs = [
                 Certificate(
                     certificate_id="IVT/JUN26/2026/0201",
-                    student_name="Aarav Sharma",
-                    student_email="aarav.sharma@example.com",
-                    program_title="Full Stack Web Development Co-Op",
-                    track_type="Internship",
-                    duration="3 Months",
-                    issue_date="June 15, 2026",
+                    student_name="Tanish Dewase",
+                    student_email="tanishdewase222@gmail.com",
+                    program_title="Java Developer",
+                    track_type="Virtual Internship",
+                    duration="1 Month",
+                    issue_date="30 June 2026",
                     grade="Distinction (Grade A+)",
-                    skills_acquired=["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"],
+                    skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
                     instructor_name="Suraj Kumar, HR & Manager",
                     is_valid=True
                 ),

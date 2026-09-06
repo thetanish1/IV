@@ -203,14 +203,14 @@ INSERT INTO certificates (certificate_id, student_name, student_email, program_t
 VALUES
 (
     'IVT/JUN26/2026/0201',
-    'Aarav Sharma',
-    'aarav.sharma@example.com',
-    'Full Stack Web Development Co-Op',
+    'Tanish Dewase',
+    'tanishdewase222@gmail.com',
+    'Java Developer',
     'Virtual Internship',
-    '3 Months',
-    'June 15, 2026',
+    '1 Month',
+    '30 June 2026',
     'Distinction (Grade A+)',
-    '["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]'::jsonb,
+    '["Java", "SQL", "GitHub", "Git", "Docker"]'::jsonb,
     'Suraj Kumar, HR & Manager',
     TRUE
 ),
