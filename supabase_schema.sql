@@ -342,12 +342,15 @@ CREATE TABLE IF NOT EXISTS student_doubts (
     subject VARCHAR(255) NOT NULL,
     question TEXT NOT NULL,
     code_snippet TEXT,
+    image_url TEXT,
     status VARCHAR(50) DEFAULT 'open',
     admin_reply TEXT,
     answered_by VARCHAR(255),
     answered_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE student_doubts ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_doubts_student_email ON student_doubts (student_email);
 CREATE INDEX IF NOT EXISTS idx_doubts_status ON student_doubts (status);

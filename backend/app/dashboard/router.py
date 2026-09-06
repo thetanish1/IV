@@ -611,6 +611,7 @@ def get_student_doubts(
             "subject": d.subject,
             "question": d.question,
             "code_snippet": d.code_snippet,
+            "image_url": d.image_url,
             "status": d.status,
             "admin_reply": d.admin_reply,
             "answered_by": d.answered_by,

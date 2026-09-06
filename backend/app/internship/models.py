@@ -90,6 +90,7 @@ class StudentDoubt(Base):
     subject = Column(String(255), nullable=False)
     question = Column(Text, nullable=False)
     code_snippet = Column(Text, nullable=True)
+    image_url = Column(Text, nullable=True)
     status = Column(String(50), default="open")  # open, answered
     admin_reply = Column(Text, nullable=True)
     answered_by = Column(String(255), nullable=True)

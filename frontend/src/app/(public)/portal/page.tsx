@@ -27,6 +27,10 @@ import {
   FileText,
   Lightbulb,
   Globe,
+  Image as ImageIcon,
+  UploadCloud,
+  X,
+  ZoomIn,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/api-client";
@@ -75,9 +79,34 @@ export default function StudentPortalPage() {
     question: "",
     code_snippet: "",
   });
+  const [doubtImage, setDoubtImage] = useState<File | null>(null);
+  const [doubtImagePreview, setDoubtImagePreview] = useState<string | null>(null);
   const [doubtLoading, setDoubtLoading] = useState(false);
   const [doubtSuccessMsg, setDoubtSuccessMsg] = useState("");
   const [doubtErrorMsg, setDoubtErrorMsg] = useState("");
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
+
+  const handleDoubtImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setDoubtErrorMsg("Please select a valid image file (PNG, JPG, WebP, GIF).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setDoubtErrorMsg("Image size exceeds 10MB limit.");
+      return;
+    }
+    setDoubtImage(file);
+    setDoubtImagePreview(URL.createObjectURL(file));
+    setDoubtErrorMsg("");
+  };
+
+  const removeDoubtImage = () => {
+    setDoubtImage(null);
+    if (doubtImagePreview) URL.revokeObjectURL(doubtImagePreview);
+    setDoubtImagePreview(null);
+  };
 
   useEffect(() => {
     const email = localStorage.getItem("user_email") || localStorage.getItem("admin_email");
@@ -196,6 +225,32 @@ export default function StudentPortalPage() {
     setDoubtErrorMsg("");
 
     try {
+      let uploadedImageUrl: string | undefined = undefined;
+
+      if (doubtImage) {
+        const formData = new FormData();
+        formData.append("file", doubtImage);
+
+        const apiBase = (
+          process.env.NEXT_PUBLIC_API_URL ||
+          process.env.NEXT_PUBLIC_API_BASE_URL ||
+          "http://localhost:8000/api"
+        ).replace(/\/$/, "");
+
+        const uploadRes = await fetch(`${apiBase}/portal/doubts/upload-image`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.detail || "Failed to upload screenshot image.");
+        }
+
+        const uploadData = await uploadRes.json();
+        uploadedImageUrl = uploadData.url;
+      }
+
       await apiRequest(`/portal/doubts?email=${encodeURIComponent(userEmail)}`, {
         method: "POST",
         body: JSON.stringify({
@@ -203,6 +258,7 @@ export default function StudentPortalPage() {
           subject: doubtForm.subject.trim(),
           question: doubtForm.question.trim(),
           code_snippet: doubtForm.code_snippet.trim() || undefined,
+          image_url: uploadedImageUrl,
         }),
       });
 
@@ -210,6 +266,7 @@ export default function StudentPortalPage() {
       setTimeout(() => {
         setShowDoubtModal(false);
         setDoubtForm({ module_name: "Week 1", subject: "", question: "", code_snippet: "" });
+        removeDoubtImage();
         setDoubtSuccessMsg("");
         fetchPortalData(userEmail);
       }, 1500);
@@ -868,6 +925,30 @@ export default function StudentPortalPage() {
 
                   <p className="text-xs text-ink-300 leading-relaxed">{d.question}</p>
 
+                  {/* Attached Error Screenshot */}
+                  {d.image_url && (
+                    <div className="space-y-1.5 pt-1">
+                      <div className="text-[11px] font-semibold text-ink-400 flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-pink-400" /> Attached Error Screenshot:
+                      </div>
+                      <div className="relative inline-block group rounded-lg overflow-hidden border border-ink-800 bg-black/50 max-w-sm">
+                        <img
+                          src={d.image_url.startsWith("http") ? d.image_url : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api").replace(/\/$/, "")}${d.image_url.startsWith("/") ? "" : "/"}${d.image_url}`}
+                          alt="Error Screenshot"
+                          className="max-h-48 w-auto object-contain cursor-pointer transition group-hover:opacity-90"
+                          onClick={() => setExpandedImage(d.image_url?.startsWith("http") ? d.image_url : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api").replace(/\/$/, "")}${d.image_url?.startsWith("/") ? "" : "/"}${d.image_url}`)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setExpandedImage(d.image_url?.startsWith("http") ? d.image_url : `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api").replace(/\/$/, "")}${d.image_url?.startsWith("/") ? "" : "/"}${d.image_url}`)}
+                          className="absolute bottom-2 right-2 px-2 py-1 bg-black/80 text-white rounded text-[10px] font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shadow-lg"
+                        >
+                          <ZoomIn className="w-3 h-3" /> Click to Zoom
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {d.code_snippet && (
                     <pre className="p-3 bg-ink-950 border border-ink-800 text-[11px] font-mono text-ink-300 rounded-lg overflow-x-auto">
                       <code>{d.code_snippet}</code>
@@ -1177,10 +1258,59 @@ export default function StudentPortalPage() {
                 />
               </div>
 
+              {/* Error Screenshot Upload */}
+              <div className="space-y-1.5">
+                <label className="text-ink-300 font-semibold flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-pink-400" /> Error Screenshot / Bug Image (Optional)
+                  </span>
+                  <span className="text-[10px] text-ink-500">Max 10MB (PNG, JPG, WebP)</span>
+                </label>
+
+                {!doubtImagePreview ? (
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-ink-700 hover:border-pink-500/50 bg-ink-900/50 hover:bg-ink-900 rounded-lg p-4 cursor-pointer transition">
+                    <UploadCloud className="w-6 h-6 text-ink-400 mb-1" />
+                    <span className="text-xs text-ink-300 font-medium">Click or drag screenshot here</span>
+                    <span className="text-[10px] text-ink-500 mt-0.5">Attach visual error logs or IDE screenshot</span>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg, image/webp, image/gif"
+                      className="hidden"
+                      onChange={handleDoubtImageChange}
+                    />
+                  </label>
+                ) : (
+                  <div className="relative p-2 bg-ink-900 border border-ink-700 rounded-lg flex items-center gap-3">
+                    <img
+                      src={doubtImagePreview}
+                      alt="Doubt Preview"
+                      className="w-14 h-14 object-cover rounded border border-ink-700 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-white truncate">{doubtImage?.name}</div>
+                      <div className="text-[10px] text-ink-400">
+                        {doubtImage ? `${(doubtImage.size / 1024).toFixed(1)} KB` : ""} • Image attached
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeDoubtImage}
+                      className="p-1.5 text-ink-400 hover:text-red-400 hover:bg-red-500/10 rounded transition"
+                      title="Remove image"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowDoubtModal(false)}
+                  onClick={() => {
+                    setShowDoubtModal(false);
+                    removeDoubtImage();
+                  }}
                   className="w-1/2 py-2.5 bg-ink-800 hover:bg-ink-700 text-ink-300 font-bold rounded-lg transition"
                 >
                   Cancel
@@ -1195,6 +1325,38 @@ export default function StudentPortalPage() {
               </div>
             </form>
           </motion.div>
+        </div>
+      )}
+
+      {/* ─── FULL-SCREEN IMAGE LIGHTBOX MODAL ───────────────────────── */}
+      {expandedImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+          onClick={() => setExpandedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setExpandedImage(null)}
+              className="absolute -top-10 right-0 p-2 text-white/70 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold"
+            >
+              <X className="w-5 h-5" /> Close (ESC)
+            </button>
+            <img
+              src={expandedImage}
+              alt="Expanded Error Screenshot"
+              className="max-h-[85vh] max-w-full object-contain rounded-lg border border-ink-700 shadow-2xl"
+            />
+            <div className="mt-3 flex items-center gap-4">
+              <a
+                href={expandedImage}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-brand-400 hover:underline flex items-center gap-1 bg-ink-900/80 px-3 py-1.5 rounded border border-ink-700"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Open Full Resolution in New Tab
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>

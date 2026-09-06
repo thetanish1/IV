@@ -127,7 +127,8 @@ def get_resume_file(filename: str):
     return FileResponse(
         path=file_path,
         media_type=media_type,
-        filename=safe_filename
+        filename=safe_filename,
+        content_disposition_type="inline"
     )
 
 

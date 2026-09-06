@@ -185,6 +185,7 @@ export interface StudentDoubtItem {
   subject: string;
   question: string;
   code_snippet?: string | null;
+  image_url?: string | null;
   status: "open" | "answered";
   admin_reply?: string | null;
   answered_by?: string | null;

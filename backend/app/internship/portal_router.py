@@ -1,16 +1,51 @@
+import os
+import uuid
 import math
+import logging
 from datetime import datetime, timedelta
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, UploadFile, File
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+import cloudinary
+import cloudinary.uploader
 
 from app.shared.database import get_db
 from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
 from app.shared.email_service import _send_smtp_email
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/portal", tags=["Student Internship Portal"])
+
+# Local directory to store uploaded doubt screenshots/images
+DOUBT_IMG_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "uploads", "doubts")
+os.makedirs(DOUBT_IMG_DIR, exist_ok=True)
+
+ALLOWED_IMAGE_TYPES = {
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+    "image/gif",
+}
+
+def _configure_cloudinary():
+    """Configure cloudinary if credentials are provided."""
+    if settings.CLOUDINARY_URL:
+        cloudinary.config(cloudinary_url=settings.CLOUDINARY_URL)
+        return True
+    elif settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY and settings.CLOUDINARY_API_SECRET:
+        cloudinary.config(
+            cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+            api_key=settings.CLOUDINARY_API_KEY,
+            api_secret=settings.CLOUDINARY_API_SECRET,
+            secure=True
+        )
+        return True
+    return False
 
 # ─── Domain Tasks Definition ──────────────────────────────────────────────────
 
@@ -392,6 +427,7 @@ class DoubtSubmitPayload(BaseModel):
     subject: str
     question: str
     code_snippet: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 # ─── Student Portal Endpoints ────────────────────────────────────────────────
@@ -607,6 +643,7 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             "subject": d.subject,
             "question": d.question,
             "code_snippet": d.code_snippet,
+            "image_url": d.image_url,
             "status": d.status,
             "admin_reply": d.admin_reply,
             "answered_by": d.answered_by,
@@ -758,6 +795,7 @@ def submit_doubt(
         subject=payload.subject,
         question=payload.question,
         code_snippet=payload.code_snippet,
+        image_url=payload.image_url,
         status="open",
     )
     db.add(doubt)
@@ -765,3 +803,90 @@ def submit_doubt(
     db.refresh(doubt)
 
     return {"success": True, "message": "Doubt submitted successfully. Our engineering mentors will reply shortly.", "id": doubt.id}
+
+
+@router.post("/doubts/upload-image")
+async def upload_doubt_image(file: UploadFile = File(...)):
+    """Upload an error screenshot or query image to Cloudinary Object Storage with local fallback."""
+    filename_lower = (file.filename or "").lower()
+    valid_ext = any(filename_lower.endswith(ext) for ext in [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"])
+    
+    if not valid_ext and file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail="Only image files (PNG, JPG, JPEG, WebP, GIF) are accepted for error screenshots."
+        )
+
+    content = await file.read()
+    ext = os.path.splitext(file.filename or "screenshot")[-1] or ".png"
+    unique_filename = f"doubt_{uuid.uuid4().hex}{ext}"
+
+    # Try uploading to Cloudinary first
+    if _configure_cloudinary():
+        try:
+            upload_result = cloudinary.uploader.upload(
+                content,
+                folder="internvision/doubts",
+                resource_type="image",
+                public_id=f"doubt_{uuid.uuid4().hex}",
+                use_filename=True,
+                unique_filename=True
+            )
+            secure_url = upload_result.get("secure_url") or upload_result.get("url")
+            if secure_url:
+                logger.info(f"Doubt image uploaded to Cloudinary: {secure_url}")
+                return {
+                    "filename": unique_filename,
+                    "url": secure_url,
+                    "original_name": file.filename,
+                    "storage": "cloudinary"
+                }
+        except Exception as e:
+            logger.error(f"Cloudinary upload failed, falling back to local storage: {e}")
+
+    # Local fallback
+    save_path = os.path.join(DOUBT_IMG_DIR, unique_filename)
+    with open(save_path, "wb") as f:
+        f.write(content)
+
+    return {
+        "filename": unique_filename,
+        "url": f"/api/portal/doubts/image/{unique_filename}",
+        "original_name": file.filename,
+        "storage": "local"
+    }
+
+
+@router.get("/doubts/image/{filename:path}")
+def get_doubt_image(filename: str):
+    """Serve or redirect to doubt error screenshot."""
+    if filename.startswith("http://") or filename.startswith("https://"):
+        return RedirectResponse(url=filename)
+
+    if "cloudinary.com" in filename:
+        full_url = filename if filename.startswith("http") else f"https://{filename}"
+        return RedirectResponse(url=full_url)
+
+    safe_filename = os.path.basename(filename)
+    file_path = os.path.join(DOUBT_IMG_DIR, safe_filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Doubt image not found")
+
+    media_type = "image/png"
+    lower = safe_filename.lower()
+    if lower.endswith(".jpg") or lower.endswith(".jpeg"):
+        media_type = "image/jpeg"
+    elif lower.endswith(".webp"):
+        media_type = "image/webp"
+    elif lower.endswith(".gif"):
+        media_type = "image/gif"
+    elif lower.endswith(".svg"):
+        media_type = "image/svg+xml"
+
+    return FileResponse(
+        path=file_path,
+        media_type=media_type,
+        filename=safe_filename,
+        content_disposition_type="inline"
+    )
+

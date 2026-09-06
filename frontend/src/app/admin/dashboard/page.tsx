@@ -54,6 +54,8 @@ import {
   XCircle,
   RefreshCw,
   FolderGit2,
+  Image as ImageIcon,
+  ZoomIn,
 } from "lucide-react";
 import {
   DashboardStats,
@@ -74,6 +76,18 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import AuthGuard from "@/components/AuthGuard";
 import BrandedMailerTab from "@/components/admin/BrandedMailerTab";
 
+const apiBase = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "http://localhost:8000/api"
+).replace(/\/$/, "");
+
+const getResumeUrl = (filename?: string | null) => {
+  if (!filename) return "";
+  if (filename.startsWith("http://") || filename.startsWith("https://")) return filename;
+  return `${apiBase}/applications/resume/${filename}`;
+};
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
@@ -82,6 +96,12 @@ export default function AdminDashboardPage() {
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+
+  // Resume Preview State
+  const [previewResume, setPreviewResume] = useState<{ url: string; name: string } | null>(null);
+
+  // Doubt Image Zoom State
+  const [expandedDoubtImage, setExpandedDoubtImage] = useState<string | null>(null);
 
   // Site Settings Feature Toggles State (Courses, Careers)
   const [siteSettings, setSiteSettings] = useState<{ show_courses: boolean; show_careers: boolean }>({
@@ -1193,16 +1213,27 @@ export default function AdminDashboardPage() {
                               </td>
                               <td className="px-5 py-4">
                                 {app.resume_filename ? (
-                                  <a
-                                    href={app.resume_filename.startsWith("http") ? app.resume_filename : `${apiBase}/applications/resume/${app.resume_filename}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-600/10 hover:bg-brand-600/20 border border-brand-500/30 text-brand-400 rounded text-xs font-semibold transition"
-                                  >
-                                    <FileText className="w-3.5 h-3.5" /> Resume PDF
-                                  </a>
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <button
+                                      type="button"
+                                      onClick={() => setPreviewResume({ url: getResumeUrl(app.resume_filename), name: app.full_name })}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-brand-600/20 hover:bg-brand-600/30 border border-brand-500/40 text-brand-300 rounded text-xs font-semibold transition"
+                                      title="Preview Resume in Modal"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" /> View
+                                    </button>
+                                    <a
+                                      href={getResumeUrl(app.resume_filename)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 px-2 py-1 bg-ink-900 hover:bg-ink-800 border border-ink-700 text-ink-300 hover:text-white rounded text-xs font-medium transition"
+                                      title="Open in new tab"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  </div>
                                 ) : (
-                                  <span className="text-xs text-ink-500">No file</span>
+                                  <span className="text-xs text-ink-500 italic">No resume</span>
                                 )}
                               </td>
                               <td className="px-5 py-4">
@@ -2080,6 +2111,30 @@ export default function AdminDashboardPage() {
                           </div>
                         )}
 
+                        {/* Attached Error Screenshot */}
+                        {d.image_url && (
+                          <div className="mt-3 flex items-center gap-3 p-2.5 bg-black/50 border border-ink-800 rounded-lg max-w-md">
+                            <img
+                              src={d.image_url.startsWith("http") ? d.image_url : `${apiBase}${d.image_url.startsWith("/") ? "" : "/"}${d.image_url}`}
+                              alt="Error Screenshot"
+                              className="w-14 h-14 object-cover rounded border border-ink-700 cursor-pointer hover:opacity-80 transition shrink-0"
+                              onClick={() => setExpandedDoubtImage(d.image_url?.startsWith("http") ? d.image_url : `${apiBase}${d.image_url?.startsWith("/") ? "" : "/"}${d.image_url}`)}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-bold text-pink-400 flex items-center gap-1.5">
+                                <ImageIcon className="w-3.5 h-3.5" /> Error Screenshot Attached
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setExpandedDoubtImage(d.image_url?.startsWith("http") ? d.image_url : `${apiBase}${d.image_url?.startsWith("/") ? "" : "/"}${d.image_url}`)}
+                                className="text-[11px] text-ink-400 hover:text-white underline mt-1 flex items-center gap-1"
+                              >
+                                <ZoomIn className="w-3 h-3" /> Click to inspect visual error
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Reply box if answered */}
                         {d.admin_reply && (
                           <div className="mt-4 p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
@@ -2272,6 +2327,40 @@ export default function AdminDashboardPage() {
                 {replyingDoubt.code_snippet && (
                   <div className="mt-2 p-2 bg-black/80 border border-ink-800 rounded font-mono text-[11px] text-pink-300">
                     <pre>{replyingDoubt.code_snippet}</pre>
+                  </div>
+                )}
+
+                {/* Attached Error Screenshot */}
+                {replyingDoubt.image_url && (
+                  <div className="mt-3 space-y-1.5 pt-2 border-t border-ink-800/80">
+                    <div className="text-xs font-bold text-pink-400 flex items-center gap-1.5">
+                      <ImageIcon className="w-3.5 h-3.5" /> Attached Error Screenshot:
+                    </div>
+                    <div className="relative group inline-block bg-black/60 border border-ink-800 rounded-lg overflow-hidden max-w-md">
+                      <img
+                        src={replyingDoubt.image_url.startsWith("http") ? replyingDoubt.image_url : `${apiBase}${replyingDoubt.image_url.startsWith("/") ? "" : "/"}${replyingDoubt.image_url}`}
+                        alt="Error Screenshot"
+                        className="max-h-56 w-auto object-contain cursor-pointer hover:opacity-90 transition"
+                        onClick={() => setExpandedDoubtImage(replyingDoubt.image_url?.startsWith("http") ? replyingDoubt.image_url : `${apiBase}${replyingDoubt.image_url?.startsWith("/") ? "" : "/"}${replyingDoubt.image_url}`)}
+                      />
+                      <div className="absolute bottom-2 right-2 flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedDoubtImage(replyingDoubt.image_url?.startsWith("http") ? replyingDoubt.image_url : `${apiBase}${replyingDoubt.image_url?.startsWith("/") ? "" : "/"}${replyingDoubt.image_url}`)}
+                          className="px-2 py-1 bg-black/80 text-white rounded text-[10px] font-semibold flex items-center gap-1 hover:bg-black transition"
+                        >
+                          <ZoomIn className="w-3 h-3" /> Zoom
+                        </button>
+                        <a
+                          href={replyingDoubt.image_url.startsWith("http") ? replyingDoubt.image_url : `${apiBase}${replyingDoubt.image_url.startsWith("/") ? "" : "/"}${replyingDoubt.image_url}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-pink-600/90 hover:bg-pink-600 text-white rounded text-[10px] font-semibold flex items-center gap-1 transition"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Open
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2677,8 +2766,8 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              {/* Resume Download Action */}
-              <div className="pt-4 border-t border-ink-800 flex items-center justify-between">
+              {/* Resume Actions */}
+              <div className="pt-4 border-t border-ink-800 flex items-center justify-between gap-4 flex-wrap">
                 <div>
                   <div className="text-xs font-bold text-white">Candidate Resume Document</div>
                   <div className="text-[11px] text-ink-400">
@@ -2687,17 +2776,116 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {selectedApp.resume_filename ? (
-                  <a
-                    href={selectedApp.resume_filename.startsWith("http") ? selectedApp.resume_filename : `${apiBase}/applications/resume/${selectedApp.resume_filename}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded text-sm font-bold flex items-center gap-2 transition shadow-[2px_2px_0px_#ffffff]"
-                  >
-                    <Download className="w-4 h-4" /> Download & View Resume PDF
-                  </a>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewResume({ url: getResumeUrl(selectedApp.resume_filename), name: selectedApp.full_name })}
+                      className="px-3.5 py-2 bg-ink-900 hover:bg-ink-800 text-ink-200 border border-ink-700 rounded text-xs font-bold flex items-center gap-1.5 transition"
+                    >
+                      <Eye className="w-4 h-4 text-brand-400" /> Preview Resume
+                    </button>
+                    <a
+                      href={getResumeUrl(selectedApp.resume_filename)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded text-xs font-bold flex items-center gap-1.5 transition shadow-[2px_2px_0px_#ffffff]"
+                    >
+                      <Download className="w-4 h-4" /> Download / Open PDF
+                    </a>
+                  </div>
                 ) : (
                   <span className="text-xs text-ink-500 italic">No resume provided</span>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────── RESUME PREVIEW MODAL ─────────────────── */}
+        {previewResume && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            onClick={() => setPreviewResume(null)}
+          >
+            <div
+              className="relative w-full max-w-5xl h-[90vh] bg-ink-950 border-2 border-brand-500/40 rounded-xl flex flex-col shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="p-4 border-b border-ink-800 flex items-center justify-between bg-ink-900">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-brand-400" />
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Resume Document — {previewResume.name}</h3>
+                    <div className="text-[11px] text-ink-400 truncate max-w-md">{previewResume.url}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={previewResume.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
+                  </a>
+                  <a
+                    href={previewResume.url}
+                    download
+                    className="px-3 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-200 rounded text-xs font-semibold flex items-center gap-1.5 transition border border-ink-700"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewResume(null)}
+                    className="p-1.5 text-ink-400 hover:text-white rounded hover:bg-ink-800 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* PDF Preview Frame */}
+              <div className="flex-1 w-full bg-ink-900 relative">
+                <iframe
+                  src={previewResume.url}
+                  className="w-full h-full border-0"
+                  title="Candidate Resume Preview"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────── DOUBT IMAGE ZOOM LIGHTBOX ─────────────────── */}
+        {expandedDoubtImage && (
+          <div
+            className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+            onClick={() => setExpandedDoubtImage(null)}
+          >
+            <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setExpandedDoubtImage(null)}
+                className="absolute -top-10 right-0 p-2 text-white/70 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold"
+              >
+                <X className="w-5 h-5" /> Close (ESC)
+              </button>
+              <img
+                src={expandedDoubtImage}
+                alt="Expanded Error Screenshot"
+                className="max-h-[85vh] max-w-full object-contain rounded-lg border border-ink-700 shadow-2xl"
+              />
+              <div className="mt-3 flex items-center gap-4">
+                <a
+                  href={expandedDoubtImage}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-pink-400 hover:underline flex items-center gap-1 bg-ink-900/80 px-3 py-1.5 rounded border border-ink-700"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Open Full Resolution in New Tab
+                </a>
               </div>
             </div>
           </div>
