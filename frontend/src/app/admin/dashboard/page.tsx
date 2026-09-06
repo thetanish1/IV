@@ -72,11 +72,12 @@ import { apiRequest } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
 import { FadeIn } from "@/components/animations/FadeIn";
 import AuthGuard from "@/components/AuthGuard";
+import BrandedMailerTab from "@/components/admin/BrandedMailerTab";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts"
+    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts" | "mailer"
   >("overview");
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -904,6 +905,19 @@ export default function AdminDashboardPage() {
                 {certificatesList.length}
               </span>
               {activeTab === "certificates" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab("mailer")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                activeTab === "mailer" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              <Mail className="w-3.5 h-3.5 text-brand-400" />
+              Branded Mailer
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                SMTP
+              </span>
+              {activeTab === "mailer" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
             </button>
           </div>
 
@@ -2087,6 +2101,13 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
               </div>
+            </FadeIn>
+          )}
+
+          {/* ─────────────────── BRANDED MAILER SECTION ─────────────────── */}
+          {activeTab === "mailer" && (
+            <FadeIn delay={0.1} direction="up">
+              <BrandedMailerTab />
             </FadeIn>
           )}
         </div>

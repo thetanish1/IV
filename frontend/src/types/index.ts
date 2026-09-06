@@ -253,3 +253,29 @@ export interface SiteSettingItem {
   updated_at?: string;
 }
 
+export interface ApplicantRecipientItem {
+  email: string;
+  name: string;
+  type: "internship" | "course" | "user";
+  role_preference: string;
+  status: string;
+  college?: string;
+  created_at?: string | null;
+}
+
+export interface SentEmailItem {
+  id: number;
+  batch_id?: string | null;
+  to: string;
+  recipient_name?: string | null;
+  subject: string;
+  heading?: string | null;
+  brand_name?: string | null;
+  status: "success" | "failed";
+  error_message?: string | null;
+  message_id?: string | null;
+  attachment_names: string[];
+  created_at?: string | null;
+}
+
+

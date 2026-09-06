@@ -22,13 +22,14 @@ class Settings(BaseSettings):
     # Google OAuth (Identity Services)
     GOOGLE_CLIENT_ID: str = ""  # Set this in .env — e.g. "xxxxx.apps.googleusercontent.com"
 
-    # SMTP / Email Notification Settings
-    SMTP_HOST: str = "smtp.gmail.com"
+    # SMTP / Email Notification Settings (Brevo SMTP Relay)
+    SMTP_HOST: str = "smtp-relay.brevo.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str = ""
+    SMTP_USER: str = "b06485001@smtp-brevo.com"
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "internvisiontechhr@gmail.com"
-    SMTP_FROM_NAME: str = "InternVision Tech"
+    SMTP_FROM_NAME: str = "InternVision Tech HR"
+    SMTP_TLS: bool = True
     # Cloudinary Object Storage Settings (for Resumes & Assets)
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
