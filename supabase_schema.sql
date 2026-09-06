@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS internship_applications (
     portfolio_url VARCHAR(500),
     experience_description TEXT,
     cover_letter TEXT,
-    resume_filename VARCHAR(255),
+    resume_filename TEXT,
     status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

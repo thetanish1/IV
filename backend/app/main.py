@@ -188,14 +188,19 @@ def startup_event():
     finally:
         db.close()
 
+from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
-# Configurable CORS Policy
+# Add custom Request Logging & ID Middleware first (inner)
+app.add_middleware(LoggingAndRequestIDMiddleware)
+
+# Add CORS Middleware last so it wraps all requests & error responses (outer)
 origins = [
     "https://iv-theta.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
+    "https://internvision.tech",
 ]
 
 app.add_middleware(
@@ -208,19 +213,18 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Custom Request Logging & ID Middleware
-app.add_middleware(LoggingAndRequestIDMiddleware)
-
-# Catch-all OPTIONS preflight route
-@app.options("/{full_path:path}")
-async def preflight_handler(full_path: str):
-    return Response(
-        status_code=200,
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Ensure CORS headers are attached even if an unhandled internal exception occurs."""
+    origin = request.headers.get("origin") or "https://iv-theta.vercel.app"
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {str(exc)}"},
         headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD",
-            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
         }
     )
 
@@ -228,6 +232,7 @@ async def preflight_handler(full_path: str):
 for r in [auth_router, courses_router, internship_router, payments_router, dashboard_router, export_router, certificates_router]:
     app.include_router(r, prefix="/api")
     app.include_router(r)
+
 
 
 @app.get("/")
