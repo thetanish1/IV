@@ -465,7 +465,7 @@ def review_student_submission(
     if body.admin_feedback is not None:
         sub.admin_feedback = body.admin_feedback
     if body.is_unlocked is not None:
-        sub.is_unlocked = 1 if body.is_unlocked else 0
+        sub.is_unlocked = bool(body.is_unlocked)
     sub.updated_at = datetime.utcnow()
 
     db.commit()
@@ -552,14 +552,14 @@ def handle_unlock_request(
                 .filter(InternshipSubmission.student_email == req.student_email, InternshipSubmission.task_key == req.task_key)\
                 .first()
         if sub:
-            sub.is_unlocked = 1
+            sub.is_unlocked = True
         else:
             new_sub = InternshipSubmission(
                 application_id=req.application_id,
                 student_email=req.student_email,
                 task_key=req.task_key,
                 title=req.task_title,
-                is_unlocked=1,
+                is_unlocked=True,
                 status="unlocked"
             )
             db.add(new_sub)

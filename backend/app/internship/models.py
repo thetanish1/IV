@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Text
+from sqlalchemy import Column, Integer, String, DateTime, JSON, Text, Boolean
 from app.shared.database import Base
 
 class InternshipApplication(Base):
@@ -56,7 +56,7 @@ class InternshipSubmission(Base):
     documentation_url = Column(String(500), nullable=True)
     notes = Column(Text, nullable=True)
     tools_used = Column(JSON, nullable=False, default=[])
-    is_unlocked = Column(Integer, default=0)  # 0 or 1 / boolean
+    is_unlocked = Column(Boolean, default=False)
     status = Column(String(50), default="submitted")  # submitted, approved, changes_requested
     admin_feedback = Column(Text, nullable=True)
     submitted_at = Column(DateTime, default=datetime.utcnow)
