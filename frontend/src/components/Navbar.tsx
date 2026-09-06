@@ -62,9 +62,15 @@ export default function Navbar() {
     };
   }, []);
 
-  // 30-Second Automatic Login Popup if not logged in
+  // 30-Second Automatic Login Popup if not logged in (strictly disabled on all /admin routes)
   useEffect(() => {
+    if (pathname.startsWith("/admin")) {
+      setShowAuthModal(false);
+      return;
+    }
+
     const timer = setTimeout(() => {
+      if (pathname.startsWith("/admin")) return;
       const token = localStorage.getItem("user_token");
       const email = localStorage.getItem("user_email");
       const dismissed = sessionStorage.getItem("auth_popup_dismissed");
@@ -74,13 +80,16 @@ export default function Navbar() {
     }, 30000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     // Ensure scrolling is always enabled and any lingering modal/Razorpay backdrop is cleaned up on route change
     document.body.style.overflow = "";
     document.documentElement.style.overflow = "";
     document.querySelectorAll(".razorpay-container").forEach((el) => el.remove());
+    if (pathname.startsWith("/admin")) {
+      setShowAuthModal(false);
+    }
     checkAuth();
   }, [pathname]);
 
@@ -104,21 +113,23 @@ export default function Navbar() {
 
   return (
     <>
-      <UserAuthModal
-        isOpen={showAuthModal}
-        onClose={handleCloseAuthModal}
-        title="Sign In to InternVision Tech"
-        subtitle="Sign in with Google or Email & Password to apply for Virtual Internships & access 100% free engineering bootcamps."
-        onSuccess={(userData) => {
-          setUserEmail(userData.user_email);
-          setUserName(userData.user_name);
-          setShowAuthModal(false);
-          // If user was on home page or clicked login, redirect to apply
-          if (pathname === "/" || pathname === "/apply") {
-            router.push("/apply");
-          }
-        }}
-      />
+      {!pathname.startsWith("/admin") && (
+        <UserAuthModal
+          isOpen={showAuthModal}
+          onClose={handleCloseAuthModal}
+          title="Sign In to InternVision Tech"
+          subtitle="Sign in with Google or Email & Password to apply for Virtual Internships & access 100% free engineering bootcamps."
+          onSuccess={(userData) => {
+            setUserEmail(userData.user_email);
+            setUserName(userData.user_name);
+            setShowAuthModal(false);
+            // If user was on home page or clicked login, redirect to apply
+            if (pathname === "/" || pathname === "/apply") {
+              router.push("/apply");
+            }
+          }}
+        />
+      )}
 
       <motion.header
         initial={{ y: -100 }}

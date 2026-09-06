@@ -4,9 +4,12 @@ from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.shared.database import get_db
-from app.shared.dependencies import get_current_admin
-from app.shared.email_service import send_course_enrollment_acceptance_email
-from app.auth.models import Admin
+from app.shared.email_service import (
+    send_course_enrollment_acceptance_email,
+    send_course_enrollment_rejection_email,
+    send_internship_acceptance_email,
+    send_internship_rejection_email,
+)
 from app.internship.models import InternshipApplication
 from app.courses.models import Course, CourseRegistration
 from app.payments.models import Payment
@@ -107,15 +110,37 @@ def get_site_users(
 def update_application_status(
     application_id: int,
     body: StatusUpdateBody,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):
     app = db.query(InternshipApplication).filter(InternshipApplication.id == application_id).first()
     if not app:
         raise HTTPException(status_code=404, detail="Application not found")
+    
+    prev_status = (app.status or "").lower()
+    new_status = body.status.strip().lower()
     app.status = body.status
     db.commit()
     db.refresh(app)
+
+    if new_status in ("accepted", "approved") and prev_status != "accepted":
+        background_tasks.add_task(
+            send_internship_acceptance_email,
+            app.email,
+            app.full_name,
+            app.duration,
+            app.role_preference
+        )
+    elif new_status in ("rejected", "declined") and prev_status != "rejected":
+        background_tasks.add_task(
+            send_internship_rejection_email,
+            app.email,
+            app.full_name,
+            app.duration,
+            app.role_preference
+        )
+
     return ApplicationResponse.model_validate(app).model_dump()
 
 @router.get("/applications")
@@ -170,19 +195,28 @@ def update_registration_status(
     if not reg:
         raise HTTPException(status_code=404, detail="Course registration not found")
     
-    prev_status = reg.status
+    prev_status = (reg.status or "").lower()
+    new_status = body.status.strip().lower()
     reg.status = body.status
     db.commit()
     db.refresh(reg)
 
+    course = db.query(Course).filter(Course.id == reg.course_id).first()
+    course_title = course.title if course else "Engineering Bootcamp"
+    course_duration = course.duration if course else "8 Weeks"
+
     # When admin accepts the enrollment, send official congratulations email
-    if body.status.lower() in ("accepted", "approved") and prev_status != "accepted":
-        course = db.query(Course).filter(Course.id == reg.course_id).first()
-        course_title = course.title if course else "Engineering Bootcamp"
-        course_duration = course.duration if course else "8 Weeks"
-        
+    if new_status in ("accepted", "approved") and prev_status != "accepted":
         background_tasks.add_task(
             send_course_enrollment_acceptance_email,
+            reg.student_email,
+            reg.student_name,
+            course_title,
+            course_duration
+        )
+    elif new_status in ("rejected", "declined") and prev_status != "rejected":
+        background_tasks.add_task(
+            send_course_enrollment_rejection_email,
             reg.student_email,
             reg.student_name,
             course_title,

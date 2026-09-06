@@ -427,3 +427,239 @@ def send_course_enrollment_acceptance_email(
     """
 
     return _send_smtp_email(student_email, subject, html_content, text_content)
+
+
+def send_internship_acceptance_email(
+    student_email: str,
+    student_name: str,
+    duration: str,
+    role_preference: str
+):
+    """
+    Sends an official Offer / Acceptance email when an admin approves an internship application.
+    """
+    display_name = student_name or student_email.split("@")[0]
+    subject = f"🎉 Selection & Offer Letter: Virtual Internship ({role_preference}) | InternVision Tech"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d0c0a; color: #e5e5e5; margin: 0; padding: 20px; }}
+        .card {{ max-width: 620px; margin: 0 auto; background: #171614; border: 1px solid #2e2c28; border-radius: 8px; overflow: hidden; }}
+        .header {{ background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 28px; text-align: left; }}
+        .header h1 {{ color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; }}
+        .badge {{ display: inline-block; background: #ffffff; color: #059669; padding: 4px 10px; font-size: 11px; font-weight: 800; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; }}
+        .content {{ padding: 32px 24px; line-height: 1.6; color: #d4d4d8; font-size: 15px; }}
+        .highlight {{ color: #34d399; font-weight: bold; }}
+        .summary-card {{ background: #1e1d1a; border: 1px solid #059669; padding: 18px; margin: 20px 0; border-radius: 6px; }}
+        .timeline-step {{ padding: 10px 0; border-bottom: 1px solid #2e2c28; }}
+        .timeline-step:last-child {{ border-bottom: none; }}
+        .step-num {{ display: inline-block; width: 22px; height: 22px; line-height: 22px; background: #10b981; color: #000; text-align: center; border-radius: 50%; font-size: 12px; font-weight: bold; margin-right: 8px; }}
+        .footer {{ padding: 20px 24px; background: #12110f; font-size: 12px; color: #71717a; border-top: 1px solid #2e2c28; text-align: center; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <span class="badge">Official Selection</span>
+          <h1>Congratulations on Your Selection!</h1>
+        </div>
+        <div class="content">
+          <p>Dear <strong style="color:#ffffff;">{display_name}</strong>,</p>
+          <p>We are delighted to inform you that after reviewing your technical profile, you have been <span style="color:#34d399; font-weight:bold;">SELECTED</span> for the <strong>InternVision Tech Virtual Pre-Hire Internship Program</strong>!</p>
+          
+          <div class="summary-card">
+            <h3 style="color:#ffffff; margin-top:0; font-size:16px; border-bottom:1px solid #2e2c28; padding-bottom:8px;">Internship Offer Summary</h3>
+            <p style="margin:6px 0;">• <strong>Role / Track:</strong> <span style="color:#60a5fa; font-weight:bold;">{role_preference}</span></p>
+            <p style="margin:6px 0;">• <strong>Duration:</strong> <span style="color:#34d399; font-weight:bold;">{duration}</span></p>
+            <p style="margin:6px 0;">• <strong>Work Mode:</strong> 100% Virtual / Remote</p>
+            <p style="margin:6px 0;">• <strong>Status:</strong> <span style="color:#34d399; font-weight:bold;">ACCEPTED & CONFIRMED</span></p>
+          </div>
+
+          <h3 style="color:#ffffff; font-size:16px;">Next Steps for Onboarding:</h3>
+          <div style="background:#1e1d1a; padding:14px; border-radius:6px; margin-bottom:20px;">
+            <div class="timeline-step">
+              <span class="step-num">1</span> <strong>Mentor Introduction:</strong> Your lead engineer will reach out with the project workspace and repository access.
+            </div>
+            <div class="timeline-step">
+              <span class="step-num">2</span> <strong>Daily Standups & Task Brief:</strong> Work on production-level code, submit PRs, and participate in peer reviews.
+            </div>
+            <div class="timeline-step">
+              <span class="step-num">3</span> <strong>Verified Digital Credential:</strong> Upon successful completion, you will receive an industry-verified certificate and performance assessment.
+            </div>
+          </div>
+
+          <p style="font-size:14px; color:#a1a1aa;">
+            If you have any questions, reply directly to this email or reach us at <a href="mailto:internvisiontechhr@gmail.com" style="color:#60a5fa;">internvisiontechhr@gmail.com</a>.
+          </p>
+        </div>
+        <div class="footer">
+          <p>© 2026 InternVision Tech Inc. Headquarters: Nagpur, Maharashtra, India.</p>
+          <p>Empowering the next generation of engineers with industry-grade software internships.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Dear {display_name},
+
+    Congratulations! You have been SELECTED for the {duration} Virtual Internship in '{role_preference}' at InternVision Tech!
+    
+    Offer Details:
+    - Track: {role_preference}
+    - Duration: {duration}
+    - Work Mode: 100% Virtual / Remote
+    - Status: ACCEPTED
+    
+    Your mentor assignment and repository access will be provided shortly.
+    
+    Best regards,
+    HR & Engineering Team | InternVision Tech
+    internvisiontechhr@gmail.com
+    """
+
+    return _send_smtp_email(student_email, subject, html_content, text_content)
+
+
+def send_internship_rejection_email(
+    student_email: str,
+    student_name: str,
+    duration: str,
+    role_preference: str
+):
+    """
+    Sends a polite rejection/update email when an internship application is declined.
+    """
+    display_name = student_name or student_email.split("@")[0]
+    subject = f"Application Status Update: Virtual Internship ({role_preference}) | InternVision Tech"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d0c0a; color: #e5e5e5; margin: 0; padding: 20px; }}
+        .card {{ max-width: 600px; margin: 0 auto; background: #171614; border: 1px solid #2e2c28; border-radius: 8px; overflow: hidden; }}
+        .header {{ background: #374151; padding: 24px; text-align: left; }}
+        .header h1 {{ color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; }}
+        .badge {{ display: inline-block; background: #4b5563; color: #ffffff; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; }}
+        .content {{ padding: 32px 24px; line-height: 1.6; color: #d4d4d8; font-size: 15px; }}
+        .footer {{ padding: 20px 24px; background: #12110f; font-size: 12px; color: #71717a; border-top: 1px solid #2e2c28; text-align: center; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <span class="badge">Application Update</span>
+          <h1>Internship Application Status</h1>
+        </div>
+        <div class="content">
+          <p>Dear <strong style="color:#ffffff;">{display_name}</strong>,</p>
+          <p>Thank you for your interest in the <strong style="color:#60a5fa;">{role_preference} ({duration})</strong> program at InternVision Tech.</p>
+          
+          <p>Due to the exceptionally high volume of applications and limited mentor bandwidth for this cohort, we are unable to offer you a seat for this batch.</p>
+
+          <p>We encourage you to continue honing your projects and apply for our upcoming cohorts. We also invite you to check our free open-access engineering bootcamps to strengthen your developer portfolio.</p>
+
+          <p style="font-size: 13px; color: #a1a1aa; margin-top: 24px;">
+            If you have any questions or would like feedback on your technical profile, feel free to contact us at <a href="mailto:internvisiontechhr@gmail.com" style="color:#60a5fa;">internvisiontechhr@gmail.com</a>.
+          </p>
+        </div>
+        <div class="footer">
+          <p>© 2026 InternVision Tech Inc. Headquarters: Nagpur, Maharashtra, India.</p>
+          <p>Empowering developers with real-world engineering experience.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Dear {display_name},
+
+    Thank you for applying for the {role_preference} ({duration}) Virtual Internship at InternVision Tech.
+    
+    Due to cohort capacity limits, we are unable to offer you a seat for this session. We strongly encourage you to re-apply for our upcoming cohorts.
+    
+    Best regards,
+    Talent Acquisition Team | InternVision Tech
+    internvisiontechhr@gmail.com
+    """
+
+    return _send_smtp_email(student_email, subject, html_content, text_content)
+
+
+def send_course_enrollment_rejection_email(
+    student_email: str,
+    student_name: str,
+    course_title: str,
+    course_duration: str = "8 Weeks"
+):
+    """
+    Sends a polite rejection/update email when a course enrollment request is declined.
+    """
+    display_name = student_name or student_email.split("@")[0]
+    subject = f"Enrollment Update: {course_title} | InternVision Tech"
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d0c0a; color: #e5e5e5; margin: 0; padding: 20px; }}
+        .card {{ max-width: 600px; margin: 0 auto; background: #171614; border: 1px solid #2e2c28; border-radius: 8px; overflow: hidden; }}
+        .header {{ background: #374151; padding: 24px; text-align: left; }}
+        .header h1 {{ color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; }}
+        .badge {{ display: inline-block; background: #4b5563; color: #ffffff; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px; }}
+        .content {{ padding: 32px 24px; line-height: 1.6; color: #d4d4d8; font-size: 15px; }}
+        .footer {{ padding: 20px 24px; background: #12110f; font-size: 12px; color: #71717a; border-top: 1px solid #2e2c28; text-align: center; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <div class="header">
+          <span class="badge">Bootcamp Admissions</span>
+          <h1>Enrollment Update</h1>
+        </div>
+        <div class="content">
+          <p>Dear <strong style="color:#ffffff;">{display_name}</strong>,</p>
+          <p>Thank you for your interest in the <strong style="color:#60a5fa;">{course_title}</strong> bootcamp at InternVision Tech.</p>
+          
+          <p>All scholarship seats for the upcoming {course_duration} cohort are currently filled. As a result, your enrollment request could not be accommodated for this batch.</p>
+
+          <p>We welcome you to submit a request for the subsequent cohort opening next month.</p>
+
+          <p style="font-size: 13px; color: #a1a1aa; margin-top: 24px;">
+            If you have questions, reach out to <a href="mailto:internvisiontechhr@gmail.com" style="color:#60a5fa;">internvisiontechhr@gmail.com</a>.
+          </p>
+        </div>
+        <div class="footer">
+          <p>© 2026 InternVision Tech Inc. Headquarters: Nagpur, Maharashtra, India.</p>
+          <p>Outcome-driven engineering bootcamps & virtual mentorship.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Dear {display_name},
+
+    Thank you for applying for '{course_title}' ({course_duration}) at InternVision Tech.
+    
+    All seats for this batch are currently full. We invite you to apply for our next batch opening soon.
+    
+    Best regards,
+    Admissions Team | InternVision Tech
+    internvisiontechhr@gmail.com
+    """
+
+    return _send_smtp_email(student_email, subject, html_content, text_content)
+
