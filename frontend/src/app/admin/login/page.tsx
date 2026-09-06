@@ -55,8 +55,8 @@ export default function AdminLoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "tanishdewase222@gmail.com",
-      password: "Admin@123456",
+      email: "",
+      password: "",
     },
   });
 
@@ -218,11 +218,6 @@ export default function AdminLoginPage() {
                 <span className="ml-2 text-[10px] text-red-400">(GOOGLE_CLIENT_ID not set)</span>
               </div>
             )}
-
-            <p className="text-[10px] text-ink-500 text-center leading-relaxed">
-              💡 <strong className="text-ink-400">Google users:</strong> Your Google email becomes your username.
-              Default password = your Google account email address.
-            </p>
           </div>
 
           {/* Divider */}
@@ -260,15 +255,6 @@ export default function AdminLoginPage() {
               {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
-            {/* Default credentials hint box */}
-            <div className="p-3 bg-ink-900/60 border border-ink-800 text-[11px] text-ink-400 space-y-1">
-              <p className="font-semibold text-ink-300">Admin Account Credentials:</p>
-              <p>Super Admin: <span className="font-mono text-brand-400">tanishdewase222@gmail.com</span></p>
-              <p>Password: <span className="font-mono text-brand-400">Admin@123456</span></p>
-              <p className="pt-1 border-t border-ink-800 mt-1">
-                Google users: password = <span className="font-mono text-brand-400">your.google@email.com</span>
-              </p>
-            </div>
 
             <button
               id="admin-login-btn"
