@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   GraduationCap,
@@ -130,6 +131,26 @@ export default function InternshipApplyPage() {
     };
   };
 
+  const fetchLiveAppStatus = async (userEmail: string) => {
+    try {
+      const res = await apiRequest<any>(`/portal/my-internship?email=${encodeURIComponent(userEmail)}`);
+      if (res && res.has_application) {
+        const appObj = {
+          full_name: res.full_name,
+          email: res.email,
+          role_preference: res.role_preference,
+          duration: res.duration,
+          status: res.status,
+          is_accepted: res.is_accepted,
+        };
+        setExistingApplication(appObj);
+        localStorage.setItem("internship_application_submitted", JSON.stringify(appObj));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   // Check auth state and existing application on load
   const loadUserAuth = () => {
     const token = localStorage.getItem("user_token");
@@ -151,11 +172,12 @@ export default function InternshipApplyPage() {
         email: email,
         full_name: prev.full_name || name || email.split("@")[0],
       }));
+      fetchLiveAppStatus(email);
     } else {
       setCurrentUser(null);
     }
 
-    // Check if application was already submitted
+    // Check cached application if available
     try {
       const savedApp = localStorage.getItem("internship_application_submitted");
       if (savedApp) {
@@ -421,45 +443,100 @@ export default function InternshipApplyPage() {
       {/* EXISTING APPLIED APPLICATION STATUS BANNER */}
       {existingApplication && (
         <FadeIn delay={0.07} direction="up">
-          <div className="bg-emerald-950/40 border-2 border-emerald-500/60 p-6 sm:p-8 rounded-lg shadow-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-500/20 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold shrink-0">
-                  <CheckCircle2 className="w-6 h-6" />
+          {((existingApplication.status || "").toLowerCase() === "accepted" || existingApplication.is_accepted) ? (
+            <div className="bg-emerald-950/60 border-2 border-emerald-500 p-6 sm:p-8 rounded-xl shadow-2xl space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-500/30 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 font-bold shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                      Admission Granted & Active
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-black text-white">
+                      {existingApplication.role_preference || "Virtual Internship Track"}
+                    </h3>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">Application Submitted</div>
-                  <h3 className="text-lg sm:text-xl font-black text-white">
-                    {existingApplication.role_preference || "Virtual Internship Track"}
-                  </h3>
+                <div className="flex items-center gap-2">
+                  <span className="px-3.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 rounded text-xs font-extrabold uppercase tracking-wider animate-pulse">
+                    ✦ Application Accepted
+                  </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded text-xs font-bold uppercase tracking-wider">
-                  ✦ Under Admissions Review
-                </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-ink-300">
+                <div className="bg-ink-900/80 border border-ink-800 p-3.5 rounded-lg">
+                  <span className="text-ink-400 font-medium">Intern Name:</span>
+                  <div className="text-white font-bold text-sm mt-0.5">{existingApplication.full_name}</div>
+                </div>
+                <div className="bg-ink-900/80 border border-ink-800 p-3.5 rounded-lg">
+                  <span className="text-ink-400 font-medium">Enrolled Track Duration:</span>
+                  <div className="text-white font-bold text-sm mt-0.5">{existingApplication.duration}</div>
+                </div>
+                <div className="bg-ink-900/80 border border-ink-800 p-3.5 rounded-lg">
+                  <span className="text-ink-400 font-medium">Registered Account:</span>
+                  <div className="text-white font-bold text-sm mt-0.5 truncate">{existingApplication.email}</div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+                <p className="text-xs text-emerald-200 leading-relaxed max-w-xl">
+                  🎉 <strong>Congratulations!</strong> Your internship has been officially accepted. You now have access to your domain task allocations, weekly time-gated submissions, and 2-way doubt resolution desk.
+                </p>
+
+                <Link
+                  href="/portal"
+                  className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm rounded-lg flex items-center justify-center gap-2 transition shadow-[0_0_20px_rgba(16,185,129,0.4)] whitespace-nowrap"
+                >
+                  <Sparkles className="w-4 h-4" /> Go To My Student Portal →
+                </Link>
               </div>
             </div>
+          ) : (
+            <div className="bg-emerald-950/40 border-2 border-emerald-500/60 p-6 sm:p-8 rounded-lg shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-500/20 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold shrink-0">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                      Application Submitted
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-white">
+                      {existingApplication.role_preference || "Virtual Internship Track"}
+                    </h3>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded text-xs font-bold uppercase tracking-wider">
+                    ✦ Under Admissions Review
+                  </span>
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-ink-300">
-              <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
-                <span className="text-ink-400 font-medium">Applicant:</span>
-                <div className="text-white font-bold mt-0.5">{existingApplication.full_name}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-ink-300">
+                <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
+                  <span className="text-ink-400 font-medium">Applicant:</span>
+                  <div className="text-white font-bold mt-0.5">{existingApplication.full_name}</div>
+                </div>
+                <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
+                  <span className="text-ink-400 font-medium">Selected Duration:</span>
+                  <div className="text-white font-bold mt-0.5">{existingApplication.duration}</div>
+                </div>
+                <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
+                  <span className="text-ink-400 font-medium">Registered Email:</span>
+                  <div className="text-white font-bold mt-0.5 truncate">{existingApplication.email}</div>
+                </div>
               </div>
-              <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
-                <span className="text-ink-400 font-medium">Selected Duration:</span>
-                <div className="text-white font-bold mt-0.5">{existingApplication.duration}</div>
-              </div>
-              <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
-                <span className="text-ink-400 font-medium">Registered Email:</span>
-                <div className="text-white font-bold mt-0.5 truncate">{existingApplication.email}</div>
-              </div>
+
+              <p className="text-xs text-emerald-300/80 leading-relaxed pt-1">
+                Your application is active and being evaluated by our senior engineering mentors. You will receive an onboarding confirmation email once reviewed.
+              </p>
             </div>
-
-            <p className="text-xs text-emerald-300/80 leading-relaxed pt-1">
-              Your application is active and being evaluated by our senior engineering mentors. You will receive an onboarding confirmation email once reviewed.
-            </p>
-          </div>
+          )}
         </FadeIn>
       )}
 

@@ -134,13 +134,15 @@ export default function HomePage() {
   useEffect(() => {
     const checkSettings = async () => {
       try {
-        const data = await apiRequest<{ show_courses: boolean }>("/settings");
-        if (data?.show_courses) setShowCourses(true);
+        const data = await apiRequest<{ show_courses?: boolean | string }>("/settings");
+        setShowCourses(data?.show_courses === true || data?.show_courses === "true");
       } catch {
         // default hidden
       }
     };
     checkSettings();
+    window.addEventListener("site-settings-changed", checkSettings);
+    return () => window.removeEventListener("site-settings-changed", checkSettings);
   }, []);
 
   return (

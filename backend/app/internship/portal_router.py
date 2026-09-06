@@ -180,6 +180,138 @@ DOMAIN_TASKS = {
             },
         ],
     },
+    "data-science": {
+        "title": "Data Science & Big Data Analytics",
+        "weeks": [
+            {
+                "week": 1,
+                "key": "month1_week1",
+                "title": "Data Wrangling, Statistical Distributions & Advanced EDA",
+                "objective": "Perform deep exploratory data analysis, hypothesis testing, outlier detection, and statistical visualizations with Pandas and Seaborn.",
+                "deliverables": ["Jupyter EDA Notebook", "Statistical Distribution Matrix", "Cleaned Datasets"],
+            },
+            {
+                "week": 2,
+                "key": "month1_week2",
+                "title": "SQL for Analytics, Window Functions & Relational Schemas",
+                "objective": "Write complex analytical SQL queries, CTEs, aggregation pipelines, and build data models in PostgreSQL.",
+                "deliverables": ["Analytical SQL queries file", "Schema ERD diagram", "Performance index report"],
+            },
+            {
+                "week": 3,
+                "key": "month1_week3",
+                "title": "Predictive Modeling & Applied Machine Learning",
+                "objective": "Train predictive regression & classification models with Scikit-Learn, evaluate performance metrics, and build feature stores.",
+                "deliverables": ["Scikit-Learn ML script", "Model evaluation benchmark", "Feature importance charts"],
+            },
+            {
+                "week": 4,
+                "key": "month1_week4",
+                "title": "Executive Business Intelligence Dashboards & Deployment",
+                "objective": "Design interactive BI dashboards using Streamlit / Power BI and deploy live with automated data refresh pipelines.",
+                "deliverables": ["Interactive Streamlit dashboard URL", "GitHub repo", "Executive insights slide deck"],
+            },
+        ],
+    },
+    "devops": {
+        "title": "Cloud DevOps & CI/CD Engineering",
+        "weeks": [
+            {
+                "week": 1,
+                "key": "month1_week1",
+                "title": "Linux Systems Administration, Bash Scripting & Git Flow",
+                "objective": "Master Linux server administration, SSH tunneling, systemd services, and automated bash scripting.",
+                "deliverables": ["Bash automation scripts", "System monitoring tool", "Git branching workflow docs"],
+            },
+            {
+                "week": 2,
+                "key": "month1_week2",
+                "title": "Docker Containerization & Multi-Container Docker Compose",
+                "objective": "Containerize full-stack services with multi-stage Docker builds, compose stacks, and volume persistence.",
+                "deliverables": ["Multi-stage Dockerfile", "Docker Compose architecture file", "Container security scan"],
+            },
+            {
+                "week": 3,
+                "key": "month1_week3",
+                "title": "CI/CD Pipelines with GitHub Actions & Automated Testing",
+                "objective": "Build automated continuous integration pipelines with linting, unit testing, Docker Hub push, and zero-downtime deploy.",
+                "deliverables": [".github/workflows/deploy.yml", "Automated test integration", "Build badge status"],
+            },
+            {
+                "week": 4,
+                "key": "month1_week4",
+                "title": "Kubernetes Orchestration & Cloud Infrastructure Deployment",
+                "objective": "Deploy scalable applications to Kubernetes / Cloud (AWS/Render) with ingress, ConfigMaps, and health probes.",
+                "deliverables": ["K8s deployment manifests", "Live cloud application URL", "Architecture walkthrough"],
+            },
+        ],
+    },
+    "cyber-security": {
+        "title": "Cyber Security & Ethical Hacking",
+        "weeks": [
+            {
+                "week": 1,
+                "key": "month1_week1",
+                "title": "Networking Protocols, Packet Analysis & Reconnaissance",
+                "objective": "Perform passive/active reconnaissance, network packet capture with Wireshark, and port scanning with Nmap.",
+                "deliverables": ["Wireshark PCAP analysis report", "Nmap network topology scan", "Recon methodology docs"],
+            },
+            {
+                "week": 2,
+                "key": "month1_week2",
+                "title": "OWASP Top 10 Web Application Vulnerability Assessment",
+                "objective": "Audit web applications against SQL injection, XSS, CSRF, and broken authentication using Burp Suite.",
+                "deliverables": ["Vulnerability assessment report", "Proof of Concept (PoC) exploits", "Remediation recommendations"],
+            },
+            {
+                "week": 3,
+                "key": "month1_week3",
+                "title": "Cryptography, SSL/TLS & Identity Access Management",
+                "objective": "Implement symmetric/asymmetric encryption, PKI certificate authorities, and secure password hashing protocols.",
+                "deliverables": ["Python crypto utility script", "SSL/TLS hardening checklist", "Security audit report"],
+            },
+            {
+                "week": 4,
+                "key": "month1_week4",
+                "title": "System Hardening, Incident Response & Penetration Testing Report",
+                "objective": "Perform defensive system hardening, configure iptables/firewalls, and author a professional penetration testing report.",
+                "deliverables": ["Professional Pen-Test Audit PDF", "Defensive hardening script", "Walkthrough video"],
+            },
+        ],
+    },
+    "ui-ux": {
+        "title": "UI/UX Design & Product Frontend",
+        "weeks": [
+            {
+                "week": 1,
+                "key": "month1_week1",
+                "title": "User Research, Wireframing & Low-Fidelity Prototyping",
+                "objective": "Conduct user persona discovery, information architecture mapping, and low-fidelity wireframes in Figma.",
+                "deliverables": ["Figma wireframe board link", "User persona cards", "User journey map"],
+            },
+            {
+                "week": 2,
+                "key": "month1_week2",
+                "title": "Comprehensive Design Systems, Color Tokens & Typography",
+                "objective": "Build high-end design systems in Figma with auto-layout, variants, typography scale, and dark-mode tokens.",
+                "deliverables": ["Figma Design System kit", "Component variant library", "Accessibility contrast matrix"],
+            },
+            {
+                "week": 3,
+                "key": "month1_week3",
+                "title": "High-Fidelity Interactive Prototypes & Micro-Animations",
+                "objective": "Create pixel-perfect interactive prototype flows with animated transitions, modal states, and interactive feedback.",
+                "deliverables": ["Figma clickable interactive prototype", "Micro-interaction specs", "Usability test recordings"],
+            },
+            {
+                "week": 4,
+                "key": "month1_week4",
+                "title": "Production Frontend Implementation with React & Tailwind CSS",
+                "objective": "Translate the Figma design system into production React + Tailwind CSS code with responsive layouts and deploy live.",
+                "deliverables": ["Live deployment URL (Vercel)", "GitHub component repository", "Lighthouse accessibility 100 score"],
+            },
+        ],
+    },
 }
 
 DEFAULT_DOMAIN_TASKS = DOMAIN_TASKS["full-stack"]
@@ -217,15 +349,23 @@ def get_tasks_for_domain(role_preference: Optional[str]):
     if not role_preference:
         return DOMAIN_TASKS["full-stack"]
     
-    role_lower = role_preference.lower()
-    if "ai" in role_lower or "machine" in role_lower or "data science" in role_lower:
+    r = role_preference.lower()
+    if "ai" in r or "machine" in r:
         return DOMAIN_TASKS["ai-ml"]
-    elif "python" in role_lower:
+    elif "data science" in r or "analytics" in r:
+        return DOMAIN_TASKS["data-science"]
+    elif "python" in r or "backend" in r:
         return DOMAIN_TASKS["python"]
-    elif "java" in role_lower:
+    elif "java" in r or "spring" in r:
         return DOMAIN_TASKS["java"]
-    elif "android" in role_lower or "app" in role_lower:
+    elif "android" in r or "app" in r or "kotlin" in r:
         return DOMAIN_TASKS["android"]
+    elif "devops" in r or "cloud" in r or "docker" in r:
+        return DOMAIN_TASKS["devops"]
+    elif "cyber" in r or "security" in r or "ethical" in r:
+        return DOMAIN_TASKS["cyber-security"]
+    elif "design" in r or "ui" in r or "ux" in r or "frontend" in r:
+        return DOMAIN_TASKS["ui-ux"]
     else:
         return DOMAIN_TASKS["full-stack"]
 
@@ -291,9 +431,15 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             "message": "Your application is currently under admissions review."
         }
 
-    # Calculate days elapsed since acceptance/creation
-    start_date = app.created_at or datetime.utcnow()
-    days_elapsed = (datetime.utcnow() - start_date).days
+    # Calculate days elapsed since acceptance/creation safely with tzinfo
+    start_date = app.created_at
+    if not start_date:
+        days_elapsed = 0
+    elif getattr(start_date, "tzinfo", None) is not None:
+        from datetime import timezone
+        days_elapsed = max(0, (datetime.now(timezone.utc) - start_date).days)
+    else:
+        days_elapsed = max(0, (datetime.utcnow() - start_date).days)
 
     # Fetch existing submissions
     submissions = db.query(InternshipSubmission).filter(InternshipSubmission.student_email == clean_email).all()

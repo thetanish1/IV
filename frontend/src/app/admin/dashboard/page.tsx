@@ -465,10 +465,10 @@ export default function AdminDashboardPage() {
 
   const fetchSiteSettings = async () => {
     try {
-      const data = await apiRequest<{ show_courses?: string; show_careers?: string }>("/admin/settings");
+      const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>("/admin/settings");
       setSiteSettings({
-        show_courses: data.show_courses === "true",
-        show_careers: data.show_careers === "true",
+        show_courses: data.show_courses === true || data.show_courses === "true",
+        show_careers: data.show_careers === true || data.show_careers === "true",
       });
     } catch (err) {
       console.error("Failed to load site settings", err);
@@ -479,11 +479,14 @@ export default function AdminDashboardPage() {
     const nextVal = !siteSettings[key];
     setUpdatingSettings(true);
     try {
-      await apiRequest("/admin/settings", {
+      const updated = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>("/admin/settings", {
         method: "PATCH",
-        body: JSON.stringify({ [key]: nextVal ? "true" : "false" }),
+        body: JSON.stringify({ [key]: nextVal }),
       });
-      setSiteSettings((prev) => ({ ...prev, [key]: nextVal }));
+      setSiteSettings({
+        show_courses: updated.show_courses === true || updated.show_courses === "true",
+        show_careers: updated.show_careers === true || updated.show_careers === "true",
+      });
       window.dispatchEvent(new Event("site-settings-changed"));
     } catch (err) {
       console.error(`Failed to toggle ${key}:`, err);

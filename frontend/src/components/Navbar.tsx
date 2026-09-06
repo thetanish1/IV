@@ -25,8 +25,13 @@ export default function Navbar() {
 
   const fetchSettings = async () => {
     try {
-      const data = await apiRequest<{ show_courses: boolean; show_careers: boolean }>("/settings");
-      if (data) setSettings(data);
+      const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>("/settings");
+      if (data) {
+        setSettings({
+          show_courses: data.show_courses === true || data.show_courses === "true",
+          show_careers: data.show_careers === true || data.show_careers === "true",
+        });
+      }
     } catch {
       // fallback defaults
     }
@@ -34,6 +39,8 @@ export default function Navbar() {
 
   useEffect(() => {
     fetchSettings();
+    window.addEventListener("site-settings-changed", fetchSettings);
+    return () => window.removeEventListener("site-settings-changed", fetchSettings);
   }, [pathname]);
 
   const checkAuth = () => {
