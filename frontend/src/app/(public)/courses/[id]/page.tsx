@@ -422,33 +422,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     setErrorMsg("");
 
     try {
-      const apiBase = (
-        process.env.NEXT_PUBLIC_API_URL ||
-        process.env.NEXT_PUBLIC_API_BASE_URL ||
-        "http://localhost:8000/api"
-      ).replace(/\/$/, "");
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-      const res = await fetch(`${apiBase}/courses/enroll`, {
+      await apiRequest("/courses/enroll", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
         body: JSON.stringify({
           course_id: typeof course?.id === "number" ? course.id : undefined,
           course_slug: course?.slug || resolvedParams.id,
-          student_name: formData.student_name,
-          student_email: formData.student_email,
-          student_phone: formData.student_phone,
-          college: formData.college || undefined,
+          student_name: formData.student_name.trim(),
+          student_email: formData.student_email.trim().toLowerCase(),
+          student_phone: formData.student_phone.trim(),
+          college: formData.college?.trim() || undefined,
         }),
-      }).finally(() => clearTimeout(timeoutId));
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.detail || "Failed to submit enrollment request.");
-      }
+      });
 
       setSubmittedSuccess(true);
     } catch (err: any) {

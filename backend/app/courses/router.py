@@ -34,7 +34,11 @@ def get_courses(
     return query.all()
 
 @router.post("/enroll", status_code=status.HTTP_201_CREATED)
+@router.post("/enroll/", status_code=status.HTTP_201_CREATED)
 @router.post("/enroll-free", status_code=status.HTTP_201_CREATED)
+@router.post("/enroll-free/", status_code=status.HTTP_201_CREATED)
+@router.post("/courses/enroll", status_code=status.HTTP_201_CREATED)
+@router.post("/courses/enroll/", status_code=status.HTTP_201_CREATED)
 def enroll_in_course_free(
     req: FreeEnrollmentRequest,
     background_tasks: BackgroundTasks,
