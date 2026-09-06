@@ -108,3 +108,19 @@ export interface CourseRegistrationItem {
   created_at: string;
 }
 
+export interface CertificateItem {
+  id?: number;
+  certificate_id: string;
+  student_name: string;
+  student_email: string;
+  program_title: string;
+  track_type: string;
+  duration: string;
+  issue_date: string;
+  grade: string;
+  skills_acquired: string[];
+  instructor_name: string;
+  is_valid: boolean;
+  created_at?: string;
+}
+

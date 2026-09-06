@@ -82,10 +82,32 @@ def issue_certificate(
         issue_date=cert_in.issue_date.strip(),
         grade=cert_in.grade.strip(),
         skills_acquired=cert_in.skills_acquired,
-        instructor_name=cert_in.instructor_name or "InternVision Tech Academic Council",
+        instructor_name=cert_in.instructor_name or "Suraj Kumar, HR & Manager",
         is_valid=True
     )
     db.add(new_cert)
     db.commit()
     db.refresh(new_cert)
     return new_cert
+
+@router.delete("/{cert_id}", status_code=status.HTTP_200_OK)
+def delete_certificate(
+    cert_id: str,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """
+    Admin Endpoint: Delete/Revoke a certificate by certificate_id or database id.
+    """
+    cert = None
+    if cert_id.isdigit():
+        cert = db.query(Certificate).filter(Certificate.id == int(cert_id)).first()
+    if not cert:
+        cert = db.query(Certificate).filter(func.upper(Certificate.certificate_id) == cert_id.strip().upper()).first()
+
+    if not cert:
+        raise NotFoundException(f"Certificate '{cert_id}' not found.")
+
+    db.delete(cert)
+    db.commit()
+    return {"success": True, "message": f"Certificate '{cert.certificate_id}' successfully deleted."}

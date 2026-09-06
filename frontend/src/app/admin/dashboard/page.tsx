@@ -32,9 +32,16 @@ import {
   GraduationCap,
   Sparkles,
   AlertCircle,
+  Key,
+  Award,
+  Plus,
+  Trash2,
+  ShieldCheck,
+  BadgeCheck,
+  Copy,
+  Check,
   Eye,
   EyeOff,
-  Key,
 } from "lucide-react";
 import {
   DashboardStats,
@@ -43,6 +50,7 @@ import {
   PaymentItem,
   SiteUserItem,
   CourseRegistrationItem,
+  CertificateItem,
 } from "@/types";
 import { apiRequest } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
@@ -51,7 +59,7 @@ import AuthGuard from "@/components/AuthGuard";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"overview" | "applications" | "users" | "enrollments" | "payments">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "applications" | "users" | "enrollments" | "payments" | "certificates">("overview");
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
@@ -114,6 +122,30 @@ export default function AdminDashboardPage() {
   const [pmtPage, setPmtPage] = useState(1);
   const [loadingPayments, setLoadingPayments] = useState(false);
 
+  // Certificates State
+  const [certificatesList, setCertificatesList] = useState<CertificateItem[]>([]);
+  const [loadingCerts, setLoadingCerts] = useState(false);
+  const [certSearch, setCertSearch] = useState("");
+  const [showIssueModal, setShowIssueModal] = useState(false);
+  const [issuing, setIssuing] = useState(false);
+  const [certError, setCertError] = useState("");
+  const [deletingCertId, setDeletingCertId] = useState<string | null>(null);
+  const [copiedCertId, setCopiedCertId] = useState<string | null>(null);
+
+  const initialCertForm = {
+    certificate_id: "",
+    student_name: "",
+    student_email: "",
+    program_title: "Full Stack Web Development Co-Op",
+    track_type: "Virtual Internship",
+    duration: "3 Months",
+    issue_date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+    grade: "Distinction (Grade A+)",
+    skills_acquired: "Next.js 15, React 19, TypeScript, FastAPI, PostgreSQL",
+    instructor_name: "Suraj Kumar, HR & Manager",
+  };
+  const [newCertForm, setNewCertForm] = useState(initialCertForm);
+
   const apiBase = (
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -137,7 +169,10 @@ export default function AdminDashboardPage() {
     if (activeTab === "payments" || activeTab === "overview") {
       fetchPayments();
     }
-  }, [activeTab, appsSearch, appsDuration, appsPage, usersSearch, usersProvider, usersPage, regSearch, regStatus, regPage, pmtSearch, pmtStatus, pmtPage]);
+    if (activeTab === "certificates" || activeTab === "overview") {
+      fetchCertificates();
+    }
+  }, [activeTab, appsSearch, appsDuration, appsPage, usersSearch, usersProvider, usersPage, regSearch, regStatus, regPage, pmtSearch, pmtStatus, pmtPage, certSearch]);
 
   const fetchStats = async () => {
     try {
@@ -263,6 +298,78 @@ export default function AdminDashboardPage() {
       console.error("Failed to update status", err);
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const fetchCertificates = async () => {
+    setLoadingCerts(true);
+    try {
+      let endpoint = "/certificates";
+      if (certSearch) {
+        endpoint += `?search=${encodeURIComponent(certSearch)}`;
+      }
+      const data = await apiRequest<CertificateItem[]>(endpoint);
+      setCertificatesList(data);
+    } catch (err) {
+      console.error("Failed to load certificates", err);
+    } finally {
+      setLoadingCerts(false);
+    }
+  };
+
+  const handleIssueCertificate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCertForm.student_name.trim() || !newCertForm.student_email.trim() || !newCertForm.program_title.trim()) {
+      setCertError("Please fill in recipient name, email, and program title.");
+      return;
+    }
+    setIssuing(true);
+    setCertError("");
+    try {
+      const generatedId =
+        newCertForm.certificate_id.trim().toUpperCase() ||
+        `IVT-${new Date().getFullYear()}-${newCertForm.program_title.includes("AI") ? "AIML" : newCertForm.program_title.includes("DevOps") ? "DO" : newCertForm.program_title.includes("Security") ? "CS" : newCertForm.program_title.includes("Java") ? "JAVA" : "FS"}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const payload = {
+        certificate_id: generatedId,
+        student_name: newCertForm.student_name.trim(),
+        student_email: newCertForm.student_email.trim().toLowerCase(),
+        program_title: newCertForm.program_title.trim(),
+        track_type: newCertForm.track_type,
+        duration: newCertForm.duration.trim(),
+        issue_date: newCertForm.issue_date.trim() || new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+        grade: newCertForm.grade.trim() || "Distinction (Grade A+)",
+        skills_acquired: newCertForm.skills_acquired.split(",").map((s) => s.trim()).filter(Boolean),
+        instructor_name: newCertForm.instructor_name.trim() || "Suraj Kumar, HR & Manager",
+      };
+
+      await apiRequest<CertificateItem>("/certificates", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      setShowIssueModal(false);
+      setNewCertForm(initialCertForm);
+      fetchCertificates();
+    } catch (err: any) {
+      setCertError(err.message || "Failed to issue certificate");
+    } finally {
+      setIssuing(false);
+    }
+  };
+
+  const handleDeleteCertificate = async (certId: string) => {
+    if (!confirm(`Are you sure you want to delete and revoke Certificate ${certId}?`)) return;
+    setDeletingCertId(certId);
+    try {
+      await apiRequest(`/certificates/${encodeURIComponent(certId)}`, {
+        method: "DELETE",
+      });
+      setCertificatesList((prev) => prev.filter((c) => c.certificate_id !== certId));
+    } catch (err) {
+      console.error("Failed to delete certificate", err);
+    } finally {
+      setDeletingCertId(null);
     }
   };
 
@@ -442,6 +549,19 @@ export default function AdminDashboardPage() {
                 {stats?.total_payments || 0}
               </span>
               {activeTab === "payments" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab("certificates")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 relative ${
+                activeTab === "certificates" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5 text-emerald-400" />
+              Certificates
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
+                {certificatesList.length}
+              </span>
+              {activeTab === "certificates" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
             </button>
           </div>
 
@@ -1075,8 +1195,354 @@ export default function AdminDashboardPage() {
             </FadeIn>
           )}
 
+          {/* ─────────────────── CERTIFICATES MANAGEMENT SECTION ─────────────────── */}
+          {(activeTab === "certificates" || activeTab === "overview") && (
+            <FadeIn delay={0.3} direction="up">
+              <div className="space-y-4 pt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <Award className="w-5 h-5 text-emerald-400" /> Certificate Registry & Verification
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      Issue and manage official digital certificates signed by{" "}
+                      <strong className="text-white">Suraj Kumar, HR & Manager</strong>.
+                    </p>
+                  </div>
 
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-full sm:w-64">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-ink-400" />
+                      <input
+                        type="text"
+                        placeholder="Search certificate or student..."
+                        value={certSearch}
+                        onChange={(e) => setCertSearch(e.target.value)}
+                        className="w-full bg-ink-950 border border-ink-800 rounded-lg pl-9 pr-3 py-1.5 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setShowIssueModal(true)}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap"
+                    >
+                      <Plus className="w-4 h-4" /> Issue Certificate
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/30">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-ink-900/50 text-ink-400 font-medium border-b border-ink-800">
+                        <tr>
+                          <th className="px-5 py-3 font-medium">Certificate ID</th>
+                          <th className="px-5 py-3 font-medium">Recipient</th>
+                          <th className="px-5 py-3 font-medium">Program & Track</th>
+                          <th className="px-5 py-3 font-medium">Duration & Date</th>
+                          <th className="px-5 py-3 font-medium">Grade / Honors</th>
+                          <th className="px-5 py-3 font-medium">Authority</th>
+                          <th className="px-5 py-3 font-medium text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-ink-800/50">
+                        {loadingCerts ? (
+                          <tr>
+                            <td colSpan={7} className="text-center py-12">
+                              <Loader2 className="w-5 h-5 animate-spin mx-auto text-ink-500" />
+                            </td>
+                          </tr>
+                        ) : certificatesList.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="text-center py-12 text-ink-500 text-sm">
+                              No certificates found. Click &quot;Issue Certificate&quot; to create one.
+                            </td>
+                          </tr>
+                        ) : (
+                          certificatesList.map((cert) => (
+                            <tr key={cert.certificate_id} className="hover:bg-ink-900/30 transition-colors">
+                              <td className="px-5 py-4 font-mono text-xs font-bold text-emerald-400">
+                                <div className="flex items-center gap-2">
+                                  <span>{cert.certificate_id}</span>
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(cert.certificate_id);
+                                      setCopiedCertId(cert.certificate_id);
+                                      setTimeout(() => setCopiedCertId(null), 2000);
+                                    }}
+                                    className="text-ink-400 hover:text-white transition"
+                                    title="Copy Certificate ID"
+                                  >
+                                    {copiedCertId === cert.certificate_id ? (
+                                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                    ) : (
+                                      <Copy className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="font-semibold text-white">{cert.student_name}</div>
+                                <div className="text-xs text-ink-400 font-mono">{cert.student_email}</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <div className="text-ink-200 font-medium">{cert.program_title}</div>
+                                <span className="inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-ink-800 text-ink-400 mt-0.5">
+                                  {cert.track_type}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 text-xs text-ink-300">
+                                <div>{cert.duration}</div>
+                                <div className="text-ink-500">{cert.issue_date}</div>
+                              </td>
+                              <td className="px-5 py-4">
+                                <span className="text-xs font-bold px-2.5 py-1 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                                  {cert.grade}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 text-xs text-ink-300">
+                                {cert.instructor_name}
+                              </td>
+                              <td className="px-5 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <a
+                                    href={`/verify-certificate?id=${encodeURIComponent(cert.certificate_id)}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="px-2.5 py-1.5 bg-ink-900 hover:bg-ink-800 text-brand-400 hover:text-brand-300 border border-ink-800 rounded text-xs font-medium transition flex items-center gap-1"
+                                    title="View Public Verification"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" /> Verify
+                                  </a>
+                                  <button
+                                    disabled={deletingCertId === cert.certificate_id}
+                                    onClick={() => handleDeleteCertificate(cert.certificate_id)}
+                                    className="p-1.5 bg-ink-900 hover:bg-red-600/30 text-ink-400 hover:text-red-400 border border-ink-800 rounded transition disabled:opacity-50"
+                                    title="Revoke and Delete Certificate"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          )}
         </div>
+
+        {/* ─────────────────── ISSUE NEW CERTIFICATE MODAL ─────────────────── */}
+        {showIssueModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-ink-950 border-2 border-ink-800 p-8 shadow-2xl space-y-6 rounded-xl">
+              {/* Close Button */}
+              <button
+                onClick={() => setShowIssueModal(false)}
+                className="absolute top-4 right-4 p-2 text-ink-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Modal Header */}
+              <div className="border-b border-ink-800 pb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider rounded">
+                  <Award className="w-3.5 h-3.5" /> Issue Digital Credential
+                </div>
+                <h2 className="text-2xl font-black text-white mt-2">Add New Verified Certificate</h2>
+                <p className="text-xs text-ink-400 mt-1">
+                  Enter candidate and course details. The certificate will be instantly verifiable on the public verification portal.
+                </p>
+              </div>
+
+              {certError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded">
+                  {certError}
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleIssueCertificate} className="space-y-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Certificate Number */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">
+                      Certificate Number <span className="text-ink-500">(Auto or Custom)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="e.g. IVT-2026-FS-9912"
+                        value={newCertForm.certificate_id}
+                        onChange={(e) => setNewCertForm({ ...newCertForm, certificate_id: e.target.value })}
+                        className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setNewCertForm({
+                            ...newCertForm,
+                            certificate_id: `IVT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+                          })
+                        }
+                        className="px-2.5 py-1 text-xs bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white rounded border border-ink-700 whitespace-nowrap"
+                      >
+                        Auto-Gen
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Program Track Type */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">Track Type</label>
+                    <select
+                      value={newCertForm.track_type}
+                      onChange={(e) => setNewCertForm({ ...newCertForm, track_type: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="Virtual Internship">Virtual Internship</option>
+                      <option value="Bootcamp">Bootcamp</option>
+                      <option value="Industrial Co-Op">Industrial Co-Op</option>
+                      <option value="Advanced Training">Advanced Training</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Candidate Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">Recipient Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Aarav Sharma"
+                      value={newCertForm.student_name}
+                      onChange={(e) => setNewCertForm({ ...newCertForm, student_name: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">Recipient Email *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. aarav.sharma@example.com"
+                      value={newCertForm.student_email}
+                      onChange={(e) => setNewCertForm({ ...newCertForm, student_email: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Course Name */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-ink-300 uppercase">Course / Program Applied *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Full Stack Web Development Co-Op"
+                    value={newCertForm.program_title}
+                    onChange={(e) => setNewCertForm({ ...newCertForm, program_title: e.target.value })}
+                    className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                {/* Duration & Issue Date & Grade */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">Duration</label>
+                    <select
+                      value={newCertForm.duration}
+                      onChange={(e) => setNewCertForm({ ...newCertForm, duration: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="1 Month">1 Month</option>
+                      <option value="3 Months">3 Months</option>
+                      <option value="6 Months">6 Months</option>
+                      <option value="8 Weeks">8 Weeks</option>
+                      <option value="10 Weeks">10 Weeks</option>
+                      <option value="12 Weeks">12 Weeks</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">Issue Date</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. September 06, 2026"
+                      value={newCertForm.issue_date}
+                      onChange={(e) => setNewCertForm({ ...newCertForm, issue_date: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-ink-300 uppercase">Grade / Performance</label>
+                    <select
+                      value={newCertForm.grade}
+                      onChange={(e) => setNewCertForm({ ...newCertForm, grade: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 cursor-pointer"
+                    >
+                      <option value="Distinction (Grade A+)">Distinction (Grade A+)</option>
+                      <option value="Excellence (Grade O)">Excellence (Grade O)</option>
+                      <option value="Merit (Grade A)">Merit (Grade A)</option>
+                      <option value="Grade B+">Grade B+</option>
+                      <option value="Completed with Honors">Completed with Honors</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Technical Competence / Skills */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-ink-300 uppercase">
+                    Technical Competencies / Skills <span className="text-ink-500">(Comma separated)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Next.js 15, React 19, TypeScript, FastAPI, PostgreSQL, Docker"
+                    value={newCertForm.skills_acquired}
+                    onChange={(e) => setNewCertForm({ ...newCertForm, skills_acquired: e.target.value })}
+                    className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-mono"
+                  />
+                </div>
+
+                {/* Issuing Authority / Manager */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-ink-300 uppercase">Issuing Authority / HR Manager</label>
+                  <input
+                    type="text"
+                    value={newCertForm.instructor_name}
+                    onChange={(e) => setNewCertForm({ ...newCertForm, instructor_name: e.target.value })}
+                    className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-ink-800">
+                  <button
+                    type="button"
+                    onClick={() => setShowIssueModal(false)}
+                    className="px-4 py-2 bg-ink-900 hover:bg-ink-800 text-ink-300 text-xs font-bold rounded transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={issuing}
+                    className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded transition flex items-center gap-2 disabled:opacity-50 shadow"
+                  >
+                    {issuing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Award className="w-4 h-4" />}
+                    Issue & Verify Certificate
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* ─────────────────── APPLICANT DETAIL REVIEW MODAL ─────────────────── */}
         {selectedApp && (

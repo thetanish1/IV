@@ -211,7 +211,7 @@ VALUES
     'August 15, 2026',
     'Distinction (Grade A+)',
     '["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]'::jsonb,
-    'Tanish Dewase, Lead Architect & Academic Director',
+    'Suraj Kumar, HR & Manager',
     TRUE
 ),
 (
@@ -237,7 +237,7 @@ VALUES
     'August 28, 2026',
     'Distinction (Grade A+)',
     '["Docker", "Kubernetes", "AWS Cloud", "Terraform", "CI/CD Pipelines", "Linux"]'::jsonb,
-    'Tanish Dewase, Lead Architect',
+    'Suraj Kumar, HR & Manager',
     TRUE
 ),
 (

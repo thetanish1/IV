@@ -57,7 +57,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "August 15, 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"],
-    instructor_name: "Tanish Dewase, Lead Architect & Academic Director",
+    instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
   "IVT-2026-AIML-5521": {
@@ -70,7 +70,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "August 20, 2026",
     grade: "Excellence (Grade O)",
     skills_acquired: ["Python", "PyTorch", "LLM APIs", "LangChain", "RAG Systems", "Vector DBs"],
-    instructor_name: "InternVision Tech AI Research Group",
+    instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
   "IVT-2026-DO-9104": {
@@ -83,7 +83,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "August 28, 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Docker", "Kubernetes", "AWS Cloud", "Terraform", "CI/CD Pipelines", "Linux"],
-    instructor_name: "Tanish Dewase, Lead Architect",
+    instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
   "IVT-2026-CS-3382": {
@@ -96,7 +96,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "September 01, 2026",
     grade: "Merit (Grade A)",
     skills_acquired: ["Penetration Testing", "Wireshark", "Burp Suite", "OWASP Top 10", "Network Security"],
-    instructor_name: "InternVision Tech Security Operations",
+    instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
 };

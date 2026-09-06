@@ -15,7 +15,7 @@ class Certificate(Base):
     issue_date = Column(String(64), nullable=False)        # e.g., "August 15, 2026"
     grade = Column(String(64), default="Excellence")       # e.g., "Distinction", "Grade A+"
     skills_acquired = Column(JSON, default=list)           # list of strings
-    instructor_name = Column(String(128), default="InternVision Tech Academic Council")
+    instructor_name = Column(String(128), default="Suraj Kumar, HR & Manager")
     credential_url = Column(String(255), nullable=True)
     is_valid = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

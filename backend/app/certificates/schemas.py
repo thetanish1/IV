@@ -28,4 +28,4 @@ class CertificateCreate(BaseModel):
     issue_date: str
     grade: str = "Excellence"
     skills_acquired: List[str] = []
-    instructor_name: Optional[str] = "InternVision Tech Academic Council"
+    instructor_name: Optional[str] = "Suraj Kumar, HR & Manager"
