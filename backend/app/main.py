@@ -47,52 +47,84 @@ def startup_event():
                 )
                 db.add(new_admin)
 
-        # Seed sample courses if none exist
+        # Seed all 7 standard bootcamps if not in database
         from app.courses.models import Course
-        if db.query(Course).count() == 0:
-            sample_courses = [
-                Course(
-                    title="Full Stack Web Development Bootcamp",
-                    slug="full-stack-web-development",
-                    description="Master modern web development using Next.js 15, React 19, TypeScript, FastAPI, and PostgreSQL. Build production applications from scratch.",
-                    price_inr=0,
-                    duration="8 Weeks",
-                    level="Intermediate",
-                    technologies=["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL"],
-                    is_published=True
-                ),
-                Course(
-                    title="AI & Machine Learning Engineering",
-                    slug="ai-machine-learning-engineering",
-                    description="Deep dive into Neural Networks, LLMs, LangChain, RAG architecture, PyTorch, and fine-tuning open-source models for enterprise AI systems.",
-                    price_inr=0,
-                    duration="12 Weeks",
-                    level="Advanced",
-                    technologies=["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"],
-                    is_published=True
-                ),
-                Course(
-                    title="Cloud DevOps & Kubernetes Mastery",
-                    slug="cloud-devops-kubernetes-mastery",
-                    description="Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.",
-                    price_inr=0,
-                    duration="10 Weeks",
-                    level="Intermediate",
-                    technologies=["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"],
-                    is_published=True
-                ),
-                Course(
-                    title="Cyber Security & Ethical Hacking",
-                    slug="cyber-security-ethical-hacking",
-                    description="Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.",
-                    price_inr=0,
-                    duration="8 Weeks",
-                    level="Beginner",
-                    technologies=["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
-                    is_published=True
-                )
-            ]
-            db.add_all(sample_courses)
+        all_bootcamps = [
+            Course(
+                title="Full Stack Web Development Bootcamp",
+                slug="full-stack-web-development",
+                description="Master modern web development using Next.js 15, React 19, TypeScript, FastAPI, and PostgreSQL. Build production applications from scratch.",
+                price_inr=0,
+                duration="8 Weeks",
+                level="Intermediate",
+                technologies=["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL"],
+                is_published=True
+            ),
+            Course(
+                title="Data Science & AI Bootcamp",
+                slug="data-science-ai",
+                description="Master statistical modeling, Exploratory Data Analysis (EDA), machine learning pipelines, Scikit-Learn, deep learning with TensorFlow, and data visualization.",
+                price_inr=0,
+                duration="10 Weeks",
+                level="Intermediate",
+                technologies=["Python", "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "Tableau"],
+                is_published=True
+            ),
+            Course(
+                title="Java Programming & Core Engineering",
+                slug="java-programming",
+                description="Master Core Java 21, Object-Oriented Programming (OOP), Data Structures & Algorithms (DSA), multithreading, and enterprise Spring Boot microservices.",
+                price_inr=0,
+                duration="8 Weeks",
+                level="Beginner",
+                technologies=["Java 21", "Spring Boot", "OOP", "DSA", "Hibernate", "MySQL"],
+                is_published=True
+            ),
+            Course(
+                title="Android App Development Bootcamp",
+                slug="android-app-development",
+                description="Build high-performance native Android apps with Kotlin, declarative Jetpack Compose UI, MVVM architecture, Coroutines, Retrofit, and Firebase.",
+                price_inr=0,
+                duration="8 Weeks",
+                level="Intermediate",
+                technologies=["Kotlin", "Jetpack Compose", "Android Studio", "Coroutines", "Retrofit", "Firebase"],
+                is_published=True
+            ),
+            Course(
+                title="AI & Machine Learning Engineering",
+                slug="ai-machine-learning-engineering",
+                description="Deep dive into Neural Networks, LLMs, LangChain, RAG architecture, PyTorch, and fine-tuning open-source models for enterprise AI systems.",
+                price_inr=0,
+                duration="12 Weeks",
+                level="Advanced",
+                technologies=["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"],
+                is_published=True
+            ),
+            Course(
+                title="Cloud DevOps & Kubernetes Mastery",
+                slug="cloud-devops-kubernetes-mastery",
+                description="Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.",
+                price_inr=0,
+                duration="10 Weeks",
+                level="Intermediate",
+                technologies=["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"],
+                is_published=True
+            ),
+            Course(
+                title="Cyber Security & Ethical Hacking",
+                slug="cyber-security-ethical-hacking",
+                description="Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.",
+                price_inr=0,
+                duration="8 Weeks",
+                level="Beginner",
+                technologies=["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
+                is_published=True
+            )
+        ]
+        for course_item in all_bootcamps:
+            existing = db.query(Course).filter(Course.slug == course_item.slug).first()
+            if not existing:
+                db.add(course_item)
 
         # Seed sample verified certificates if none exist
         if db.query(Certificate).count() == 0:

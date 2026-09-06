@@ -187,11 +187,128 @@ const COURSE_CURRICULUM: Record<
     ],
     prerequisites: ["Basic computer networking knowledge", "Comfort using command-line interfaces"],
   },
+  "data-science-ai": {
+    summary:
+      "Master statistical data analysis, machine learning algorithms, deep learning with TensorFlow/PyTorch, exploratory data analytics, and generative AI data pipelines.",
+    modules: [
+      {
+        title: "Module 1: Advanced Python & Numerical Computing",
+        desc: "Python for data analysis, vectorization with NumPy, complex data structures, and memory-efficient data processing.",
+        topics: ["NumPy Arrays & Matrices", "Pandas DataFrames", "Data Wrangling & Cleaning", "Handling Missing Data"],
+      },
+      {
+        title: "Module 2: Exploratory Data Analysis & Visualization",
+        desc: "Transform raw datasets into actionable insights using Matplotlib, Seaborn, Plotly, and interactive dashboards.",
+        topics: ["Statistical Distributions", "Correlation & Covariance", "Seaborn & Plotly", "Business Dashboarding"],
+      },
+      {
+        title: "Module 3: Applied Machine Learning & Predictive Modeling",
+        desc: "Supervised and unsupervised ML algorithms, regression, classification, clustering, cross-validation, and Scikit-Learn pipelines.",
+        topics: ["Linear & Logistic Regression", "Decision Trees & Random Forests", "Gradient Boosting (XGBoost)", "K-Means & PCA"],
+      },
+      {
+        title: "Module 4: Deep Learning & Neural Networks",
+        desc: "Neural network architectures, CNNs for computer vision, RNNs/Transformers for NLP, and PyTorch model training.",
+        topics: ["Artificial Neural Networks (ANN)", "Convolutional Networks (CNN)", "Transfer Learning", "PyTorch Framework"],
+      },
+      {
+        title: "Module 5: Generative AI & Big Data Analytics",
+        desc: "Vector embeddings, LLM data processing, SQL database integration, model evaluation, and cloud model serving.",
+        topics: ["SQL & Database Aggregations", "Vector Embeddings", "Model Deployment (FastAPI/Streamlit)", "MLOps Basics"],
+      },
+    ],
+    outcomes: [
+      "Build end-to-end data analytics pipelines from data ingestion to model deployment",
+      "Develop and fine-tune predictive machine learning and deep learning models",
+      "Perform high-impact exploratory data analysis with interactive visualizations",
+      "Integrate generative AI and vector databases for intelligent data solutions",
+    ],
+    prerequisites: ["Basic programming concepts in any language", "Fundamental high-school mathematics and statistics"],
+  },
+  "java-programming": {
+    summary:
+      "Comprehensive Java engineering program covering Object-Oriented Programming (OOP), Data Structures & Algorithms, Multithreading, and enterprise Spring Boot microservices.",
+    modules: [
+      {
+        title: "Module 1: Core Java & Modern Syntax (Java 21)",
+        desc: "Variables, control flow, methods, arrays, Memory management (Stack vs Heap), and Garbage Collection in Java.",
+        topics: ["Java 21 Features", "JVM Architecture & Memory", "Methods & Parameter Passing", "Exception Handling"],
+      },
+      {
+        title: "Module 2: Object-Oriented Programming (OOP) Deep Dive",
+        desc: "Master Inheritance, Polymorphism, Abstraction, Encapsulation, Interfaces, and SOLID architectural design principles.",
+        topics: ["SOLID Design Principles", "Abstract Classes & Interfaces", "Generics & Collections Framework", "Lambda Expressions & Streams"],
+      },
+      {
+        title: "Module 3: Data Structures & Algorithmic Problem Solving",
+        desc: "Arrays, LinkedLists, Stacks, Queues, Binary Trees, Graphs, Sorting algorithms, and Big-O time/space complexity.",
+        topics: ["LinkedLists & Trees", "Recursion & Dynamic Programming", "Sorting & Searching", "LeetCode Pattern Mastery"],
+      },
+      {
+        title: "Module 4: Multithreading, Concurrency & Database Integration",
+        desc: "Java Concurrency API, ExecutorService, thread safety, synchronization, and JDBC database access with MySQL.",
+        topics: ["Thread Lifecycle & Synchronization", "Executor Framework", "JDBC & HikariCP", "MySQL & Relational Modeling"],
+      },
+      {
+        title: "Module 5: Spring Boot & Enterprise Microservices",
+        desc: "Build production RESTful APIs, Spring Data JPA, Hibernate ORM, authentication security, and Docker containerization.",
+        topics: ["Spring Boot 3 REST APIs", "Hibernate & Spring Data JPA", "Spring Security & JWT", "Microservices Architecture"],
+      },
+    ],
+    outcomes: [
+      "Master Object-Oriented Programming and modern Java 21 development standards",
+      "Solve complex Data Structures & Algorithms problems with optimal time complexity",
+      "Build scalable, high-throughput enterprise REST microservices using Spring Boot",
+      "Integrate relational databases with Hibernate ORM and Spring Data JPA",
+    ],
+    prerequisites: ["Basic computer literacy", "Prior coding experience is helpful but not mandatory"],
+  },
+  "android-app-development": {
+    summary:
+      "Modern native Android app development using Kotlin, Jetpack Compose, MVVM architectural pattern, Coroutines, Retrofit networking, and Firebase backend.",
+    modules: [
+      {
+        title: "Module 1: Kotlin Programming Language Essentials",
+        desc: "Kotlin syntax, null-safety, functional programming, data classes, extension functions, and collections.",
+        topics: ["Kotlin Syntax & Null Safety", "Data Classes & Lambdas", "Extension Functions", "Kotlin Coroutines & Flow"],
+      },
+      {
+        title: "Module 2: Declarative UI with Jetpack Compose",
+        desc: "Build reactive, modern Android user interfaces with Jetpack Compose, State Management, and Material Design 3.",
+        topics: ["Composable Functions", "State & Recomposition", "Layouts & Modifiers", "Material 3 Design System"],
+      },
+      {
+        title: "Module 3: Android Architecture & MVVM Pattern",
+        desc: "Clean Architecture, ViewModel, LiveData / StateFlow, Room Local Database, and Navigation Component.",
+        topics: ["MVVM Architectural Pattern", "ViewModel & StateFlow", "Room Database & SQLite", "Navigation Compose"],
+      },
+      {
+        title: "Module 4: REST API Integration & Networking",
+        desc: "Connect Android applications to backend APIs using Retrofit, OkHttp, JSON serialization, and asynchronous image loading.",
+        topics: ["Retrofit & OkHttp", "JSON Parsing (Kotlinx Serialization)", "Coil Image Loading", "Error & Offline Handling"],
+      },
+      {
+        title: "Module 5: Firebase Backend, Push Notifications & Play Store Release",
+        desc: "Firebase Authentication, Cloud Firestore, Firebase Cloud Messaging (FCM), app signing, and Google Play Store distribution.",
+        topics: ["Firebase Auth & Firestore", "FCM Push Notifications", "App Performance & ProGuard", "Play Store Publishing"],
+      },
+    ],
+    outcomes: [
+      "Build and publish modern, reactive Android apps using Kotlin and Jetpack Compose",
+      "Implement industry-standard MVVM architecture with Room and Retrofit",
+      "Integrate cloud databases, authentication, and push notifications via Firebase",
+      "Package, sign, and distribute production applications to the Google Play Store",
+    ],
+    prerequisites: ["Basic understanding of programming fundamentals and OOP concepts"],
+  },
 };
 
 const getDefaultCourse = (slug: string): Course | null => {
   const fallbackTitles: Record<string, string> = {
     "full-stack-web-development": "Full Stack Web Development Bootcamp",
+    "data-science-ai": "Data Science & AI Bootcamp",
+    "java-programming": "Java Programming & Core Engineering",
+    "android-app-development": "Android App Development Bootcamp",
     "ai-machine-learning-engineering": "AI & Machine Learning Engineering",
     "cloud-devops-kubernetes-mastery": "Cloud DevOps & Kubernetes Mastery",
     "cyber-security-ethical-hacking": "Cyber Security & Ethical Hacking",
@@ -210,18 +327,24 @@ const getDefaultCourse = (slug: string): Course | null => {
     duration:
       slug === "ai-machine-learning-engineering"
         ? "12 Weeks"
-        : slug === "cloud-devops-kubernetes-mastery"
+        : slug === "cloud-devops-kubernetes-mastery" || slug === "data-science-ai"
         ? "10 Weeks"
         : "8 Weeks",
     level:
       slug === "ai-machine-learning-engineering"
         ? "Advanced"
-        : slug === "cyber-security-ethical-hacking"
+        : slug === "cyber-security-ethical-hacking" || slug === "java-programming"
         ? "Beginner - Intermediate"
         : "Intermediate",
     technologies:
       slug === "full-stack-web-development"
         ? ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]
+        : slug === "data-science-ai"
+        ? ["Python", "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "Tableau"]
+        : slug === "java-programming"
+        ? ["Java 21", "Spring Boot", "OOP", "DSA", "Hibernate", "MySQL"]
+        : slug === "android-app-development"
+        ? ["Kotlin", "Jetpack Compose", "Android Studio", "Coroutines", "Retrofit", "Firebase"]
         : slug === "ai-machine-learning-engineering"
         ? ["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"]
         : slug === "cloud-devops-kubernetes-mastery"

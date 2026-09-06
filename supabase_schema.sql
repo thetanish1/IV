@@ -94,8 +94,38 @@ VALUES
     'Master Next.js 15, React 19, FastAPI, PostgreSQL, and modern Tailwind CSS. Build production-scale full stack web applications.',
     'Intermediate',
     '8 Weeks',
-    4999.00,
+    0.00,
     ARRAY['Next.js', 'React', 'FastAPI', 'PostgreSQL', 'Tailwind CSS']
+),
+(
+    'data-science-ai',
+    'Data Science & AI Bootcamp',
+    'data-science-ai',
+    'Master statistical modeling, Exploratory Data Analysis (EDA), machine learning pipelines, Scikit-Learn, deep learning with TensorFlow, and data visualization.',
+    'Intermediate',
+    '10 Weeks',
+    0.00,
+    ARRAY['Python', 'Pandas', 'NumPy', 'Scikit-Learn', 'TensorFlow', 'Tableau']
+),
+(
+    'java-programming',
+    'Java Programming & Core Engineering',
+    'java-programming',
+    'Master Core Java 21, Object-Oriented Programming (OOP), Data Structures & Algorithms (DSA), multithreading, and enterprise Spring Boot microservices.',
+    'Beginner',
+    '8 Weeks',
+    0.00,
+    ARRAY['Java 21', 'Spring Boot', 'OOP', 'DSA', 'Hibernate', 'MySQL']
+),
+(
+    'android-app-development',
+    'Android App Development Bootcamp',
+    'android-app-development',
+    'Build high-performance native Android apps with Kotlin, declarative Jetpack Compose UI, MVVM architecture, Coroutines, Retrofit, and Firebase.',
+    'Intermediate',
+    '8 Weeks',
+    0.00,
+    ARRAY['Kotlin', 'Jetpack Compose', 'Android Studio', 'Coroutines', 'Retrofit', 'Firebase']
 ),
 (
     'ai-machine-learning-engineering',
@@ -104,8 +134,28 @@ VALUES
     'Build cutting-edge AI models, fine-tune LLMs, integrate PyTorch and Vector DBs into production systems.',
     'Advanced',
     '12 Weeks',
-    6999.00,
+    0.00,
     ARRAY['Python', 'PyTorch', 'OpenAI API', 'LangChain', 'FastAPI', 'Vector DBs']
+),
+(
+    'cloud-devops-kubernetes-mastery',
+    'Cloud DevOps & Kubernetes Mastery',
+    'cloud-devops-kubernetes-mastery',
+    'Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.',
+    'Intermediate',
+    '10 Weeks',
+    0.00,
+    ARRAY['Docker', 'Kubernetes', 'AWS', 'Terraform', 'GitHub Actions']
+),
+(
+    'cyber-security-ethical-hacking',
+    'Cyber Security & Ethical Hacking',
+    'cyber-security-ethical-hacking',
+    'Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.',
+    'Beginner',
+    '8 Weeks',
+    0.00,
+    ARRAY['Linux', 'Metasploit', 'Wireshark', 'Burp Suite', 'Python']
 )
 ON CONFLICT (id) DO NOTHING;
 

@@ -289,6 +289,108 @@ export default function HomePage() {
  </Link>
  </div>
  </div>
+
+ {/* Course 5: Data Science & AI */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-teal-500 transition-all hover:shadow-[6px_6px_0px_#14b8a6] relative group">
+ <div className="space-y-6">
+ <div className="flex items-center justify-between">
+ <span className="px-3 py-1 text-xs font-bold bg-teal-600 text-white uppercase tracking-wider">
+ Intermediate
+ </span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">10 Weeks · Virtual</span>
+ </div>
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-teal-400 transition">
+ Data Science & AI Bootcamp
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Master statistical modeling, Exploratory Data Analysis (EDA), machine learning pipelines, Scikit-Learn, deep learning with TensorFlow, and data visualization.
+ </p>
+ <div className="flex flex-wrap gap-2 pt-2">
+ {["Python", "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "Tableau"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {tech}
+ </span>
+ ))}
+ </div>
+ </div>
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-teal-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/data-science-ai" className="px-6 py-3 text-sm font-bold bg-teal-600 hover:bg-teal-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
+ </Link>
+ </div>
+ </div>
+
+ {/* Course 6: Java Programming */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-amber-500 transition-all hover:shadow-[6px_6px_0px_#f59e0b] relative group">
+ <div className="space-y-6">
+ <div className="flex items-center justify-between">
+ <span className="px-3 py-1 text-xs font-bold bg-amber-600 text-white uppercase tracking-wider">
+ Beginner - Intermediate
+ </span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">8 Weeks · Virtual</span>
+ </div>
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-amber-400 transition">
+ Java Programming & Core Engineering
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Master Core Java 21, Object-Oriented Programming (OOP), Data Structures & Algorithms (DSA), multithreading, and enterprise Spring Boot microservices.
+ </p>
+ <div className="flex flex-wrap gap-2 pt-2">
+ {["Java 21", "Spring Boot", "OOP", "DSA", "Hibernate", "MySQL"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {tech}
+ </span>
+ ))}
+ </div>
+ </div>
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-amber-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/java-programming" className="px-6 py-3 text-sm font-bold bg-amber-600 hover:bg-amber-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
+ </Link>
+ </div>
+ </div>
+
+ {/* Course 7: Android App Development */}
+ <div className="bg-ink-950 border border-ink-800 p-8 sm:p-10 flex flex-col justify-between space-y-8 h-full hover:border-green-500 transition-all hover:shadow-[6px_6px_0px_#22c55e] relative group md:col-span-2 lg:col-span-1">
+ <div className="space-y-6">
+ <div className="flex items-center justify-between">
+ <span className="px-3 py-1 text-xs font-bold bg-green-600 text-white uppercase tracking-wider">
+ Intermediate
+ </span>
+ <span className="text-xs text-ink-400 font-bold uppercase tracking-widest">8 Weeks · Virtual</span>
+ </div>
+ <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-green-400 transition">
+ Android App Development Bootcamp
+ </h3>
+ <p className="text-ink-400 text-sm leading-relaxed">
+ Build high-performance native Android apps with Kotlin, declarative Jetpack Compose UI, MVVM architecture, Coroutines, Retrofit, and Firebase.
+ </p>
+ <div className="flex flex-wrap gap-2 pt-2">
+ {["Kotlin", "Jetpack Compose", "Android Studio", "Coroutines", "Retrofit", "Firebase"].map((tech) => (
+ <span key={tech} className="px-3 py-1 text-xs font-medium bg-ink-900 text-ink-300 border border-ink-800">
+ {tech}
+ </span>
+ ))}
+ </div>
+ </div>
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-ink-800">
+ <div>
+ <div className="text-xs text-green-400 font-bold uppercase tracking-wider">100% Free · Scholarship</div>
+ <div className="text-2xl font-black text-white">Free Enrollment</div>
+ </div>
+ <Link href="/courses/android-app-development" className="px-6 py-3 text-sm font-bold bg-green-600 hover:bg-green-500 text-white transition text-center shadow-[2px_2px_0px_#ffffff]">
+ Enroll Now (Free)
+ </Link>
+ </div>
+ </div>
  </div>
  </section>
 
