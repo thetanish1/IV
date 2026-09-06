@@ -40,11 +40,15 @@ export default function HomePage() {
 
  <div className="flex flex-col items-start">
  <Link
- href="/courses"
- className="w-full sm:w-auto px-8 py-4 font-bold bg-transparent hover:bg-ink-900 text-white border border-ink-700 flex items-center justify-center transition-all"
+ href="/verify-certificate"
+ className="w-full sm:w-auto px-8 py-4 font-bold bg-transparent hover:bg-ink-900 text-white border border-ink-700 hover:border-brand-500 flex items-center justify-center gap-2.5 transition-all shadow-sm group"
  >
- Explore Courses
+ <ShieldCheck className="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform" />
+ Certificate Verification
  </Link>
+ <p className="text-xs text-ink-500 mt-3 font-medium flex items-center gap-1.5">
+ <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Instant Credential Authenticity
+ </p>
  </div>
  </div>
  </div>

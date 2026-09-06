@@ -17,6 +17,8 @@ from app.internship.router import router as internship_router
 from app.payments.router import router as payments_router
 from app.dashboard.router import router as dashboard_router
 from app.export.router import router as export_router
+from app.certificates.router import router as certificates_router
+from app.certificates.models import Certificate
 
 Base.metadata.create_all(bind=engine)
 
@@ -62,7 +64,7 @@ def startup_event():
                 Course(
                     title="AI & Machine Learning Engineering",
                     slug="ai-machine-learning-engineering",
-                    description="Deep dive into Machine Learning, Neural Networks, PyTorch, Large Language Models (LLMs), LangChain, and AI Agent development.",
+                    description="Deep dive into Neural Networks, LLMs, LangChain, RAG architecture, PyTorch, and fine-tuning open-source models for enterprise AI systems.",
                     price_inr=0,
                     duration="12 Weeks",
                     level="Advanced",
@@ -72,7 +74,7 @@ def startup_event():
                 Course(
                     title="Cloud DevOps & Kubernetes Mastery",
                     slug="cloud-devops-kubernetes-mastery",
-                    description="Learn Docker, Kubernetes, CI/CD pipelines, AWS deployment, Terraform, and monitoring tools like Prometheus and Grafana.",
+                    description="Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.",
                     price_inr=0,
                     duration="10 Weeks",
                     level="Intermediate",
@@ -91,6 +93,64 @@ def startup_event():
                 )
             ]
             db.add_all(sample_courses)
+
+        # Seed sample verified certificates if none exist
+        if db.query(Certificate).count() == 0:
+            sample_certs = [
+                Certificate(
+                    certificate_id="IVT-2026-FS-8492",
+                    student_name="Aarav Sharma",
+                    student_email="aarav.sharma@example.com",
+                    program_title="Full Stack Web Development Co-Op",
+                    track_type="Internship",
+                    duration="3 Months",
+                    issue_date="August 15, 2026",
+                    grade="Distinction (Grade A+)",
+                    skills_acquired=["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"],
+                    instructor_name="Tanish Dewase, Lead Architect & Academic Director",
+                    is_valid=True
+                ),
+                Certificate(
+                    certificate_id="IVT-2026-AIML-5521",
+                    student_name="Ananya Verma",
+                    student_email="ananya.verma@example.com",
+                    program_title="AI & Machine Learning Engineering Track",
+                    track_type="Bootcamp",
+                    duration="12 Weeks",
+                    issue_date="August 20, 2026",
+                    grade="Excellence (Grade O)",
+                    skills_acquired=["Python", "PyTorch", "LLM APIs", "LangChain", "RAG Systems", "Vector DBs"],
+                    instructor_name="InternVision Tech AI Research Group",
+                    is_valid=True
+                ),
+                Certificate(
+                    certificate_id="IVT-2026-DO-9104",
+                    student_name="Rohan Kulkarni",
+                    student_email="rohan.kulkarni@example.com",
+                    program_title="Cloud DevOps & Kubernetes Mastery",
+                    track_type="Internship",
+                    duration="6 Months Industrial Co-Op",
+                    issue_date="August 28, 2026",
+                    grade="Distinction (Grade A+)",
+                    skills_acquired=["Docker", "Kubernetes", "AWS Cloud", "Terraform", "CI/CD Pipelines", "Linux"],
+                    instructor_name="Tanish Dewase, Lead Architect",
+                    is_valid=True
+                ),
+                Certificate(
+                    certificate_id="IVT-2026-CS-3382",
+                    student_name="Priya Patel",
+                    student_email="priya.patel@example.com",
+                    program_title="Cyber Security & Ethical Hacking Track",
+                    track_type="Bootcamp",
+                    duration="8 Weeks",
+                    issue_date="September 01, 2026",
+                    grade="Merit (Grade A)",
+                    skills_acquired=["Penetration Testing", "Wireshark", "Burp Suite", "OWASP Top 10", "Network Security"],
+                    instructor_name="InternVision Tech Security Operations",
+                    is_valid=True
+                ),
+            ]
+            db.add_all(sample_certs)
 
         db.commit()
     finally:
@@ -133,7 +193,7 @@ async def preflight_handler(full_path: str):
     )
 
 # Feature Routers mounted under /api and root for total path compatibility
-for r in [auth_router, courses_router, internship_router, payments_router, dashboard_router, export_router]:
+for r in [auth_router, courses_router, internship_router, payments_router, dashboard_router, export_router, certificates_router]:
     app.include_router(r, prefix="/api")
     app.include_router(r)
 

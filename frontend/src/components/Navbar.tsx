@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Sparkles, BookOpen, GraduationCap, Phone, Shield, Menu, X, Home, Briefcase, User, LogOut } from "lucide-react";
+import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -137,6 +137,15 @@ export default function Navbar() {
             Careers
           </Link>
           <Link
+            href="/verify-certificate"
+            className={`flex items-center gap-1.5 transition-colors ${
+              isActive("/verify-certificate") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4 text-brand-400" />
+            Verify Certificate
+          </Link>
+          <Link
             href="/contact"
             className={`flex items-center gap-1.5 transition-colors ${
               isActive("/contact") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
@@ -251,6 +260,18 @@ export default function Navbar() {
             >
               <Briefcase className="w-4 h-4" />
               Careers
+            </Link>
+            <Link
+              href="/verify-certificate"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
+                isActive("/verify-certificate")
+                  ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
+                  : "bg-ink-900 text-ink-300 hover:text-white"
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              Verify Certificate
             </Link>
             <Link
               href="/contact"

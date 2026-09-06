@@ -25,6 +25,7 @@ export default function Footer() {
  <li><Link href="/"className="hover:text-white transition">Home</Link></li>
  <li><Link href="/courses"className="hover:text-white transition">Course Catalog</Link></li>
  <li><Link href="/apply"className="hover:text-white transition">Internship Application</Link></li>
+ <li><Link href="/verify-certificate" className="hover:text-white transition flex items-center gap-1.5"><span className="text-brand-400">✓</span> Certificate Verification</Link></li>
  <li><Link href="/contact"className="hover:text-white transition">Contact Support</Link></li>
  </ul>
  </div>

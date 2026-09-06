@@ -127,3 +127,80 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments (razorpay_order_id);
+
+-- 7. Certificates Table (Digital Credential Verification Registry)
+CREATE TABLE IF NOT EXISTS certificates (
+    id SERIAL PRIMARY KEY,
+    certificate_id VARCHAR(64) UNIQUE NOT NULL,
+    student_name VARCHAR(128) NOT NULL,
+    student_email VARCHAR(128) NOT NULL,
+    program_title VARCHAR(255) NOT NULL,
+    track_type VARCHAR(64) DEFAULT 'Internship',
+    duration VARCHAR(64) NOT NULL,
+    issue_date VARCHAR(64) NOT NULL,
+    grade VARCHAR(64) DEFAULT 'Excellence',
+    skills_acquired JSONB DEFAULT '[]'::jsonb,
+    instructor_name VARCHAR(128) DEFAULT 'InternVision Tech Academic Council',
+    credential_url VARCHAR(255),
+    is_valid BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_certificates_cert_id ON certificates (certificate_id);
+
+-- Sample Verified Certificates Seed
+INSERT INTO certificates (certificate_id, student_name, student_email, program_title, track_type, duration, issue_date, grade, skills_acquired, instructor_name, is_valid)
+VALUES
+(
+    'IVT-2026-FS-8492',
+    'Aarav Sharma',
+    'aarav.sharma@example.com',
+    'Full Stack Web Development Co-Op',
+    'Virtual Internship',
+    '3 Months',
+    'August 15, 2026',
+    'Distinction (Grade A+)',
+    '["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]'::jsonb,
+    'Tanish Dewase, Lead Architect & Academic Director',
+    TRUE
+),
+(
+    'IVT-2026-AIML-5521',
+    'Ananya Verma',
+    'ananya.verma@example.com',
+    'AI & Machine Learning Engineering Track',
+    'Bootcamp',
+    '12 Weeks',
+    'August 20, 2026',
+    'Excellence (Grade O)',
+    '["Python", "PyTorch", "LLM APIs", "LangChain", "RAG Systems", "Vector DBs"]'::jsonb,
+    'InternVision Tech AI Research Group',
+    TRUE
+),
+(
+    'IVT-2026-DO-9104',
+    'Rohan Kulkarni',
+    'rohan.kulkarni@example.com',
+    'Cloud DevOps & Kubernetes Mastery',
+    'Virtual Internship',
+    '6 Months Industrial Co-Op',
+    'August 28, 2026',
+    'Distinction (Grade A+)',
+    '["Docker", "Kubernetes", "AWS Cloud", "Terraform", "CI/CD Pipelines", "Linux"]'::jsonb,
+    'Tanish Dewase, Lead Architect',
+    TRUE
+),
+(
+    'IVT-2026-CS-3382',
+    'Priya Patel',
+    'priya.patel@example.com',
+    'Cyber Security & Ethical Hacking Track',
+    'Bootcamp',
+    '8 Weeks',
+    'September 01, 2026',
+    'Merit (Grade A)',
+    '["Penetration Testing", "Wireshark", "Burp Suite", "OWASP Top 10", "Network Security"]'::jsonb,
+    'InternVision Tech Security Operations',
+    TRUE
+)
+ON CONFLICT (certificate_id) DO NOTHING;
