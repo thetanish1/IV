@@ -285,9 +285,10 @@ export default function AdminDashboardPage() {
       const data = await apiRequest<PaginatedResult<InternshipApplicationResponse>>(
         `/admin/applications?${params.toString()}`
       );
-      setAppsData(data);
+      setAppsData(data && Array.isArray(data.items) ? data : { total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } catch (err) {
       console.error(err);
+      setAppsData({ total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } finally {
       setLoadingApps(false);
     }
@@ -304,9 +305,10 @@ export default function AdminDashboardPage() {
       if (usersProvider !== "all") params.set("provider", usersProvider);
 
       const data = await apiRequest<PaginatedResult<SiteUserItem>>(`/admin/users?${params.toString()}`);
-      setUsersData(data);
+      setUsersData(data && Array.isArray(data.items) ? data : { total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } catch (err) {
       console.error(err);
+      setUsersData({ total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } finally {
       setLoadingUsers(false);
     }
@@ -323,9 +325,10 @@ export default function AdminDashboardPage() {
       if (pmtStatus !== "all") params.set("status", pmtStatus);
 
       const data = await apiRequest<PaginatedResult<PaymentItem>>(`/admin/payments?${params.toString()}`);
-      setPaymentsData(data);
+      setPaymentsData(data && Array.isArray(data.items) ? data : { total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } catch (err) {
       console.error(err);
+      setPaymentsData({ total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } finally {
       setLoadingPayments(false);
     }
@@ -342,9 +345,10 @@ export default function AdminDashboardPage() {
       if (regStatus !== "all") params.set("status", regStatus);
 
       const data = await apiRequest<PaginatedResult<CourseRegistrationItem>>(`/admin/registrations?${params.toString()}`);
-      setRegistrationsData(data);
+      setRegistrationsData(data && Array.isArray(data.items) ? data : { total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } catch (err) {
       console.error(err);
+      setRegistrationsData({ total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
     } finally {
       setLoadingRegs(false);
     }
@@ -377,7 +381,7 @@ export default function AdminDashboardPage() {
       // Update in appsData list
       setAppsData((prev) => ({
         ...prev,
-        items: prev.items.map((item) => (item.id === appId ? { ...item, status: newStatus } : item)),
+        items: (prev?.items || []).map((item) => (item.id === appId ? { ...item, status: newStatus } : item)),
       }));
     } catch (err) {
       console.error("Failed to update status", err);
@@ -394,9 +398,10 @@ export default function AdminDashboardPage() {
         endpoint += `?search=${encodeURIComponent(certSearch)}`;
       }
       const data = await apiRequest<CertificateItem[]>(endpoint);
-      setCertificatesList(data);
+      setCertificatesList(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load certificates", err);
+      setCertificatesList([]);
     } finally {
       setLoadingCerts(false);
     }
@@ -455,7 +460,7 @@ export default function AdminDashboardPage() {
       await apiRequest(`/certificates/${encodeURIComponent(certId)}`, {
         method: "DELETE",
       });
-      setCertificatesList((prev) => prev.filter((c) => c.certificate_id !== certId));
+      setCertificatesList((prev) => (Array.isArray(prev) ? prev : []).filter((c) => c.certificate_id !== certId));
     } catch (err) {
       console.error("Failed to delete certificate", err);
     } finally {
@@ -467,8 +472,8 @@ export default function AdminDashboardPage() {
     try {
       const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>("/admin/settings");
       setSiteSettings({
-        show_courses: data.show_courses === true || data.show_courses === "true",
-        show_careers: data.show_careers === true || data.show_careers === "true",
+        show_courses: data?.show_courses === true || data?.show_courses === "true",
+        show_careers: data?.show_careers === true || data?.show_careers === "true",
       });
     } catch (err) {
       console.error("Failed to load site settings", err);
@@ -484,8 +489,8 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({ [key]: nextVal }),
       });
       setSiteSettings({
-        show_courses: updated.show_courses === true || updated.show_courses === "true",
-        show_careers: updated.show_careers === true || updated.show_careers === "true",
+        show_courses: updated?.show_courses === true || updated?.show_courses === "true",
+        show_careers: updated?.show_careers === true || updated?.show_careers === "true",
       });
       window.dispatchEvent(new Event("site-settings-changed"));
     } catch (err) {
@@ -502,9 +507,10 @@ export default function AdminDashboardPage() {
       if (subStatusFilter !== "all") params.set("status", subStatusFilter);
       if (subSearch) params.set("search", subSearch);
       const data = await apiRequest<SubmissionAdminItem[]>(`/admin/submissions?${params.toString()}`);
-      setSubmissionsList(data);
+      setSubmissionsList(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch submissions", err);
+      setSubmissionsList([]);
     } finally {
       setLoadingSubmissions(false);
     }
@@ -529,7 +535,7 @@ export default function AdminDashboardPage() {
           is_unlocked: reviewUnlocked,
         }),
       });
-      setSubmissionsList((prev) => prev.map((s) => (s.id === selectedSub.id ? { ...s, ...updated } : s)));
+      setSubmissionsList((prev) => (Array.isArray(prev) ? prev : []).map((s) => (s.id === selectedSub.id ? { ...s, ...updated } : s)));
       setSelectedSub(null);
     } catch (err) {
       console.error("Failed to save review", err);
@@ -542,9 +548,10 @@ export default function AdminDashboardPage() {
     setLoadingUnlocks(true);
     try {
       const data = await apiRequest<UnlockRequestAdminItem[]>("/admin/unlock-requests");
-      setUnlockRequests(data);
+      setUnlockRequests(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load unlock requests", err);
+      setUnlockRequests([]);
     } finally {
       setLoadingUnlocks(false);
     }
@@ -558,7 +565,7 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({ action }),
       });
       setUnlockRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: action === "approve" ? "approved" : "rejected" } : r))
+        (Array.isArray(prev) ? prev : []).map((r) => (r.id === id ? { ...r, status: action === "approve" ? "approved" : "rejected" } : r))
       );
       // Refresh submissions if an unlock occurred
       if (action === "approve") {
@@ -577,9 +584,10 @@ export default function AdminDashboardPage() {
       const params = new URLSearchParams();
       if (doubtFilter !== "all") params.set("status", doubtFilter);
       const data = await apiRequest<StudentDoubtItem[]>(`/admin/doubts?${params.toString()}`);
-      setDoubtsList(data);
+      setDoubtsList(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load doubts", err);
+      setDoubtsList([]);
     } finally {
       setLoadingDoubts(false);
     }
@@ -596,7 +604,7 @@ export default function AdminDashboardPage() {
           answered_by: "InternVision HR & Mentor Team",
         }),
       });
-      setDoubtsList((prev) => prev.map((d) => (d.id === replyingDoubt.id ? updated : d)));
+      setDoubtsList((prev) => (Array.isArray(prev) ? prev : []).map((d) => (d.id === replyingDoubt.id ? updated : d)));
       setReplyingDoubt(null);
       setDoubtReplyText("");
     } catch (err) {
@@ -643,8 +651,8 @@ export default function AdminDashboardPage() {
     router.push("/admin/login");
   };
 
-  const pendingUnlocksCount = unlockRequests.filter((u) => u.status === "pending").length;
-  const openDoubtsCount = doubtsList.filter((d) => d.status === "open").length;
+  const pendingUnlocksCount = (Array.isArray(unlockRequests) ? unlockRequests : []).filter((u) => u?.status === "pending").length;
+  const openDoubtsCount = (Array.isArray(doubtsList) ? doubtsList : []).filter((d) => d?.status === "open").length;
 
   return (
     <AuthGuard>

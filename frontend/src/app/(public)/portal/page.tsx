@@ -351,9 +351,9 @@ export default function StudentPortalPage() {
   }
 
   // ACCEPTED & CONFIRMED INTERN WORKSPACE
-  const weeklyTasks = portalData.weekly_tasks || [];
-  const completedCount = weeklyTasks.filter((t) => t.submission && t.submission.status === "approved").length;
-  const submittedCount = weeklyTasks.filter((t) => t.submission).length;
+  const weeklyTasks = Array.isArray(portalData?.weekly_tasks) ? portalData.weekly_tasks : [];
+  const completedCount = weeklyTasks.filter((t) => t?.submission && t.submission.status === "approved").length;
+  const submittedCount = weeklyTasks.filter((t) => t?.submission).length;
   const progressPercent = Math.round((submittedCount / (weeklyTasks.length || 1)) * 100);
 
   return (
