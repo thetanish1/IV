@@ -114,24 +114,44 @@ function formatBytes(bytes: number): string {
 
 const TEMPLATE_PRESETS = [
   {
-    name: "🎉 Offer Letter & Acceptance",
-    subject: "Congratulations! Your Internship Offer Letter - InternVision Tech",
-    heading: "Official Internship Onboarding & Task Access",
+    name: "🎉 1 Month Offer & 4-Week Roadmap",
+    subject: "Official Selection: 1-Month Virtual Internship | InternVision Tech",
+    heading: "1-Month Virtual Internship Selection & 4-Week Roadmap",
     message:
-      "We are delighted to inform you that your application for the Virtual Internship Program has been officially **ACCEPTED**!\n\nYour weekly task allocations and submissions desk are now unlocked on the [Internship Portal](https://iv-theta.vercel.app/portal).\n\nPlease find your official Offer Letter attached with this email.",
+      "We are thrilled to inform you that your application for the 1-Month Virtual Internship Program has been officially **ACCEPTED**!\n\n**Program Overview:**\n• **Week 1:** UI Architecture & Responsive Component Systems\n• **Week 2:** RESTful Backend APIs & Database Models\n• **Week 3:** Authentication, Route Guards & Cloud Storage\n• **Week 4:** Production Cloud Deployment & CI/CD Pipeline\n\nYour task briefs and submissions desk are live on your [Student Workspace](https://iv-theta.vercel.app/portal).",
     ctaText: "Open My Student Portal",
     ctaUrl: "https://iv-theta.vercel.app/portal",
     accentColor: "#10b981",
   },
   {
-    name: "📋 Weekly Task Allocation Reminder",
-    subject: "Reminder: Weekly Task Submission Desk is Active",
-    heading: "Weekly Milestone & Task Submission Reminder",
+    name: "🎉 3 Months Offer & Capstone Roadmap",
+    subject: "Official Selection: 3-Month Virtual Internship | InternVision Tech",
+    heading: "3-Month Virtual Internship Selection & Capstone Roadmap",
     message:
-      "We hope this email finds you well. We wanted to remind you that the [Internship Submission Form](https://iv-theta.vercel.app/portal) is active for you to submit your weekly engineering deliverables.\n\nPlease ensure your GitHub repository and live deployment links are included in your submission.",
-    ctaText: "Submit Assigned Task",
+      "Congratulations! Your application for the 3-Month Virtual Pre-Hire Internship has been officially **ACCEPTED**!\n\n**Program Overview:**\n• **Month 1:** 4 Core Weekly Domain Milestone Tasks\n• **Month 2:** Full-Scale Industry Capstone Project (SaaS Catalog or Proposal)\n• **Month 3:** Personal Developer Portfolio Website Deployment\n\nAccess your tasks and submit milestones directly at your [Student Portal](https://iv-theta.vercel.app/portal).",
+    ctaText: "Open My Student Portal",
     ctaUrl: "https://iv-theta.vercel.app/portal",
     accentColor: "#2563eb",
+  },
+  {
+    name: "🎉 6 Months Offer & Real-Life SaaS Roadmap",
+    subject: "Official Selection: 6-Month Virtual Internship | InternVision Tech",
+    heading: "6-Month Virtual Internship Selection & Production Roadmap",
+    message:
+      "Congratulations! You have been selected for our comprehensive 6-Month Virtual Internship Program!\n\n**Program Overview:**\n• **Month 1:** Foundational Architecture & Weekly Tasks\n• **Month 2:** End-to-End Industry Project Build\n• **Month 3:** Personal Developer Portfolio Launch\n• **Months 4-6:** Real-Life Enterprise Production Project (Full-Stack + AI System) & Pre-Placement Interview\n\nStart your journey today at your [Student Portal](https://iv-theta.vercel.app/portal).",
+    ctaText: "Open My Student Portal",
+    ctaUrl: "https://iv-theta.vercel.app/portal",
+    accentColor: "#f59e0b",
+  },
+  {
+    name: "⏰ Milestone Submission Due Today",
+    subject: "⏰ Milestone Submission Due Today - Action Required | InternVision Tech",
+    heading: "Milestone Deliverable Due Today by 11:59 PM IST",
+    message:
+      "This is an automated reminder that your current internship milestone deliverable is **DUE TODAY**.\n\nPlease ensure your GitHub repository URL and live production deployment link are submitted via your [Student Submission Desk](https://iv-theta.vercel.app/portal).\n\nSubmitting on time ensures continuous mentorship feedback and graduation eligibility.",
+    ctaText: "Submit Deliverable Now",
+    ctaUrl: "https://iv-theta.vercel.app/portal",
+    accentColor: "#e11d48",
   },
   {
     name: "🏆 Completion Certificate Released",

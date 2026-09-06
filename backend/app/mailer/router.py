@@ -17,9 +17,16 @@ from sqlalchemy.orm import Session
 from app.shared.database import get_db
 from app.core.config import settings
 from app.mailer.models import SentEmail
-from app.internship.models import InternshipApplication
+from app.internship.models import InternshipApplication, InternshipSubmission
 from app.courses.models import CourseRegistration
 from app.auth.user_models import SiteUser
+from app.shared.email_service import (
+    send_submission_due_reminder_email,
+    send_internship_acceptance_email,
+    send_welcome_login_email,
+    send_doubt_answered_email,
+    send_submission_reviewed_email,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -467,3 +474,97 @@ async def send_branded_email(request: Request, db: Session = Depends(get_db)):
         "failureCount": failure_count,
         "results": results,
     }
+
+
+@router.post("/send-submission-reminders")
+def dispatch_submission_due_reminders(
+    target_email: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Scans active accepted internship students and dispatches automated
+    Submission Due Today Reminder emails.
+    """
+    query = db.query(InternshipApplication).filter(
+        InternshipApplication.status.in_(["accepted", "active"])
+    )
+    if target_email:
+        query = query.filter(InternshipApplication.email == target_email.strip().lower())
+
+    apps = query.all()
+    results = []
+
+    for app in apps:
+        # Determine active task/milestone
+        subs = db.query(InternshipSubmission).filter(
+            InternshipSubmission.student_email == app.email
+        ).all()
+        submitted_keys = {s.task_key for s in subs if s.status in ("submitted", "approved", "under_review")}
+
+        # Milestone plan
+        duration = app.duration or "1 Month"
+        role = app.role_preference or "Virtual Internship"
+
+        # Determine pending task
+        if "week1" not in submitted_keys:
+            task_key = "week1"
+            task_title = "Week 1: Core Architecture & Responsive Component Systems"
+        elif "week2" not in submitted_keys:
+            task_key = "week2"
+            task_title = "Week 2: RESTful Backend APIs & Database Models"
+        elif "week3" not in submitted_keys:
+            task_key = "week3"
+            task_title = "Week 3: Authentication, Protected Routing & Cloud Uploads"
+        elif "week4" not in submitted_keys:
+            task_key = "week4"
+            task_title = "Week 4: Production Cloud Deployment & CI/CD Pipeline"
+        elif duration in ("3 Months", "6 Months") and "month2_project" not in submitted_keys:
+            task_key = "month2_project"
+            task_title = "Month 2: Full-Scale Industry Capstone Project Deliverable"
+        elif duration in ("3 Months", "6 Months") and "month3_portfolio" not in submitted_keys:
+            task_key = "month3_portfolio"
+            task_title = "Month 3: Personal Developer Portfolio Deployment"
+        elif duration == "6 Months" and "month4_6_project" not in submitted_keys:
+            task_key = "month4_6_project"
+            task_title = "Months 4-6: Production Enterprise Full-Stack & AI System"
+        else:
+            task_key = "final_review"
+            task_title = "Final Program Evaluation & Exit Portfolio"
+
+        ok = send_submission_due_reminder_email(
+            student_email=app.email,
+            student_name=app.full_name or app.email.split("@")[0],
+            task_title=task_title,
+            task_key=task_key,
+            duration=duration,
+            role_preference=role,
+        )
+
+        # Log sent email record
+        msg_id = f"reminder-{uuid.uuid4()}"
+        sent_record = SentEmail(
+            to_email=app.email,
+            recipient_name=app.full_name,
+            subject=f"⏰ Milestone Submission Due Today: {task_title}",
+            heading="Milestone Submission Due Today",
+            brand_name="InternVision Tech HR",
+            status="success" if ok else "failed",
+            message_id=msg_id,
+        )
+        db.add(sent_record)
+        db.commit()
+
+        results.append({
+            "email": app.email,
+            "name": app.full_name,
+            "task_key": task_key,
+            "task_title": task_title,
+            "success": ok,
+        })
+
+    return {
+        "success": True,
+        "processed": len(results),
+        "results": results
+    }
+

@@ -10,6 +10,8 @@ from app.shared.email_service import (
     send_course_enrollment_rejection_email,
     send_internship_acceptance_email,
     send_internship_rejection_email,
+    send_submission_reviewed_email,
+    send_doubt_answered_email,
 )
 from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
 from app.courses.models import Course, CourseRegistration
@@ -449,6 +451,7 @@ def get_student_submissions(
 def review_student_submission(
     submission_id: int,
     body: SubmissionReviewBody,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):
@@ -467,6 +470,19 @@ def review_student_submission(
 
     db.commit()
     db.refresh(sub)
+
+    # Queue review feedback email to student
+    app = db.query(InternshipApplication).filter(InternshipApplication.email == sub.student_email).first()
+    st_name = app.full_name if app else sub.student_email.split("@")[0]
+    background_tasks.add_task(
+        send_submission_reviewed_email,
+        sub.student_email,
+        st_name,
+        sub.title,
+        sub.status,
+        sub.admin_feedback or ""
+    )
+
     return {"success": True, "message": "Submission updated successfully", "status": sub.status}
 
 
@@ -619,6 +635,7 @@ def get_student_doubts(
 def reply_to_student_doubt(
     doubt_id: int,
     body: DoubtReplyBody,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):
@@ -634,6 +651,17 @@ def reply_to_student_doubt(
 
     db.commit()
     db.refresh(doubt)
+
+    # Queue email notification to student
+    background_tasks.add_task(
+        send_doubt_answered_email,
+        doubt.student_email,
+        doubt.student_name,
+        doubt.module_name or doubt.subject or "Technical Question",
+        doubt.question,
+        doubt.admin_reply,
+        doubt.answered_by
+    )
 
     return {"success": True, "message": "Reply posted successfully", "doubt_id": doubt.id}
 
