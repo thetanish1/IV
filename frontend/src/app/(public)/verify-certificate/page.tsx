@@ -229,7 +229,7 @@ function CertificateVerifierContent() {
             </div>
             <input
               type="text"
-              placeholder="Enter Certificate Number (e.g. IVT/JUN26/2026/0201)"
+              placeholder="Enter Certificate Number..."
               value={inputCertId}
               onChange={(e) => setInputCertId(e.target.value)}
               className="w-full bg-ink-900/90 border-2 border-ink-700 hover:border-brand-500 focus:border-brand-400 pl-12 pr-36 py-4 text-white text-base rounded-none placeholder-ink-500 font-mono transition-colors focus:outline-none"
@@ -427,8 +427,8 @@ function CertificateVerifierContent() {
                 <ShieldAlert className="w-4 h-4 text-yellow-400" /> Verification Tips:
               </p>
               <ul className="list-disc list-inside space-y-1 text-ink-300">
-                <li>Check that the Certificate Number follows the format <span className="font-mono text-white">IVT/MONTHYEAR/YEAR/NUMBER</span> (e.g. <span className="font-mono text-white">IVT/JUN26/2026/0201</span>)</li>
                 <li>Ensure there are no accidental typos or missing digits</li>
+                <li>Verify you have entered the exact Certificate Number printed on your credential</li>
                 <li>If the certificate was recently issued, please allow up to 24 hours for registry synchronization</li>
               </ul>
             </div>
