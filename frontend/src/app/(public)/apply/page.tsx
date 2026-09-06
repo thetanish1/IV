@@ -61,6 +61,7 @@ export default function InternshipApplyPage() {
   // Application Form State
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [existingApplication, setExistingApplication] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -93,7 +94,7 @@ export default function InternshipApplyPage() {
     "http://localhost:8000/api"
   ).replace(/\/$/, "");
 
-  // Sync authenticated user with backend Supabase database
+  // Sync authenticated user with backend database
   const syncWithBackend = async (
     userEmail: string,
     userName: string,
@@ -120,7 +121,7 @@ export default function InternshipApplyPage() {
     }
 
     return {
-      access_token: "firebase_" + Date.now(),
+      access_token: "user_" + Date.now(),
       token_type: "bearer",
       user_email: userEmail,
       user_name: userName,
@@ -129,7 +130,7 @@ export default function InternshipApplyPage() {
     };
   };
 
-  // Check auth state on load
+  // Check auth state and existing application on load
   const loadUserAuth = () => {
     const token = localStorage.getItem("user_token");
     const email = localStorage.getItem("user_email");
@@ -153,6 +154,16 @@ export default function InternshipApplyPage() {
     } else {
       setCurrentUser(null);
     }
+
+    // Check if application was already submitted
+    try {
+      const savedApp = localStorage.getItem("internship_application_submitted");
+      if (savedApp) {
+        const parsed = JSON.parse(savedApp);
+        setExistingApplication(parsed);
+      }
+    } catch {}
+
     setAuthChecked(true);
   };
 
@@ -352,6 +363,19 @@ export default function InternshipApplyPage() {
         }),
       });
 
+      // Persist application status locally
+      const appRecord = {
+        full_name: formData.full_name,
+        email: formData.email,
+        duration: formData.duration,
+        role_preference: formData.role_preference,
+        college: formData.college,
+        submitted_at: new Date().toISOString(),
+        status: "pending",
+      };
+      localStorage.setItem("internship_application_submitted", JSON.stringify(appRecord));
+      setExistingApplication(appRecord);
+
       router.push(
         `/success?type=application&name=${encodeURIComponent(
           formData.full_name
@@ -394,6 +418,51 @@ export default function InternshipApplyPage() {
         </div>
       </FadeIn>
 
+      {/* EXISTING APPLIED APPLICATION STATUS BANNER */}
+      {existingApplication && (
+        <FadeIn delay={0.07} direction="up">
+          <div className="bg-emerald-950/40 border-2 border-emerald-500/60 p-6 sm:p-8 rounded-lg shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-500/20 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold shrink-0">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">Application Submitted</div>
+                  <h3 className="text-lg sm:text-xl font-black text-white">
+                    {existingApplication.role_preference || "Virtual Internship Track"}
+                  </h3>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded text-xs font-bold uppercase tracking-wider">
+                  ✦ Under Admissions Review
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-ink-300">
+              <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
+                <span className="text-ink-400 font-medium">Applicant:</span>
+                <div className="text-white font-bold mt-0.5">{existingApplication.full_name}</div>
+              </div>
+              <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
+                <span className="text-ink-400 font-medium">Selected Duration:</span>
+                <div className="text-white font-bold mt-0.5">{existingApplication.duration}</div>
+              </div>
+              <div className="bg-ink-900/60 border border-ink-800 p-3 rounded">
+                <span className="text-ink-400 font-medium">Registered Email:</span>
+                <div className="text-white font-bold mt-0.5 truncate">{existingApplication.email}</div>
+              </div>
+            </div>
+
+            <p className="text-xs text-emerald-300/80 leading-relaxed pt-1">
+              Your application is active and being evaluated by our senior engineering mentors. You will receive an onboarding confirmation email once reviewed.
+            </p>
+          </div>
+        </FadeIn>
+      )}
+
       {/* MANDATORY SIGN-IN GATE */}
       {authChecked && !currentUser && (
         <FadeIn delay={0.1} direction="up">
@@ -403,7 +472,6 @@ export default function InternshipApplyPage() {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" /> InternVision Tech
                 </div>
-                <span className="text-xs text-ink-400 font-semibold">Firebase Authentication</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 Sign In to Begin Application
@@ -975,21 +1043,33 @@ export default function InternshipApplyPage() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-4 font-black text-base uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-3 transition shadow-[6px_6px_0px_#ffffff] disabled:opacity-50"
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" /> Submitting Virtual Internship Application...
-              </>
-            ) : (
-              <>
-                Submit Virtual Internship Application <ArrowRight className="w-5 h-5" />
-              </>
+          <div className="space-y-3">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-4 font-black text-base uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-3 transition shadow-[6px_6px_0px_#ffffff] disabled:opacity-50"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" /> Submitting Virtual Internship Application...
+                </>
+              ) : existingApplication ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  Submit Updated / Additional Internship Application <ArrowRight className="w-5 h-5" />
+                </>
+              ) : (
+                <>
+                  Submit Virtual Internship Application <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+            {existingApplication && (
+              <p className="text-center text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" /> You already have an active application under review.
+              </p>
             )}
-          </button>
+          </div>
         </form>
       </div>
     </div>

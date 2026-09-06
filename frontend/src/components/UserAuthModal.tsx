@@ -207,7 +207,6 @@ export default function UserAuthModal({
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" /> InternVision Tech
               </div>
-              <span className="text-xs text-ink-400 font-semibold">Firebase Auth</span>
             </div>
             <h2 className="text-2xl font-black text-white tracking-tight">{title}</h2>
             <p className="text-xs text-ink-400 leading-relaxed">{subtitle}</p>

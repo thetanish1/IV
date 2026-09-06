@@ -369,6 +369,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   const [submitting, setSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isAlreadyApplied, setIsAlreadyApplied] = useState(false);
 
   const [formData, setFormData] = useState({
     student_name: "",
@@ -377,7 +378,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     college: "",
   });
 
-  // Pre-fill user data from localStorage if logged in
+  // Pre-fill user data from localStorage and check applied state
   useEffect(() => {
     const email = localStorage.getItem("user_email") || "";
     const name = localStorage.getItem("user_name") || "";
@@ -388,7 +389,15 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         student_name: name || prev.student_name,
       }));
     }
-  }, []);
+
+    try {
+      const appliedList: string[] = JSON.parse(localStorage.getItem("applied_courses") || "[]");
+      const currentSlug = resolvedParams?.id || course?.slug;
+      if (currentSlug && (appliedList.includes(currentSlug) || (course?.id && appliedList.includes(String(course.id))))) {
+        setIsAlreadyApplied(true);
+      }
+    } catch {}
+  }, [resolvedParams, course]);
 
   useEffect(() => {
     fetchCourseDetails();
@@ -434,6 +443,17 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         }),
       });
 
+      // Persist applied status locally
+      try {
+        const appliedList: string[] = JSON.parse(localStorage.getItem("applied_courses") || "[]");
+        const currentSlug = course?.slug || resolvedParams.id;
+        if (!appliedList.includes(currentSlug)) {
+          appliedList.push(currentSlug);
+          localStorage.setItem("applied_courses", JSON.stringify(appliedList));
+        }
+      } catch {}
+
+      setIsAlreadyApplied(true);
       setSubmittedSuccess(true);
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -609,9 +629,16 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
           <FadeIn delay={0.15} direction="up">
             <div className="bg-ink-950 border-2 border-brand-500 p-8 space-y-8 sticky top-24 shadow-[10px_10px_0px_#1a1915]">
               <div className="space-y-2 border-b border-ink-800 pb-6">
-                <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 uppercase tracking-wider inline-flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> 100% Free Scholarship
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 uppercase tracking-wider inline-flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> 100% Free Scholarship
+                  </span>
+                  {isAlreadyApplied && (
+                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/20 px-2.5 py-1 rounded border border-emerald-500/40 uppercase tracking-wider inline-flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Applied
+                    </span>
+                  )}
+                </div>
                 <div className="text-4xl font-black text-white tracking-tight">Free Enrollment</div>
                 <p className="text-xs text-ink-400 leading-relaxed">
                   Admission is application-based. Submit your request for administrative review and cohort mentor allocation.
@@ -619,20 +646,41 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
               </div>
 
               <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowEnrollModal(true);
-                    setSubmittedSuccess(false);
-                    setErrorMsg("");
-                  }}
-                  className="w-full py-4 text-base font-black uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-0.5 transition-all flex items-center justify-center gap-2.5"
-                >
-                  <Zap className="w-5 h-5" /> Request Free Enrollment
-                </button>
-                <p className="text-center text-[11px] text-ink-400">
-                  Acceptance confirmation dispatched via email upon admin review.
-                </p>
+                {isAlreadyApplied ? (
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEnrollModal(true);
+                        setSubmittedSuccess(true);
+                      }}
+                      className="w-full py-4 text-base font-black uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-0.5 transition-all flex items-center justify-center gap-2.5"
+                    >
+                      <CheckCircle2 className="w-5 h-5" /> Applied (Under Review)
+                    </button>
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs text-emerald-300 flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
+                      <span>Application submitted! Admissions team is reviewing.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEnrollModal(true);
+                        setSubmittedSuccess(false);
+                        setErrorMsg("");
+                      }}
+                      className="w-full py-4 text-base font-black uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-0.5 transition-all flex items-center justify-center gap-2.5"
+                    >
+                      <Zap className="w-5 h-5" /> Request Free Enrollment
+                    </button>
+                    <p className="text-center text-[11px] text-ink-400">
+                      Acceptance confirmation dispatched via email upon admin review.
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="space-y-3.5 pt-4 border-t border-ink-800 text-xs font-semibold text-ink-300">
