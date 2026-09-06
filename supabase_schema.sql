@@ -72,92 +72,108 @@ CREATE INDEX IF NOT EXISTS idx_internship_apps_status ON internship_applications
 
 -- 5. Courses Table
 CREATE TABLE IF NOT EXISTS courses (
-    id VARCHAR(100) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) UNIQUE NOT NULL,
     description TEXT NOT NULL,
+    price_inr INTEGER NOT NULL DEFAULT 0,
+    duration VARCHAR(100) NOT NULL,
     level VARCHAR(50) NOT NULL,
-    duration VARCHAR(50) NOT NULL,
-    price NUMERIC(10, 2) NOT NULL,
-    technologies TEXT[] DEFAULT '{}',
+    technologies JSONB DEFAULT '[]'::jsonb,
+    is_published BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Seed Default Courses
-INSERT INTO courses (id, title, slug, description, level, duration, price, technologies)
+INSERT INTO courses (title, slug, description, level, duration, price_inr, technologies, is_published)
 VALUES 
 (
-    'full-stack-web-development',
     'Full Stack Web Development Bootcamp',
     'full-stack-web-development',
     'Master Next.js 15, React 19, FastAPI, PostgreSQL, and modern Tailwind CSS. Build production-scale full stack web applications.',
     'Intermediate',
     '8 Weeks',
-    0.00,
-    ARRAY['Next.js', 'React', 'FastAPI', 'PostgreSQL', 'Tailwind CSS']
+    0,
+    '["Next.js", "React", "FastAPI", "PostgreSQL", "Tailwind CSS"]'::jsonb,
+    TRUE
 ),
 (
-    'data-science-ai',
     'Data Science & AI Bootcamp',
     'data-science-ai',
     'Master statistical modeling, Exploratory Data Analysis (EDA), machine learning pipelines, Scikit-Learn, deep learning with TensorFlow, and data visualization.',
     'Intermediate',
     '10 Weeks',
-    0.00,
-    ARRAY['Python', 'Pandas', 'NumPy', 'Scikit-Learn', 'TensorFlow', 'Tableau']
+    0,
+    '["Python", "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "Tableau"]'::jsonb,
+    TRUE
 ),
 (
-    'java-programming',
     'Java Programming & Core Engineering',
     'java-programming',
     'Master Core Java 21, Object-Oriented Programming (OOP), Data Structures & Algorithms (DSA), multithreading, and enterprise Spring Boot microservices.',
     'Beginner',
     '8 Weeks',
-    0.00,
-    ARRAY['Java 21', 'Spring Boot', 'OOP', 'DSA', 'Hibernate', 'MySQL']
+    0,
+    '["Java 21", "Spring Boot", "OOP", "DSA", "Hibernate", "MySQL"]'::jsonb,
+    TRUE
 ),
 (
-    'android-app-development',
     'Android App Development Bootcamp',
     'android-app-development',
     'Build high-performance native Android apps with Kotlin, declarative Jetpack Compose UI, MVVM architecture, Coroutines, Retrofit, and Firebase.',
     'Intermediate',
     '8 Weeks',
-    0.00,
-    ARRAY['Kotlin', 'Jetpack Compose', 'Android Studio', 'Coroutines', 'Retrofit', 'Firebase']
+    0,
+    '["Kotlin", "Jetpack Compose", "Android Studio", "Coroutines", "Retrofit", "Firebase"]'::jsonb,
+    TRUE
 ),
 (
-    'ai-machine-learning-engineering',
     'AI & Machine Learning Engineering Bootcamp',
     'ai-machine-learning-engineering',
     'Build cutting-edge AI models, fine-tune LLMs, integrate PyTorch and Vector DBs into production systems.',
     'Advanced',
     '12 Weeks',
-    0.00,
-    ARRAY['Python', 'PyTorch', 'OpenAI API', 'LangChain', 'FastAPI', 'Vector DBs']
+    0,
+    '["Python", "PyTorch", "OpenAI API", "LangChain", "FastAPI", "Vector DBs"]'::jsonb,
+    TRUE
 ),
 (
-    'cloud-devops-kubernetes-mastery',
     'Cloud DevOps & Kubernetes Mastery',
     'cloud-devops-kubernetes-mastery',
     'Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.',
     'Intermediate',
     '10 Weeks',
-    0.00,
-    ARRAY['Docker', 'Kubernetes', 'AWS', 'Terraform', 'GitHub Actions']
+    0,
+    '["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"]'::jsonb,
+    TRUE
 ),
 (
-    'cyber-security-ethical-hacking',
     'Cyber Security & Ethical Hacking',
     'cyber-security-ethical-hacking',
     'Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.',
     'Beginner',
     '8 Weeks',
-    0.00,
-    ARRAY['Linux', 'Metasploit', 'Wireshark', 'Burp Suite', 'Python']
+    0,
+    '["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"]'::jsonb,
+    TRUE
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (slug) DO NOTHING;
+
+-- 6. Course Registrations Table
+CREATE TABLE IF NOT EXISTS course_registrations (
+    id SERIAL PRIMARY KEY,
+    course_id INTEGER NOT NULL REFERENCES courses (id) ON DELETE CASCADE,
+    student_name VARCHAR(255) NOT NULL,
+    student_email VARCHAR(255) NOT NULL,
+    student_phone VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_course_reg_email ON course_registrations (student_email);
+CREATE INDEX IF NOT EXISTS idx_course_reg_status ON course_registrations (status);
 
 -- 6. Payments Table (Razorpay Orders & Transactions)
 CREATE TABLE IF NOT EXISTS payments (
