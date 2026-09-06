@@ -326,9 +326,14 @@ export default function AdminDashboardPage() {
     setIssuing(true);
     setCertError("");
     try {
-      const generatedId =
-        newCertForm.certificate_id.trim().toUpperCase() ||
-        `IVT-${new Date().getFullYear()}-${newCertForm.program_title.includes("AI") ? "AIML" : newCertForm.program_title.includes("DevOps") ? "DO" : newCertForm.program_title.includes("Security") ? "CS" : newCertForm.program_title.includes("Java") ? "JAVA" : "FS"}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const now = new Date();
+      const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+      const mmm = months[now.getMonth()];
+      const yy = String(now.getFullYear()).slice(-2);
+      const yyyy = String(now.getFullYear());
+      const randSeq = String(Math.floor(1 + Math.random() * 9999)).padStart(4, "0");
+      const autoId = `IVT/${mmm}${yy}/${yyyy}/${randSeq}`;
+      const generatedId = newCertForm.certificate_id.trim().toUpperCase() || autoId;
 
       const payload = {
         certificate_id: generatedId,
@@ -1375,19 +1380,25 @@ export default function AdminDashboardPage() {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder="e.g. IVT-2026-FS-9912"
+                        placeholder="e.g. IVT/JUN26/2026/0201"
                         value={newCertForm.certificate_id}
                         onChange={(e) => setNewCertForm({ ...newCertForm, certificate_id: e.target.value })}
                         className="w-full bg-ink-900 border border-ink-800 rounded px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
                       />
                       <button
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
+                          const now = new Date();
+                          const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                          const mmm = months[now.getMonth()];
+                          const yy = String(now.getFullYear()).slice(-2);
+                          const yyyy = String(now.getFullYear());
+                          const randSeq = String(Math.floor(1 + Math.random() * 9999)).padStart(4, "0");
                           setNewCertForm({
                             ...newCertForm,
-                            certificate_id: `IVT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-                          })
-                        }
+                            certificate_id: `IVT/${mmm}${yy}/${yyyy}/${randSeq}`,
+                          });
+                        }}
                         className="px-2.5 py-1 text-xs bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white rounded border border-ink-700 whitespace-nowrap"
                       >
                         Auto-Gen

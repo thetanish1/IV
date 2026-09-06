@@ -47,21 +47,21 @@ interface VerifiedCertificate {
 }
 
 const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
-  "IVT-2026-FS-8492": {
-    certificate_id: "IVT-2026-FS-8492",
+  "IVT/JUN26/2026/0201": {
+    certificate_id: "IVT/JUN26/2026/0201",
     student_name: "Aarav Sharma",
     student_email: "aarav.sharma@example.com",
     program_title: "Full Stack Web Development Co-Op",
     track_type: "Virtual Internship",
     duration: "3 Months",
-    issue_date: "August 15, 2026",
+    issue_date: "June 15, 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"],
     instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
-  "IVT-2026-AIML-5521": {
-    certificate_id: "IVT-2026-AIML-5521",
+  "IVT/AUG26/2026/0202": {
+    certificate_id: "IVT/AUG26/2026/0202",
     student_name: "Ananya Verma",
     student_email: "ananya.verma@example.com",
     program_title: "AI & Machine Learning Engineering Track",
@@ -73,8 +73,8 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
-  "IVT-2026-DO-9104": {
-    certificate_id: "IVT-2026-DO-9104",
+  "IVT/AUG26/2026/0203": {
+    certificate_id: "IVT/AUG26/2026/0203",
     student_name: "Rohan Kulkarni",
     student_email: "rohan.kulkarni@example.com",
     program_title: "Cloud DevOps & Kubernetes Mastery",
@@ -86,8 +86,8 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     instructor_name: "Suraj Kumar, HR & Manager",
     is_valid: true,
   },
-  "IVT-2026-CS-3382": {
-    certificate_id: "IVT-2026-CS-3382",
+  "IVT/SEP26/2026/0204": {
+    certificate_id: "IVT/SEP26/2026/0204",
     student_name: "Priya Patel",
     student_email: "priya.patel@example.com",
     program_title: "Cyber Security & Ethical Hacking Track",
@@ -149,14 +149,14 @@ function CertificateVerifierContent() {
     }
 
     // Client-side fallback check
-    const normalizedTarget = cleanId.replace(/[- ]/g, "");
+    const normalizedTarget = cleanId.replace(/[-/ ]/g, "");
     let matchedCert: VerifiedCertificate | null = null;
 
     for (const [key, cert] of Object.entries(FALLBACK_CERTIFICATES)) {
       if (
         key.toUpperCase() === cleanId ||
-        key.toUpperCase().replace(/[- ]/g, "") === normalizedTarget ||
-        cert.certificate_id.toUpperCase().replace(/[- ]/g, "") === normalizedTarget
+        key.toUpperCase().replace(/[-/ ]/g, "") === normalizedTarget ||
+        cert.certificate_id.toUpperCase().replace(/[-/ ]/g, "") === normalizedTarget
       ) {
         matchedCert = cert;
         break;
@@ -229,7 +229,7 @@ function CertificateVerifierContent() {
             </div>
             <input
               type="text"
-              placeholder="Enter Certificate Number (e.g. IVT-2026-FS-8492)"
+              placeholder="Enter Certificate Number (e.g. IVT/JUN26/2026/0201)"
               value={inputCertId}
               onChange={(e) => setInputCertId(e.target.value)}
               className="w-full bg-ink-900/90 border-2 border-ink-700 hover:border-brand-500 focus:border-brand-400 pl-12 pr-36 py-4 text-white text-base rounded-none placeholder-ink-500 font-mono transition-colors focus:outline-none"
@@ -244,24 +244,6 @@ function CertificateVerifierContent() {
             </button>
           </div>
         </form>
-
-        {/* ─── QUICK DEMO SAMPLE BADGES ─── */}
-        <div className="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-ink-400">
-          <span className="font-semibold text-ink-300">Try Sample IDs:</span>
-          {Object.keys(FALLBACK_CERTIFICATES).map((cid) => (
-            <button
-              key={cid}
-              onClick={() => {
-                setInputCertId(cid);
-                router.replace(`/verify-certificate?id=${encodeURIComponent(cid)}`);
-                performVerification(cid);
-              }}
-              className="px-2.5 py-1 bg-ink-900 border border-ink-800 hover:border-brand-500 text-ink-300 hover:text-white font-mono rounded transition-colors"
-            >
-              {cid}
-            </button>
-          ))}
-        </div>
       </section>
 
       {/* ─── VERIFICATION RESULT DISPLAY ─── */}
@@ -445,7 +427,7 @@ function CertificateVerifierContent() {
                 <ShieldAlert className="w-4 h-4 text-yellow-400" /> Verification Tips:
               </p>
               <ul className="list-disc list-inside space-y-1 text-ink-300">
-                <li>Check that the Certificate Number starts with <span className="font-mono text-white">IVT-2026-</span></li>
+                <li>Check that the Certificate Number follows the format <span className="font-mono text-white">IVT/MONTHYEAR/YEAR/NUMBER</span> (e.g. <span className="font-mono text-white">IVT/JUN26/2026/0201</span>)</li>
                 <li>Ensure there are no accidental typos or missing digits</li>
                 <li>If the certificate was recently issued, please allow up to 24 hours for registry synchronization</li>
               </ul>

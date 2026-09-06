@@ -11,7 +11,7 @@ from app.certificates.schemas import CertificateVerifyResponse, CertificateCreat
 
 router = APIRouter(prefix="/certificates", tags=["Certificates"])
 
-@router.get("/verify/{cert_id}", response_model=CertificateVerifyResponse)
+@router.get("/verify/{cert_id:path}", response_model=CertificateVerifyResponse)
 def verify_certificate(cert_id: str, db: Session = Depends(get_db)):
     """
     Public Endpoint: Verify authenticity of an InternVision Tech certificate.
@@ -26,11 +26,11 @@ def verify_certificate(cert_id: str, db: Session = Depends(get_db)):
     ).first()
 
     if not cert:
-        # Also try matching without hyphens or spaces
-        normalized_target = clean_id.replace("-", "").replace(" ", "")
+        # Also try matching without hyphens, slashes, or spaces
+        normalized_target = clean_id.replace("-", "").replace("/", "").replace(" ", "")
         all_certs = db.query(Certificate).filter(Certificate.is_valid == True).all()
         for c in all_certs:
-            if c.certificate_id.upper().replace("-", "").replace(" ", "") == normalized_target:
+            if c.certificate_id.upper().replace("-", "").replace("/", "").replace(" ", "") == normalized_target:
                 cert = c
                 break
 
@@ -90,7 +90,7 @@ def issue_certificate(
     db.refresh(new_cert)
     return new_cert
 
-@router.delete("/{cert_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{cert_id:path}", status_code=status.HTTP_200_OK)
 def delete_certificate(
     cert_id: str,
     db: Session = Depends(get_db),

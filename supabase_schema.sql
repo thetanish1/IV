@@ -202,20 +202,20 @@ CREATE INDEX IF NOT EXISTS idx_certificates_cert_id ON certificates (certificate
 INSERT INTO certificates (certificate_id, student_name, student_email, program_title, track_type, duration, issue_date, grade, skills_acquired, instructor_name, is_valid)
 VALUES
 (
-    'IVT-2026-FS-8492',
+    'IVT/JUN26/2026/0201',
     'Aarav Sharma',
     'aarav.sharma@example.com',
     'Full Stack Web Development Co-Op',
     'Virtual Internship',
     '3 Months',
-    'August 15, 2026',
+    'June 15, 2026',
     'Distinction (Grade A+)',
     '["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"]'::jsonb,
     'Suraj Kumar, HR & Manager',
     TRUE
 ),
 (
-    'IVT-2026-AIML-5521',
+    'IVT/AUG26/2026/0202',
     'Ananya Verma',
     'ananya.verma@example.com',
     'AI & Machine Learning Engineering Track',
@@ -224,11 +224,11 @@ VALUES
     'August 20, 2026',
     'Excellence (Grade O)',
     '["Python", "PyTorch", "LLM APIs", "LangChain", "RAG Systems", "Vector DBs"]'::jsonb,
-    'InternVision Tech AI Research Group',
+    'Suraj Kumar, HR & Manager',
     TRUE
 ),
 (
-    'IVT-2026-DO-9104',
+    'IVT/AUG26/2026/0203',
     'Rohan Kulkarni',
     'rohan.kulkarni@example.com',
     'Cloud DevOps & Kubernetes Mastery',
@@ -241,7 +241,7 @@ VALUES
     TRUE
 ),
 (
-    'IVT-2026-CS-3382',
+    'IVT/SEP26/2026/0204',
     'Priya Patel',
     'priya.patel@example.com',
     'Cyber Security & Ethical Hacking Track',
@@ -250,7 +250,7 @@ VALUES
     'September 01, 2026',
     'Merit (Grade A)',
     '["Penetration Testing", "Wireshark", "Burp Suite", "OWASP Top 10", "Network Security"]'::jsonb,
-    'InternVision Tech Security Operations',
+    'Suraj Kumar, HR & Manager',
     TRUE
 )
 ON CONFLICT (certificate_id) DO NOTHING;

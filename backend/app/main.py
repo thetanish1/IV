@@ -130,20 +130,20 @@ def startup_event():
         if db.query(Certificate).count() == 0:
             sample_certs = [
                 Certificate(
-                    certificate_id="IVT-2026-FS-8492",
+                    certificate_id="IVT/JUN26/2026/0201",
                     student_name="Aarav Sharma",
                     student_email="aarav.sharma@example.com",
                     program_title="Full Stack Web Development Co-Op",
                     track_type="Internship",
                     duration="3 Months",
-                    issue_date="August 15, 2026",
+                    issue_date="June 15, 2026",
                     grade="Distinction (Grade A+)",
                     skills_acquired=["Next.js 15", "React 19", "TypeScript", "FastAPI", "PostgreSQL", "Tailwind CSS"],
                     instructor_name="Suraj Kumar, HR & Manager",
                     is_valid=True
                 ),
                 Certificate(
-                    certificate_id="IVT-2026-AIML-5521",
+                    certificate_id="IVT/AUG26/2026/0202",
                     student_name="Ananya Verma",
                     student_email="ananya.verma@example.com",
                     program_title="AI & Machine Learning Engineering Track",
@@ -156,7 +156,7 @@ def startup_event():
                     is_valid=True
                 ),
                 Certificate(
-                    certificate_id="IVT-2026-DO-9104",
+                    certificate_id="IVT/AUG26/2026/0203",
                     student_name="Rohan Kulkarni",
                     student_email="rohan.kulkarni@example.com",
                     program_title="Cloud DevOps & Kubernetes Mastery",
@@ -169,7 +169,7 @@ def startup_event():
                     is_valid=True
                 ),
                 Certificate(
-                    certificate_id="IVT-2026-CS-3382",
+                    certificate_id="IVT/SEP26/2026/0204",
                     student_name="Priya Patel",
                     student_email="priya.patel@example.com",
                     program_title="Cyber Security & Ethical Hacking Track",
@@ -178,7 +178,7 @@ def startup_event():
                     issue_date="September 01, 2026",
                     grade="Merit (Grade A)",
                     skills_acquired=["Penetration Testing", "Wireshark", "Burp Suite", "OWASP Top 10", "Network Security"],
-                    instructor_name="InternVision Tech Security Operations",
+                    instructor_name="Suraj Kumar, HR & Manager",
                     is_valid=True
                 ),
             ]
