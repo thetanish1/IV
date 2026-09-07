@@ -205,7 +205,7 @@ def update_registration_status(
     course = db.query(Course).filter(Course.id == reg.course_id).first()
     course_title = course.title if course else f"Bootcamp Program #{reg.course_id}"
 
-    if status_val == "accepted":
+    if status_val in ["accepted", "approved"]:
         background_tasks.add_task(
             send_course_enrollment_acceptance_email,
             student_email=reg.student_email,
@@ -454,9 +454,16 @@ def delete_course_registration(
     current_admin: Admin = Depends(require_permission("enrollments"))
 ):
     """Admin endpoint to permanently delete a course enrollment record."""
+    # Unlink any related payment records first to satisfy foreign key constraints
+    try:
+        db.query(Payment).filter(Payment.registration_id == reg_id).update({"registration_id": None})
+        db.commit()
+    except Exception:
+        db.rollback()
+
     reg = db.query(CourseRegistration).filter(CourseRegistration.id == reg_id).first()
     if not reg:
-        raise HTTPException(status_code=404, detail="Registration record not found")
+        return {"success": True, "message": f"Registration record #{reg_id} already deleted or not found."}
     db.delete(reg)
     db.commit()
     return {"success": True, "message": f"Course registration #{reg_id} has been deleted."}
@@ -471,7 +478,7 @@ def delete_payment_record(
     """Admin endpoint to delete/archive a payment transaction record."""
     pmt = db.query(Payment).filter(Payment.id == payment_id).first()
     if not pmt:
-        raise HTTPException(status_code=404, detail="Payment record not found")
+        return {"success": True, "message": f"Payment transaction #{payment_id} already deleted or not found."}
     db.delete(pmt)
     db.commit()
     return {"success": True, "message": f"Payment transaction #{payment_id} has been deleted."}

@@ -7,16 +7,14 @@
     @apply bg-ink-900 text-ink-50 antialiased min-h-screen font-sans;
   }
 
-  /* Force dark mode color-scheme on all form controls across the portal */
+  /* Support native dark theme color-scheme for form controls */
   input,
   textarea,
   select {
     color-scheme: dark;
-    background-color: #0f172a;
-    color: #ffffff;
   }
 
-  /* Browser autofill styling override to prevent white flash/backgrounds */
+  /* Browser autofill styling override to prevent bright white browser flashes */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -27,31 +25,31 @@
   select:-webkit-autofill:hover,
   select:-webkit-autofill:focus {
     -webkit-text-fill-color: #ffffff !important;
-    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
-    box-shadow: 0 0 0px 1000px #0f172a inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1a1814 inset !important;
+    box-shadow: 0 0 0px 1000px #1a1814 inset !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
-  /* Custom styled scrollbars for dark theme */
+  /* Custom styled scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0b0f19;
+    background: #11100d;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: #26241f;
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #3d3a32;
   }
 }
 
 /* Custom clean UI helpers */
 .glass-card {
-  @apply bg-slate-900/80 border border-white/10 backdrop-blur-xl;
+  @apply bg-ink-950 border border-ink-800;
 }
 
 .gradient-text {
