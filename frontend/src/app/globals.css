@@ -3,14 +3,55 @@
 @tailwind utilities;
 
 @layer base {
- body {
- @apply bg-ink-900 text-ink-50 antialiased min-h-screen font-sans;
- }
+  body {
+    @apply bg-ink-900 text-ink-50 antialiased min-h-screen font-sans;
+  }
+
+  /* Force dark mode color-scheme on all form controls across the portal */
+  input,
+  textarea,
+  select {
+    color-scheme: dark;
+    background-color: #0f172a;
+    color: #ffffff;
+  }
+
+  /* Browser autofill styling override to prevent white flash/backgrounds */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
+    box-shadow: 0 0 0px 1000px #0f172a inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Custom styled scrollbars for dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0b0f19;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
 }
 
 /* Custom clean UI helpers */
 .glass-card {
-  @apply bg-ink-950 border border-ink-800;
+  @apply bg-slate-900/80 border border-white/10 backdrop-blur-xl;
 }
 
 .gradient-text {
