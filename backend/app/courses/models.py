@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from app.shared.database import Base
+from app.payments.models import Payment
 
 class Course(Base):
     __tablename__ = "courses"

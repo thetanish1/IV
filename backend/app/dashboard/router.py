@@ -35,6 +35,7 @@ def get_stats(
 ):
     """Platform KPI metrics and aggregate telemetry overview."""
     total_apps = db.query(InternshipApplication).count()
+    pending_apps = db.query(InternshipApplication).filter(InternshipApplication.status == "pending").count()
     total_regs = db.query(CourseRegistration).count()
     
     # Calculate captured revenue
@@ -54,13 +55,24 @@ def get_stats(
     except Exception:
         pass
 
+    total_contacts_count = 0
+    new_contacts_count = 0
+    try:
+        total_contacts_count = db.query(ContactQuery).count()
+        new_contacts_count = db.query(ContactQuery).filter(ContactQuery.status == "pending").count()
+    except Exception:
+        pass
+
     return DashboardStats(
         total_applications=total_apps,
+        pending_applications=pending_apps,
         total_registrations=total_regs,
-        total_revenue_inr=float(total_rev),
+        total_revenue_inr=int(total_rev),
         successful_payments=successful_pmts,
         total_payments=total_pmts,
-        total_users=total_users_count
+        total_users=total_users_count,
+        total_contacts=total_contacts_count,
+        new_contacts=new_contacts_count
     )
 
 
@@ -208,7 +220,7 @@ def update_registration_status(
             course_title=course_title
         )
 
-    return RegistrationResponse.from_orm(reg)
+    return RegistrationResponse.model_validate(reg)
 
 
 # ─── 4. Payments Auditing ───────────────────────────────────────────────────
@@ -226,9 +238,9 @@ def get_payments(
     query = db.query(Payment)
     if q:
         query = query.filter(
-            Payment.student_name.ilike(f"%{q}%") |
             Payment.student_email.ilike(f"%{q}%") |
-            Payment.razorpay_payment_id.ilike(f"%{q}%")
+            Payment.payment_id.ilike(f"%{q}%") |
+            Payment.order_id.ilike(f"%{q}%")
         )
     if status and status != "all":
         query = query.filter(Payment.status == status)
@@ -245,7 +257,7 @@ def get_payments(
         "page": page,
         "limit": limit,
         "total_pages": total_pages,
-        "items": [PaymentResponse.from_orm(item) for item in items]
+        "items": [PaymentResponse.model_validate(item) for item in items]
     }
 
 
@@ -289,7 +301,7 @@ def get_contact_queries(
                 "id": c.id,
                 "name": c.name,
                 "email": c.email,
-                "phone": c.phone,
+                "phone": getattr(c, "phone", None),
                 "subject": c.subject,
                 "message": c.message,
                 "status": c.status,

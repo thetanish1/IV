@@ -57,6 +57,14 @@ def list_certificates(
         )
     return query.order_by(Certificate.id.desc()).all()
 
+@router.get("/admin/certificates", response_model=list[CertificateVerifyResponse], include_in_schema=False)
+def list_certificates_admin_alias(
+    search: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    return list_certificates(search=search, db=db, current_admin=current_admin)
+
 @router.post("", response_model=CertificateVerifyResponse, status_code=status.HTTP_201_CREATED)
 def issue_certificate(
     cert_in: CertificateCreate,

@@ -52,7 +52,7 @@ def get_applications(
         "page": page,
         "limit": limit,
         "total_pages": total_pages,
-        "items": [ApplicationResponse.from_orm(item) for item in items]
+        "items": [ApplicationResponse.model_validate(item) for item in items]
     }
 
 
@@ -95,7 +95,7 @@ def update_application_status(
             domain_track=app.role_preference or "Software Engineering"
         )
 
-    return ApplicationResponse.from_orm(app)
+    return ApplicationResponse.model_validate(app)
 
 
 @router.delete("/applications/all")
