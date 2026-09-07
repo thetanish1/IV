@@ -74,7 +74,6 @@ export default function StudentPortalPage() {
   // Doubt Form State
   const [showDoubtModal, setShowDoubtModal] = useState(false);
   const [doubtForm, setDoubtForm] = useState({
-    module_name: "Week 1",
     subject: "",
     question: "",
     code_snippet: "",
@@ -251,10 +250,14 @@ export default function StudentPortalPage() {
         uploadedImageUrl = uploadData.url;
       }
 
+      const autoModuleName = portalData?.domain_title || portalData?.role_preference 
+        ? `${portalData.domain_title || portalData.role_preference}${portalData.duration ? ` • ${portalData.duration}` : ""}`
+        : "Technical Internship Track";
+
       await apiRequest(`/portal/doubts?email=${encodeURIComponent(userEmail)}`, {
         method: "POST",
         body: JSON.stringify({
-          module_name: doubtForm.module_name,
+          module_name: autoModuleName,
           subject: doubtForm.subject.trim(),
           question: doubtForm.question.trim(),
           code_snippet: doubtForm.code_snippet.trim() || undefined,
@@ -265,7 +268,7 @@ export default function StudentPortalPage() {
       setDoubtSuccessMsg("Query submitted! Our technical mentors will reply in your portal thread.");
       setTimeout(() => {
         setShowDoubtModal(false);
-        setDoubtForm({ module_name: "Week 1", subject: "", question: "", code_snippet: "" });
+        setDoubtForm({ subject: "", question: "", code_snippet: "" });
         removeDoubtImage();
         setDoubtSuccessMsg("");
         fetchPortalData(userEmail);
@@ -1256,22 +1259,17 @@ export default function StudentPortalPage() {
             )}
 
             <form onSubmit={handleSubmitDoubt} className="space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="text-ink-300 font-semibold">Module / Milestone</label>
-                <select
-                  value={doubtForm.module_name}
-                  onChange={(e) => setDoubtForm({ ...doubtForm, module_name: e.target.value })}
-                  className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none"
-                >
-                  <option value="Week 1">Week 1: UI Architecture & Setup</option>
-                  <option value="Week 2">Week 2: Backend APIs & Database</option>
-                  <option value="Week 3">Week 3: Auth & Security</option>
-                  <option value="Week 4">Week 4: Deployment & CI/CD</option>
-                  <option value="Month 2 Project">Month 2: Milestone Project</option>
-                  <option value="Month 3 Portfolio">Month 3: Portfolio Website</option>
-                  <option value="Months 4-6 Capstone">Months 4-6: Enterprise Capstone</option>
-                  <option value="General Query">General Technical Inquiry</option>
-                </select>
+              <div className="p-3 bg-brand-500/10 border border-brand-500/20 rounded-lg flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-mono tracking-wider text-brand-400 block font-semibold">Track & Milestone Context</span>
+                  <span className="text-white font-medium text-xs">
+                    {portalData?.domain_title || portalData?.role_preference || "Technical Internship Track"}
+                    {portalData?.duration ? ` • ${portalData.duration}` : ""}
+                  </span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
+                  Auto-routed to Mentors
+                </span>
               </div>
 
               <div className="space-y-1.5">
