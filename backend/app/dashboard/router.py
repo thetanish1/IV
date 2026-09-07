@@ -601,16 +601,21 @@ def handle_unlock_request(
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):
-    """Admin approves (unlocks) or rejects a task unlock request."""
+    """Admin approves (unlocks) or rejects/locks a task unlock request, turning the student submission slot on or off."""
     req = db.query(TaskUnlockRequest).filter(TaskUnlockRequest.id == request_id).first()
     if not req:
         raise HTTPException(status_code=404, detail="Unlock request not found")
 
-    if body.action.lower() in ("approve", "approved", "unlock"):
+    action_lower = body.action.strip().lower()
+
+    if action_lower in ("approve", "approved", "unlock", "open", "on"):
         req.status = "approved"
-        # Also ensure submission record is marked unlocked
+        # Ensure submission record is marked unlocked
         sub = db.query(InternshipSubmission)\
-                .filter(InternshipSubmission.student_email == req.student_email, InternshipSubmission.task_key == req.task_key)\
+                .filter(
+                    (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
+                    InternshipSubmission.task_key == req.task_key
+                )\
                 .first()
         if sub:
             sub.is_unlocked = True
@@ -624,12 +629,53 @@ def handle_unlock_request(
                 status="unlocked"
             )
             db.add(new_sub)
+
+    elif action_lower in ("toggle", "switch"):
+        if req.status == "approved":
+            req.status = "rejected"
+            sub = db.query(InternshipSubmission)\
+                    .filter(
+                        (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
+                        InternshipSubmission.task_key == req.task_key
+                    )\
+                    .first()
+            if sub:
+                sub.is_unlocked = False
+        else:
+            req.status = "approved"
+            sub = db.query(InternshipSubmission)\
+                    .filter(
+                        (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
+                        InternshipSubmission.task_key == req.task_key
+                    )\
+                    .first()
+            if sub:
+                sub.is_unlocked = True
+            else:
+                new_sub = InternshipSubmission(
+                    application_id=req.application_id,
+                    student_email=req.student_email,
+                    task_key=req.task_key,
+                    title=req.task_title,
+                    is_unlocked=True,
+                    status="unlocked"
+                )
+                db.add(new_sub)
+
     else:
         req.status = "rejected"
+        sub = db.query(InternshipSubmission)\
+                .filter(
+                    (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
+                    InternshipSubmission.task_key == req.task_key
+                )\
+                .first()
+        if sub:
+            sub.is_unlocked = False
 
     req.updated_at = datetime.utcnow()
     db.commit()
-    return {"success": True, "message": f"Unlock request {req.status}"}
+    return {"success": True, "status": req.status, "message": f"Task submission slot is now {req.status}"}
 
 
 # ─── Student Doubts & Query Helpdesk ─────────────────────────────────────────

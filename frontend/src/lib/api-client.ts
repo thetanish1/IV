@@ -3,7 +3,7 @@ const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
-  timeoutMs: number = 8000
+  timeoutMs: number = 30000
 ): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers = new Headers(options.headers || {});
@@ -38,6 +38,13 @@ export async function apiRequest<T>(
     }
 
     return response.json();
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      if (err.name === "AbortError" || err.message.toLowerCase().includes("abort") || err.message.toLowerCase().includes("timeout")) {
+        throw new Error("Request timed out or connection was interrupted. Please try again.");
+      }
+    }
+    throw err;
   } finally {
     clearTimeout(timeoutId);
   }

@@ -484,11 +484,15 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
         days_elapsed = max(0, (datetime.utcnow() - start_date).days)
 
     # Fetch existing submissions
-    submissions = db.query(InternshipSubmission).filter(InternshipSubmission.student_email == clean_email).all()
+    submissions = db.query(InternshipSubmission).filter(
+        (func.lower(InternshipSubmission.student_email) == clean_email) | (InternshipSubmission.application_id == app.id)
+    ).all()
     sub_map = {s.task_key: s for s in submissions}
 
     # Fetch unlock requests
-    unlock_requests = db.query(TaskUnlockRequest).filter(TaskUnlockRequest.student_email == clean_email).all()
+    unlock_requests = db.query(TaskUnlockRequest).filter(
+        (func.lower(TaskUnlockRequest.student_email) == clean_email) | (TaskUnlockRequest.application_id == app.id)
+    ).all()
     unlock_map = {u.task_key: u for u in unlock_requests}
 
     # Domain tasks
@@ -751,19 +755,26 @@ def request_task_unlock(
     """
     clean_email = email.strip().lower()
     app = db.query(InternshipApplication)\
-            .filter((InternshipApplication.email == clean_email) | (InternshipApplication.google_email == clean_email))\
+            .filter((func.lower(InternshipApplication.email) == clean_email) | (func.lower(InternshipApplication.google_email) == clean_email))\
+            .order_by(InternshipApplication.created_at.desc())\
             .first()
 
     if not app:
         raise HTTPException(status_code=404, detail="Student internship application not found")
 
     existing = db.query(TaskUnlockRequest)\
-                 .filter(TaskUnlockRequest.student_email == clean_email, TaskUnlockRequest.task_key == payload.task_key)\
+                 .filter(
+                     (func.lower(TaskUnlockRequest.student_email) == clean_email) | (TaskUnlockRequest.application_id == app.id),
+                     TaskUnlockRequest.task_key == payload.task_key
+                 )\
                  .first()
 
     if existing:
         existing.reason = payload.reason
         existing.status = "pending"
+        existing.application_id = app.id
+        existing.student_email = clean_email
+        existing.student_name = app.full_name
         existing.updated_at = datetime.utcnow()
         db.commit()
         return {"success": True, "message": "Unlock request updated and sent to admin"}

@@ -125,6 +125,7 @@ export default function AdminDashboardPage() {
   // Unlock Requests State
   const [unlockRequests, setUnlockRequests] = useState<UnlockRequestAdminItem[]>([]);
   const [loadingUnlocks, setLoadingUnlocks] = useState(false);
+  const [unlockFilter, setUnlockFilter] = useState("all");
   const [actioningUnlockId, setActioningUnlockId] = useState<number | null>(null);
 
   // Student Doubts Helpdesk State
@@ -288,6 +289,7 @@ export default function AdminDashboardPage() {
     pmtPage,
     certSearch,
     subStatusFilter,
+    unlockFilter,
     doubtFilter,
     contactFilter,
     contactSearch,
@@ -648,7 +650,10 @@ export default function AdminDashboardPage() {
   const fetchUnlockRequests = async () => {
     setLoadingUnlocks(true);
     try {
-      const data = await apiRequest<{ items: UnlockRequestAdminItem[]; total: number } | UnlockRequestAdminItem[]>("/admin/unlock-requests");
+      const params = new URLSearchParams();
+      if (unlockFilter !== "all") params.set("status", unlockFilter);
+      const endpoint = params.toString() ? `/admin/unlock-requests?${params.toString()}` : "/admin/unlock-requests";
+      const data = await apiRequest<{ items: UnlockRequestAdminItem[]; total: number } | UnlockRequestAdminItem[]>(endpoint);
       const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
       setUnlockRequests(list);
     } catch (err) {
@@ -659,20 +664,19 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleUnlockAction = async (id: number, action: "approve" | "reject") => {
+  const handleUnlockAction = async (id: number, action: "approve" | "reject" | "toggle") => {
     setActioningUnlockId(id);
     try {
-      await apiRequest(`/admin/unlock-requests/${id}/action`, {
+      const res = await apiRequest<{ success: boolean; status?: string; message?: string }>(`/admin/unlock-requests/${id}/action`, {
         method: "POST",
         body: JSON.stringify({ action }),
       });
+      const updatedStatus = res?.status || (action === "approve" ? "approved" : "rejected");
       setUnlockRequests((prev) =>
-        (Array.isArray(prev) ? prev : []).map((r) => (r.id === id ? { ...r, status: action === "approve" ? "approved" : "rejected" } : r))
+        (Array.isArray(prev) ? prev : []).map((r) => (r.id === id ? { ...r, status: updatedStatus } : r))
       );
       // Refresh submissions if an unlock occurred
-      if (action === "approve") {
-        fetchSubmissions();
-      }
+      fetchSubmissions();
     } catch (err) {
       console.error(`Failed to ${action} unlock request`, err);
     } finally {
@@ -2155,19 +2159,31 @@ export default function AdminDashboardPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                      <Unlock className="w-5 h-5 text-amber-400" /> Student Unlock Requests
+                      <Unlock className="w-5 h-5 text-amber-400" /> Student Task Unlock Desk
                     </h2>
                     <p className="text-xs text-ink-400 mt-0.5">
-                      Fast-track students who completed prior work and requested early access to next milestone modules.
+                      Review individual deadline extension & early access requests. Toggle task submission forms ON/OFF for each student.
                     </p>
                   </div>
-                  <button
-                    onClick={fetchUnlockRequests}
-                    className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition self-start sm:self-auto"
-                    title="Refresh Unlock Requests"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={unlockFilter}
+                      onChange={(e) => setUnlockFilter(e.target.value)}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Unlock Requests</option>
+                      <option value="pending">Pending Approval</option>
+                      <option value="approved">Approved / Form Active (ON)</option>
+                      <option value="rejected">Rejected / Form Locked (OFF)</option>
+                    </select>
+                    <button
+                      onClick={fetchUnlockRequests}
+                      className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition self-start sm:self-auto"
+                      title="Refresh Unlock Requests"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/30">
@@ -2179,8 +2195,8 @@ export default function AdminDashboardPage() {
                           <th className="px-5 py-3 font-medium">Requested Module</th>
                           <th className="px-5 py-3 font-medium">Student Reason & Justification</th>
                           <th className="px-5 py-3 font-medium">Requested At</th>
-                          <th className="px-5 py-3 font-medium">Status</th>
-                          <th className="px-5 py-3 font-medium text-right">Actions</th>
+                          <th className="px-5 py-3 font-medium">Submission Form State</th>
+                          <th className="px-5 py-3 font-medium text-right">Form Controls (ON / OFF)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-ink-800/50">
@@ -2193,7 +2209,7 @@ export default function AdminDashboardPage() {
                         ) : unlockRequests.length === 0 ? (
                           <tr>
                             <td colSpan={6} className="text-center py-12 text-ink-500 text-sm">
-                              No unlock requests currently pending.
+                              No unlock requests found.
                             </td>
                           </tr>
                         ) : (
@@ -2221,38 +2237,68 @@ export default function AdminDashboardPage() {
                               </td>
                               <td className="px-5 py-4">
                                 <span
-                                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                  className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border inline-flex items-center gap-1.5 ${
                                     req.status === "approved"
                                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                                       : req.status === "rejected"
                                       ? "bg-red-500/10 text-red-400 border-red-500/30"
-                                      : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                                      : "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
                                   }`}
                                 >
-                                  {req.status}
+                                  {req.status === "approved" ? (
+                                    <>
+                                      <Unlock className="w-3 h-3 text-emerald-400" /> FORM UNLOCKED (ON)
+                                    </>
+                                  ) : req.status === "rejected" ? (
+                                    <>
+                                      <Lock className="w-3 h-3 text-red-400" /> FORM LOCKED (OFF)
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Clock className="w-3 h-3 text-amber-400" /> PENDING REVIEW
+                                    </>
+                                  )}
                                 </span>
                               </td>
                               <td className="px-5 py-4 text-right">
-                                {req.status === "pending" ? (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <button
-                                      disabled={actioningUnlockId === req.id}
-                                      onClick={() => handleUnlockAction(req.id, "approve")}
-                                      className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition disabled:opacity-50"
-                                    >
-                                      Approve & Unlock
-                                    </button>
+                                <div className="flex items-center justify-end gap-2">
+                                  {req.status === "approved" ? (
                                     <button
                                       disabled={actioningUnlockId === req.id}
                                       onClick={() => handleUnlockAction(req.id, "reject")}
-                                      className="px-3 py-1 bg-ink-800 hover:bg-red-600/80 text-ink-300 hover:text-white rounded text-xs font-medium transition disabled:opacity-50"
+                                      className="px-3 py-1.5 bg-ink-900 hover:bg-red-600/30 text-ink-300 hover:text-red-300 border border-ink-800 hover:border-red-500/40 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                                      title="Lock this student's task submission form"
                                     >
-                                      Reject
+                                      <Lock className="w-3.5 h-3.5 text-red-400" /> Turn OFF (Lock Form)
                                     </button>
-                                  </div>
-                                ) : (
-                                  <span className="text-xs text-ink-500 font-mono">Action recorded</span>
-                                )}
+                                  ) : req.status === "rejected" ? (
+                                    <button
+                                      disabled={actioningUnlockId === req.id}
+                                      onClick={() => handleUnlockAction(req.id, "approve")}
+                                      className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                                      title="Unlock this student's task submission form"
+                                    >
+                                      <Unlock className="w-3.5 h-3.5 text-emerald-400" /> Turn ON (Unlock Form)
+                                    </button>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        disabled={actioningUnlockId === req.id}
+                                        onClick={() => handleUnlockAction(req.id, "approve")}
+                                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                                      >
+                                        <Unlock className="w-3.5 h-3.5" /> Approve & Turn ON
+                                      </button>
+                                      <button
+                                        disabled={actioningUnlockId === req.id}
+                                        onClick={() => handleUnlockAction(req.id, "reject")}
+                                        className="px-3 py-1.5 bg-ink-800 hover:bg-red-600/80 text-ink-300 hover:text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5 disabled:opacity-50"
+                                      >
+                                        <Lock className="w-3.5 h-3.5" /> Reject (Keep OFF)
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           ))
