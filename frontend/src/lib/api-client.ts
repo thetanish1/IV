@@ -44,10 +44,19 @@ export async function apiRequest<T>(
 }
 
 export function getExportUrl(type: 'applications' | 'payments', params?: Record<string, string>): string {
- const token = typeof window !=="undefined"? localStorage.getItem("token") :"";
- const query = new URLSearchParams(params || {});
- if (token) {
- query.set("token", token);
- }
- return `${API_BASE_URL}/admin/export/${type}?${query.toString()}`;
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
+  const query = new URLSearchParams(params || {});
+  if (token) {
+    query.set("token", token);
+  }
+  return `${API_BASE_URL}/admin/export/${type}?${query.toString()}`;
 }
+
+export function getImageUrl(url?: string | null): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const cleanBase = API_BASE_URL.replace(/\/api\/?$/, "").replace(/\/$/, "");
+  const cleanPath = url.startsWith("/") ? url : `/${url}`;
+  return `${cleanBase}${cleanPath}`;
+}
+

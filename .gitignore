@@ -22,3 +22,8 @@ frontend/out/
 # Uploads
 backend/uploads/resumes/*
 !backend/uploads/resumes/.gitkeep
+backend/uploads/doubts/*
+!backend/uploads/doubts/.gitkeep
+
+# TypeScript
+*.tsbuildinfo

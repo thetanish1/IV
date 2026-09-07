@@ -69,8 +69,9 @@ import {
   SubmissionAdminItem,
   UnlockRequestAdminItem,
   StudentDoubtItem,
+  ContactQueryItem,
 } from "@/types";
-import { apiRequest } from "@/lib/api-client";
+import { apiRequest, getImageUrl } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
 import { FadeIn } from "@/components/animations/FadeIn";
 import AuthGuard from "@/components/AuthGuard";
@@ -91,7 +92,7 @@ const getResumeUrl = (filename?: string | null) => {
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts" | "mailer"
+    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts" | "contacts" | "mailer"
   >("overview");
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -134,6 +135,20 @@ export default function AdminDashboardPage() {
   const [doubtReplyText, setDoubtReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
 
+  // Contact Queries State
+  const [contactsList, setContactsList] = useState<ContactQueryItem[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [contactFilter, setContactFilter] = useState("all");
+  const [contactSearch, setContactSearch] = useState("");
+  const [contactPage, setContactPage] = useState(1);
+  const [contactTotalPages, setContactTotalPages] = useState(1);
+  const [contactTotalCount, setContactTotalCount] = useState(0);
+  const [replyingContact, setReplyingContact] = useState<ContactQueryItem | null>(null);
+  const [contactReplyText, setContactReplyText] = useState("");
+  const [sendingContactReply, setSendingContactReply] = useState(false);
+  const [deletingContactId, setDeletingContactId] = useState<number | null>(null);
+  const [deletingAllContacts, setDeletingAllContacts] = useState(false);
+
   // Applications Table State
   const [appsData, setAppsData] = useState<PaginatedResult<InternshipApplicationResponse>>({
     total: 0,
@@ -150,6 +165,8 @@ export default function AdminDashboardPage() {
   // Selected Application for Detail Modal
   const [selectedApp, setSelectedApp] = useState<InternshipApplicationResponse | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [deletingAppId, setDeletingAppId] = useState<number | null>(null);
+  const [deletingAllApps, setDeletingAllApps] = useState(false);
 
   // Users Table State
   const [usersData, setUsersData] = useState<PaginatedResult<SiteUserItem>>({
@@ -252,6 +269,9 @@ export default function AdminDashboardPage() {
     if (activeTab === "doubts" || activeTab === "overview") {
       fetchDoubts();
     }
+    if (activeTab === "contacts" || activeTab === "overview") {
+      fetchContacts();
+    }
   }, [
     activeTab,
     appsSearch,
@@ -269,6 +289,9 @@ export default function AdminDashboardPage() {
     certSearch,
     subStatusFilter,
     doubtFilter,
+    contactFilter,
+    contactSearch,
+    contactPage,
   ]);
 
   const fetchStats = async () => {
@@ -404,10 +427,66 @@ export default function AdminDashboardPage() {
         ...prev,
         items: (prev?.items || []).map((item) => (item.id === appId ? { ...item, status: newStatus } : item)),
       }));
+      fetchStats();
     } catch (err) {
       console.error("Failed to update status", err);
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleDeleteApp = async (appId: number, studentName?: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete the application for "${studentName || `ID #${appId}`}" from the database?\n\nThis will also remove any related submissions, unlock requests, and doubts.`
+      )
+    ) {
+      return;
+    }
+    setDeletingAppId(appId);
+    try {
+      await apiRequest(`/admin/applications/${appId}`, {
+        method: "DELETE",
+      });
+      if (selectedApp?.id === appId) {
+        setSelectedApp(null);
+      }
+      setAppsData((prev) => ({
+        ...prev,
+        total: Math.max(0, (prev?.total || 1) - 1),
+        items: (prev?.items || []).filter((item) => item.id !== appId),
+      }));
+      fetchStats();
+    } catch (err) {
+      console.error("Failed to delete application", err);
+      alert("Failed to delete application. Please try again.");
+    } finally {
+      setDeletingAppId(null);
+    }
+  };
+
+  const handleDeleteAllApps = async () => {
+    const confirmation = prompt(
+      "⚠️ DANGER: Type 'DELETE ALL' to permanently erase ALL internship applications and student submissions from the database:"
+    );
+    if (confirmation !== "DELETE ALL") {
+      if (confirmation !== null) alert("Operation cancelled. Confirmation text did not match.");
+      return;
+    }
+    setDeletingAllApps(true);
+    try {
+      await apiRequest("/admin/applications/all", {
+        method: "DELETE",
+      });
+      setSelectedApp(null);
+      setAppsData({ total: 0, page: 1, limit: 10, total_pages: 1, items: [] });
+      fetchStats();
+      alert("All internship applications have been successfully deleted from the database.");
+    } catch (err) {
+      console.error("Failed to delete all applications", err);
+      alert("Failed to delete all applications. Please try again.");
+    } finally {
+      setDeletingAllApps(false);
     }
   };
 
@@ -621,17 +700,126 @@ export default function AdminDashboardPage() {
       const updated = await apiRequest<StudentDoubtItem>(`/admin/doubts/${replyingDoubt.id}/reply`, {
         method: "POST",
         body: JSON.stringify({
-          reply: doubtReplyText.trim(),
-          answered_by: "InternVision HR & Mentor Team",
+          admin_reply: doubtReplyText.trim(),
         }),
       });
-      setDoubtsList((prev) => (Array.isArray(prev) ? prev : []).map((d) => (d.id === replyingDoubt.id ? updated : d)));
+      setDoubtsList((prev) => (Array.isArray(prev) ? prev : []).map((d) => (d.id === replyingDoubt.id ? { ...d, admin_reply: doubtReplyText.trim(), status: "answered" } : d)));
       setReplyingDoubt(null);
       setDoubtReplyText("");
     } catch (err) {
       console.error("Failed to send doubt reply", err);
+      alert("Failed to send reply. Please check your connection.");
     } finally {
       setSendingReply(false);
+    }
+  };
+
+  const fetchContacts = async () => {
+    setLoadingContacts(true);
+    try {
+      const params = new URLSearchParams();
+      if (contactFilter !== "all") params.set("status", contactFilter);
+      if (contactSearch.trim()) params.set("q", contactSearch.trim());
+      params.set("page", String(contactPage));
+      params.set("limit", "15");
+      const data = await apiRequest<{
+        total: number;
+        page: number;
+        limit: number;
+        total_pages: number;
+        items: ContactQueryItem[];
+      }>(`/admin/contacts?${params.toString()}`);
+      if (data && Array.isArray(data.items)) {
+        setContactsList(data.items);
+        setContactTotalPages(data.total_pages || 1);
+        setContactTotalCount(data.total || 0);
+      } else {
+        setContactsList([]);
+      }
+    } catch (err) {
+      console.error("Failed to load contact queries", err);
+      setContactsList([]);
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const handleUpdateContactStatus = async (id: number, newStatus: string) => {
+    try {
+      await apiRequest(`/admin/contacts/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
+      });
+      setContactsList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c))
+      );
+      fetchStats();
+    } catch (err) {
+      console.error("Failed to update contact status", err);
+    }
+  };
+
+  const handleSendContactReply = async () => {
+    if (!replyingContact || !contactReplyText.trim()) return;
+    setSendingContactReply(true);
+    try {
+      await apiRequest(`/admin/contacts/${replyingContact.id}/reply`, {
+        method: "POST",
+        body: JSON.stringify({ admin_reply: contactReplyText.trim() }),
+      });
+      setContactsList((prev) =>
+        prev.map((c) =>
+          c.id === replyingContact.id
+            ? {
+                ...c,
+                status: "replied",
+                admin_reply: contactReplyText.trim(),
+                replied_at: new Date().toISOString(),
+              }
+            : c
+        )
+      );
+      setReplyingContact(null);
+      setContactReplyText("");
+      fetchStats();
+    } catch (err) {
+      console.error("Failed to send contact reply", err);
+      alert("Failed to send reply email. Please check your network connection.");
+    } finally {
+      setSendingContactReply(false);
+    }
+  };
+
+  const handleDeleteContact = async (id: number, senderName: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete the inquiry from "${senderName}"?`)) return;
+    setDeletingContactId(id);
+    try {
+      await apiRequest(`/admin/contacts/${id}`, { method: "DELETE" });
+      setContactsList((prev) => prev.filter((c) => c.id !== id));
+      setContactTotalCount((prev) => Math.max(0, prev - 1));
+      fetchStats();
+    } catch (err) {
+      console.error("Failed to delete contact inquiry", err);
+      alert("Failed to delete contact inquiry.");
+    } finally {
+      setDeletingContactId(null);
+    }
+  };
+
+  const handleDeleteAllContacts = async () => {
+    const filterText = contactFilter !== "all" ? ` with status "${contactFilter}"` : " all";
+    if (!window.confirm(`Are you sure you want to PERMANENTLY DELETE${filterText} contact queries from the database? This action cannot be undone.`)) return;
+    setDeletingAllContacts(true);
+    try {
+      const params = contactFilter !== "all" ? `?status=${contactFilter}` : "";
+      await apiRequest(`/admin/contacts/all${params}`, { method: "DELETE" });
+      fetchContacts();
+      fetchStats();
+    } catch (err) {
+      console.error("Failed to delete all contact queries", err);
+      alert("Failed to delete contact queries.");
+    } finally {
+      setDeletingAllContacts(false);
     }
   };
 
@@ -674,60 +862,55 @@ export default function AdminDashboardPage() {
 
   const pendingUnlocksCount = (Array.isArray(unlockRequests) ? unlockRequests : []).filter((u) => u?.status === "pending").length;
   const openDoubtsCount = (Array.isArray(doubtsList) ? doubtsList : []).filter((d) => d?.status === "open").length;
+  const newContactsCount = stats?.new_contacts !== undefined ? stats.new_contacts : (Array.isArray(contactsList) ? contactsList : []).filter((c) => c?.status === "new").length;
+  const totalContactsCount = stats?.total_contacts !== undefined ? stats.total_contacts : contactTotalCount;
 
   return (
     <AuthGuard>
       <div className="min-h-screen bg-black text-ink-50 font-sans selection:bg-brand-500/30 pb-20">
         {/* TOP BAR */}
         <header className="border-b border-ink-800 bg-ink-950/80 sticky top-0 z-40 backdrop-blur-xl">
-          <div className="max-w-[90rem] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+          <div className="max-w-[90rem] mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center text-brand-400">
+              <div className="w-8 h-8 rounded bg-brand-600/20 border border-brand-500/40 flex items-center justify-center text-brand-400">
                 <Shield className="w-4 h-4" />
               </div>
-              <div>
-                <h1 className="text-sm font-semibold tracking-tight text-white">Admin Dashboard</h1>
-                <div className="text-[10px] text-ink-400">Super Admin: tanishdewase222@gmail.com</div>
-              </div>
+              <span className="font-bold text-sm tracking-tight text-white uppercase">
+                InternVision <span className="text-brand-400">Admin Control</span>
+              </span>
             </div>
 
-            {/* LIVE PORTAL TOGGLE SWITCHES (HOMEPAGE & NAVBAR VISIBILITY) */}
-            <div className="hidden md:flex items-center gap-3 bg-ink-900/90 border border-ink-800 px-4 py-1.5 rounded-xl shadow-inner">
-              <span className="text-[11px] font-semibold uppercase text-ink-400 tracking-wider flex items-center gap-1.5 mr-1">
-                <Sliders className="w-3.5 h-3.5 text-brand-400" /> Site Controls:
-              </span>
-
-              {/* Courses Toggle Button */}
+            {/* Feature Toggles: Courses & Careers */}
+            <div className="hidden md:flex items-center gap-3">
               <button
                 type="button"
                 disabled={updatingSettings}
                 onClick={() => handleToggleSetting("show_courses")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
+                className={`px-3 py-1.5 rounded text-xs font-semibold border flex items-center gap-1.5 transition ${
                   siteSettings.show_courses
-                    ? "bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm shadow-purple-500/10"
-                    : "bg-ink-950 text-ink-400 border-ink-800 hover:text-ink-200"
+                    ? "bg-brand-500/10 text-brand-400 border-brand-500/30 hover:bg-brand-500/20"
+                    : "bg-ink-900 text-ink-400 border-ink-800 hover:text-ink-200"
                 }`}
-                title="Toggle Courses link in navigation and homepage display"
+                title="Toggle Course Catalog visibility on frontend"
               >
                 {siteSettings.show_courses ? (
-                  <ToggleRight className="w-4 h-4 text-purple-400" />
+                  <ToggleRight className="w-4 h-4 text-brand-400" />
                 ) : (
                   <ToggleLeft className="w-4 h-4 text-ink-500" />
                 )}
                 <span>Courses: {siteSettings.show_courses ? "ON" : "OFF"}</span>
               </button>
 
-              {/* Careers Toggle Button */}
               <button
                 type="button"
                 disabled={updatingSettings}
                 onClick={() => handleToggleSetting("show_careers")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
+                className={`px-3 py-1.5 rounded text-xs font-semibold border flex items-center gap-1.5 transition ${
                   siteSettings.show_careers
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-500/10"
-                    : "bg-ink-950 text-ink-400 border-ink-800 hover:text-ink-200"
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
+                    : "bg-ink-900 text-ink-400 border-ink-800 hover:text-ink-200"
                 }`}
-                title="Toggle Careers portal link in navigation"
+                title="Toggle Careers Page visibility on frontend"
               >
                 {siteSettings.show_careers ? (
                   <ToggleRight className="w-4 h-4 text-emerald-400" />
@@ -750,7 +933,7 @@ export default function AdminDashboardPage() {
         <div className="max-w-[90rem] mx-auto px-6 py-8 space-y-8">
           {/* STATS CARDS */}
           <FadeIn delay={0.1} direction="up">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <div className="p-5 rounded-xl border border-ink-800 bg-ink-950/50 hover:bg-ink-900/50 transition-colors">
                 <div className="flex items-center justify-between text-ink-400 mb-3">
                   <span className="text-xs font-medium tracking-wide">Total Revenue</span>
@@ -798,6 +981,26 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="text-2xl font-semibold text-white">
                   {stats ? stats.successful_payments : "—"}
+                </div>
+              </div>
+
+              <div
+                onClick={() => setActiveTab("contacts")}
+                className="p-5 rounded-xl border border-ink-800 bg-ink-950/50 hover:border-cyan-500/40 hover:bg-ink-900/50 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between text-ink-400 mb-3">
+                  <span className="text-xs font-medium tracking-wide group-hover:text-cyan-400 transition-colors">Contact Inquiries</span>
+                  <Mail className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <div className="text-2xl font-semibold text-white">
+                    {totalContactsCount}
+                  </div>
+                  {newContactsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
+                      {newContactsCount} NEW
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -876,6 +1079,25 @@ export default function AdminDashboardPage() {
                 </span>
               )}
               {activeTab === "doubts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+            </button>
+            <button
+              onClick={() => setActiveTab("contacts")}
+              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                activeTab === "contacts" ? "text-white" : "text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              <Mail className="w-3.5 h-3.5 text-cyan-400" />
+              Contact Queries
+              {newContactsCount > 0 ? (
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
+                  {newContactsCount} NEW
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
+                  {totalContactsCount}
+                </span>
+              )}
+              {activeTab === "contacts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
             </button>
             <button
               onClick={() => setActiveTab("users")}
@@ -1152,6 +1374,19 @@ export default function AdminDashboardPage() {
                     >
                       <Download className="w-3.5 h-3.5" /> Export Excel
                     </button>
+                    <button
+                      onClick={handleDeleteAllApps}
+                      disabled={deletingAllApps}
+                      className="px-3 py-1.5 text-sm font-medium bg-red-950/60 border border-red-800/70 hover:bg-red-900 text-red-300 hover:text-white rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                      title="Delete all internship applications from database"
+                    >
+                      {deletingAllApps ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-red-400" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                      )}
+                      Delete All
+                    </button>
                   </div>
                 </div>
 
@@ -1250,12 +1485,26 @@ export default function AdminDashboardPage() {
                                 </span>
                               </td>
                               <td className="px-5 py-4">
-                                <button
-                                  onClick={() => setSelectedApp(app)}
-                                  className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-white rounded text-xs font-semibold border border-ink-700 flex items-center gap-1.5 transition"
-                                >
-                                  <Eye className="w-3.5 h-3.5" /> Review
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setSelectedApp(app)}
+                                    className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-white rounded text-xs font-semibold border border-ink-700 flex items-center gap-1.5 transition"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" /> Review
+                                  </button>
+                                  <button
+                                    disabled={deletingAppId === app.id}
+                                    onClick={() => handleDeleteApp(app.id, app.full_name)}
+                                    className="p-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-200 border border-red-800/50 rounded transition disabled:opacity-50"
+                                    title={`Delete application for ${app.full_name}`}
+                                  >
+                                    {deletingAppId === app.id ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))
@@ -2115,10 +2364,10 @@ export default function AdminDashboardPage() {
                         {d.image_url && (
                           <div className="mt-3 flex items-center gap-3 p-2.5 bg-black/50 border border-ink-800 rounded-lg max-w-md">
                             <img
-                              src={d.image_url.startsWith("http") ? d.image_url : `${apiBase}${d.image_url.startsWith("/") ? "" : "/"}${d.image_url}`}
+                              src={getImageUrl(d.image_url)}
                               alt="Error Screenshot"
                               className="w-14 h-14 object-cover rounded border border-ink-700 cursor-pointer hover:opacity-80 transition shrink-0"
-                              onClick={() => setExpandedDoubtImage(d.image_url?.startsWith("http") ? d.image_url : `${apiBase}${d.image_url?.startsWith("/") ? "" : "/"}${d.image_url}`)}
+                              onClick={() => setExpandedDoubtImage(getImageUrl(d.image_url))}
                             />
                             <div className="flex-1 min-w-0">
                               <div className="text-xs font-bold text-pink-400 flex items-center gap-1.5">
@@ -2126,7 +2375,7 @@ export default function AdminDashboardPage() {
                               </div>
                               <button
                                 type="button"
-                                onClick={() => setExpandedDoubtImage(d.image_url?.startsWith("http") ? d.image_url : `${apiBase}${d.image_url?.startsWith("/") ? "" : "/"}${d.image_url}`)}
+                                onClick={() => setExpandedDoubtImage(getImageUrl(d.image_url))}
                                 className="text-[11px] text-ink-400 hover:text-white underline mt-1 flex items-center gap-1"
                               >
                                 <ZoomIn className="w-3 h-3" /> Click to inspect visual error
@@ -2155,6 +2404,210 @@ export default function AdminDashboardPage() {
                     ))
                   )}
                 </div>
+              </div>
+            </FadeIn>
+          )}
+
+          {/* ─────────────────── CONTACT QUERIES SECTION ─────────────────── */}
+          {(activeTab === "contacts" || activeTab === "overview") && (
+            <FadeIn delay={0.35} direction="up">
+              <div className="space-y-4 pt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-cyan-400" /> Contact Inquiries & Candidate Queries
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      Direct inquiries sent via the public contact page. Reply via email and resolve student queries.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="relative w-full sm:w-60">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-ink-400" />
+                      <input
+                        type="text"
+                        placeholder="Search contact queries..."
+                        value={contactSearch}
+                        onChange={(e) => {
+                          setContactSearch(e.target.value);
+                          setContactPage(1);
+                        }}
+                        className="w-full bg-ink-950 border border-ink-800 rounded-lg pl-9 pr-3 py-1.5 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                      />
+                    </div>
+
+                    <select
+                      value={contactFilter}
+                      onChange={(e) => {
+                        setContactFilter(e.target.value);
+                        setContactPage(1);
+                      }}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Inquiries</option>
+                      <option value="new">New / Unread</option>
+                      <option value="read">Read / In-Progress</option>
+                      <option value="replied">Replied / Resolved</option>
+                    </select>
+
+                    <button
+                      onClick={fetchContacts}
+                      className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+                      title="Refresh Contact Queries"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+
+                    {contactsList.length > 0 && (
+                      <button
+                        disabled={deletingAllContacts}
+                        onClick={handleDeleteAllContacts}
+                        className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+                        title="Permanently delete all contact queries"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete All
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {loadingContacts ? (
+                    <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-cyan-400" />
+                    </div>
+                  ) : contactsList.length === 0 ? (
+                    <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30 text-ink-500 text-sm">
+                      No contact inquiries found.
+                    </div>
+                  ) : (
+                    contactsList.map((c) => (
+                      <div
+                        key={c.id}
+                        className={`p-5 rounded-xl border transition-all ${
+                          c.status === "new"
+                            ? "bg-cyan-950/10 border-cyan-500/40 shadow-sm shadow-cyan-500/10"
+                            : c.status === "replied"
+                            ? "bg-emerald-950/10 border-emerald-500/30"
+                            : "bg-ink-950/30 border-ink-800 hover:border-ink-700"
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-ink-800/60">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                  c.status === "new"
+                                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 animate-pulse"
+                                    : c.status === "replied"
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                    : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                                }`}
+                              >
+                                {c.status === "new" ? "● NEW INQUIRY" : c.status === "replied" ? "✓ REPLIED" : "READ"}
+                              </span>
+                              <h3 className="text-base font-bold text-white">{c.subject}</h3>
+                            </div>
+                            <div className="text-xs text-ink-400 mt-1 flex items-center gap-2 flex-wrap">
+                              <span>From: <strong className="text-white">{c.name}</strong></span>
+                              <span>•</span>
+                              <a
+                                href={`mailto:${c.email}`}
+                                className="text-cyan-400 hover:underline flex items-center gap-1 font-mono"
+                              >
+                                {c.email}
+                              </a>
+                              <span>•</span>
+                              <span className="text-ink-500">
+                                {c.created_at ? new Date(c.created_at).toLocaleString() : ""}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 self-start flex-wrap">
+                            <button
+                              onClick={() => {
+                                setReplyingContact(c);
+                                setContactReplyText(c.admin_reply || "");
+                              }}
+                              className="px-3.5 py-1.5 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap cursor-pointer"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              {c.admin_reply ? "Edit Reply / Re-send" : "Reply to User"}
+                            </button>
+
+                            {c.status === "new" && (
+                              <button
+                                onClick={() => handleUpdateContactStatus(c.id, "read")}
+                                className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-ink-300 border border-ink-700 rounded-lg text-xs font-medium transition whitespace-nowrap"
+                                title="Mark inquiry as read"
+                              >
+                                Mark Read
+                              </button>
+                            )}
+
+                            <button
+                              disabled={deletingContactId === c.id}
+                              onClick={() => handleDeleteContact(c.id, c.name)}
+                              className="p-1.5 text-ink-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition"
+                              title="Delete inquiry"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Inquiry Message Body */}
+                        <div className="mt-3 text-sm text-ink-200 whitespace-pre-wrap leading-relaxed bg-ink-900/40 p-4 rounded-lg border border-ink-800/80">
+                          {c.message}
+                        </div>
+
+                        {/* Official Admin Reply Snippet if answered */}
+                        {c.admin_reply && (
+                          <div className="mt-3 p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
+                            <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                              <span>✓ Official Reply Sent ({c.replied_by || "Admin Support"})</span>
+                              {c.replied_at && (
+                                <span className="text-ink-500 font-normal">
+                                  {new Date(c.replied_at).toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-ink-200 whitespace-pre-wrap leading-relaxed">
+                              {c.admin_reply}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Pagination for Contact Queries */}
+                {contactTotalPages > 1 && (
+                  <div className="flex items-center justify-between pt-4 border-t border-ink-800 text-xs text-ink-400">
+                    <div>
+                      Page {contactPage} of {contactTotalPages} ({contactTotalCount} inquiries)
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled={contactPage <= 1}
+                        onClick={() => setContactPage((p) => Math.max(1, p - 1))}
+                        className="px-3 py-1.5 bg-ink-900 border border-ink-800 rounded text-xs text-white disabled:opacity-40 hover:bg-ink-800 transition"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        disabled={contactPage >= contactTotalPages}
+                        onClick={() => setContactPage((p) => Math.min(contactTotalPages, p + 1))}
+                        className="px-3 py-1.5 bg-ink-900 border border-ink-800 rounded text-xs text-white disabled:opacity-40 hover:bg-ink-800 transition"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </FadeIn>
           )}
@@ -2644,7 +3097,7 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     disabled={updatingStatus}
                     onClick={() => handleUpdateAppStatus(selectedApp.id, "accepted")}
@@ -2658,6 +3111,14 @@ export default function AdminDashboardPage() {
                     className="px-3.5 py-2 bg-red-600/80 hover:bg-red-600 text-white rounded text-xs font-bold transition disabled:opacity-50"
                   >
                     Reject
+                  </button>
+                  <button
+                    disabled={deletingAppId === selectedApp.id}
+                    onClick={() => handleDeleteApp(selectedApp.id, selectedApp.full_name)}
+                    className="px-3 py-2 bg-red-950 hover:bg-red-900 text-red-300 hover:text-white rounded text-xs font-bold border border-red-800 transition flex items-center gap-1.5 disabled:opacity-50"
+                    title="Permanently delete application"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-400" /> Delete
                   </button>
                 </div>
               </div>
@@ -2854,6 +3315,209 @@ export default function AdminDashboardPage() {
                   className="w-full h-full border-0"
                   title="Candidate Resume Preview"
                 />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────── DOUBT REPLY MODAL ─────────────────── */}
+        {replyingDoubt && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setReplyingDoubt(null)}
+          >
+            <div
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-ink-950 border-2 border-pink-500/40 p-6 sm:p-8 shadow-2xl space-y-6 rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setReplyingDoubt(null)}
+                className="absolute top-4 right-4 p-2 text-ink-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="border-b border-ink-800 pb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-bold uppercase tracking-wider rounded">
+                  <MessageSquare className="w-3.5 h-3.5" /> Technical Mentor Resolution
+                </div>
+                <h2 className="text-xl font-black text-white mt-2">
+                  {replyingDoubt.subject}
+                </h2>
+                <div className="text-xs text-ink-400 mt-1">
+                  Student: <strong className="text-white">{replyingDoubt.student_name}</strong> ({replyingDoubt.student_email}) •{" "}
+                  <span className="text-brand-400 font-mono">{replyingDoubt.domain_track}</span> •{" "}
+                  <span className="text-ink-300 font-mono">{replyingDoubt.module_name}</span>
+                </div>
+              </div>
+
+              {/* Doubt Question */}
+              <div className="space-y-2 bg-ink-900/60 p-4 border border-ink-800 rounded-lg">
+                <h4 className="text-xs font-bold uppercase text-ink-400 tracking-wider">Student Question / Blocker</h4>
+                <p className="text-xs text-ink-200 leading-relaxed whitespace-pre-wrap">{replyingDoubt.question}</p>
+              </div>
+
+              {/* Code Snippet if any */}
+              {replyingDoubt.code_snippet && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase text-ink-400 tracking-wider">Code Snippet</h4>
+                  <div className="p-3 bg-black/80 border border-ink-800 rounded-lg font-mono text-xs text-pink-300 overflow-x-auto">
+                    <pre>{replyingDoubt.code_snippet}</pre>
+                  </div>
+                </div>
+              )}
+
+              {/* Attached Error Screenshot */}
+              {replyingDoubt.image_url && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase text-ink-400 tracking-wider flex items-center gap-1.5">
+                    <ImageIcon className="w-3.5 h-3.5 text-pink-400" /> Attached Screenshot:
+                  </h4>
+                  <div className="relative inline-block group rounded-lg overflow-hidden border border-ink-800 bg-black/50">
+                    <img
+                      src={getImageUrl(replyingDoubt.image_url)}
+                      alt="Error Screenshot"
+                      className="max-h-56 w-auto object-contain cursor-pointer hover:opacity-90 transition"
+                      onClick={() => setExpandedDoubtImage(getImageUrl(replyingDoubt.image_url))}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setExpandedDoubtImage(getImageUrl(replyingDoubt.image_url))}
+                      className="absolute bottom-2 right-2 px-2.5 py-1 bg-black/80 text-white rounded text-[10px] font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition shadow-lg"
+                    >
+                      <ZoomIn className="w-3 h-3" /> Full View
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Mentor Reply Input */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-brand-400 tracking-wider">
+                  Mentor Solution & Resolution *
+                </label>
+                <textarea
+                  rows={5}
+                  required
+                  placeholder="Explain the solution, code fix, or step-by-step guidance for the student..."
+                  value={doubtReplyText}
+                  onChange={(e) => setDoubtReplyText(e.target.value)}
+                  className="w-full bg-ink-900 border border-ink-700/80 rounded-lg p-3 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-pink-500"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-ink-800">
+                <button
+                  type="button"
+                  onClick={() => setReplyingDoubt(null)}
+                  className="px-4 py-2 bg-ink-900 hover:bg-ink-800 text-ink-300 rounded text-xs font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={sendingReply || !doubtReplyText.trim()}
+                  onClick={handleSendDoubtReply}
+                  className="px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded text-xs font-bold flex items-center gap-2 transition disabled:opacity-50 cursor-pointer shadow-lg shadow-pink-600/30"
+                >
+                  {sendingReply ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Sending Resolution...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" /> Send Solution to Student
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────── CONTACT QUERY REPLY MODAL ─────────────────── */}
+        {replyingContact && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setReplyingContact(null)}
+          >
+            <div
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-ink-950 border-2 border-cyan-500/40 p-6 sm:p-8 shadow-2xl space-y-6 rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setReplyingContact(null)}
+                className="absolute top-4 right-4 p-2 text-ink-400 hover:text-white transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="border-b border-ink-800 pb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-wider rounded">
+                  <Mail className="w-3.5 h-3.5" /> Official Email Response
+                </div>
+                <h2 className="text-xl font-black text-white mt-2">
+                  {replyingContact.subject}
+                </h2>
+                <div className="text-xs text-ink-400 mt-1 flex items-center gap-2 flex-wrap">
+                  <span>To: <strong className="text-white">{replyingContact.name}</strong></span>
+                  <span>•</span>
+                  <span className="text-cyan-400 font-mono">{replyingContact.email}</span>
+                  <span>•</span>
+                  <span className="text-ink-500">
+                    Received: {replyingContact.created_at ? new Date(replyingContact.created_at).toLocaleString() : ""}
+                  </span>
+                </div>
+              </div>
+
+              {/* Original Inquiry Message */}
+              <div className="space-y-2 bg-ink-900/60 p-4 border border-ink-800 rounded-lg">
+                <h4 className="text-xs font-bold uppercase text-ink-400 tracking-wider">Original Message from User</h4>
+                <p className="text-xs text-ink-200 leading-relaxed whitespace-pre-wrap">{replyingContact.message}</p>
+              </div>
+
+              {/* Admin Reply Input */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-cyan-400 tracking-wider">
+                  Official Response Message *
+                </label>
+                <textarea
+                  rows={5}
+                  required
+                  placeholder="Type your official response to this inquiry..."
+                  value={contactReplyText}
+                  onChange={(e) => setContactReplyText(e.target.value)}
+                  className="w-full bg-ink-900 border border-ink-700/80 rounded-lg p-3 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-cyan-500"
+                />
+                <p className="text-[11px] text-ink-400">
+                  ✦ Sending this reply will immediately dispatch a branded email directly to <strong className="text-white">{replyingContact.email}</strong> and mark this ticket as <span className="text-emerald-400">Replied</span>.
+                </p>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-ink-800">
+                <button
+                  type="button"
+                  onClick={() => setReplyingContact(null)}
+                  className="px-4 py-2 bg-ink-900 hover:bg-ink-800 text-ink-300 rounded text-xs font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={sendingContactReply || !contactReplyText.trim()}
+                  onClick={handleSendContactReply}
+                  className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold flex items-center gap-2 transition disabled:opacity-50 cursor-pointer shadow-lg shadow-cyan-600/30"
+                >
+                  {sendingContactReply ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Dispatching Email...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" /> Send Email Response
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

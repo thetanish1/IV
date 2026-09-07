@@ -8,3 +8,5 @@ class DashboardStats(BaseModel):
     successful_payments: int
     pending_applications: int
     total_users: int = 0
+    total_contacts: int = 0
+    new_contacts: int = 0

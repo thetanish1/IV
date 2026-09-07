@@ -1,15 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, MapPin, Send, CheckCircle2, Sparkles } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle2, Sparkles, Loader2, AlertCircle } from "lucide-react";
+import { apiRequest } from "@/lib/api-client";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError(null);
+    setLoading(true);
+
+    try {
+      await apiRequest("/contact", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err?.message || "Failed to send message. Please try again or email us directly.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,11 +82,28 @@ export default function ContactPage() {
               </div>
               <h3 className="text-2xl font-bold text-white">Message Received!</h3>
               <p className="text-ink-400 text-sm max-w-md mx-auto">
-                Thank you for reaching out, {formData.name}. Our team will get back to you at {formData.email} within 24 hours.
+                Thank you for reaching out, <span className="text-white font-medium">{formData.name}</span>. Your message has been routed directly to our admin team and we will reply to <span className="text-brand-400">{formData.email}</span> shortly.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmitted(false);
+                  setFormData({ name: "", email: "", subject: "", message: "" });
+                }}
+                className="mt-4 px-5 py-2 text-xs font-semibold text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/30 transition"
+              >
+                Send Another Message
+              </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 flex items-start gap-2 text-rose-400 text-xs">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs text-ink-300 font-medium">Your Name *</label>
@@ -122,9 +155,18 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-brand-600/30 flex items-center justify-center gap-2 transition"
+                disabled={loading}
+                className="w-full py-3.5 font-bold bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white shadow-brand-600/30 flex items-center justify-center gap-2 transition cursor-pointer"
               >
-                <Send className="w-4 h-4" /> Send Message
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Sending Message...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" /> Send Message
+                  </>
+                )}
               </button>
             </form>
           )}

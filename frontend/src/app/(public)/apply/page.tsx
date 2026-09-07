@@ -76,10 +76,10 @@ export default function InternshipApplyPage() {
     linkedin_url: "",
     github_url: "",
     portfolio_url: "",
-    skills: "Python, React, Machine Learning, FastAPI, PostgreSQL",
+    skills: "",
     experience_description: "",
     cover_letter: "",
-    role_preference: "AI & Machine Learning Engineering",
+    role_preference: "",
     duration: "3 Months",
     resume_filename: "",
     resume_original_name: "",
@@ -88,6 +88,7 @@ export default function InternshipApplyPage() {
   // Resume Upload State
   const [uploadingResume, setUploadingResume] = useState(false);
   const [resumeUploadError, setResumeUploadError] = useState("");
+  const [refreshingStatus, setRefreshingStatus] = useState(false);
 
   const apiBase = (
     process.env.NEXT_PUBLIC_API_URL ||
@@ -132,6 +133,7 @@ export default function InternshipApplyPage() {
   };
 
   const fetchLiveAppStatus = async (userEmail: string) => {
+    setRefreshingStatus(true);
     try {
       const res = await apiRequest<any>(`/portal/my-internship?email=${encodeURIComponent(userEmail)}`);
       if (res && res.has_application) {
@@ -142,12 +144,18 @@ export default function InternshipApplyPage() {
           duration: res.duration,
           status: res.status,
           is_accepted: res.is_accepted,
+          is_rejected: res.is_rejected,
         };
         setExistingApplication(appObj);
         localStorage.setItem("internship_application_submitted", JSON.stringify(appObj));
+      } else {
+        setExistingApplication(null);
+        localStorage.removeItem("internship_application_submitted");
       }
     } catch {
       // ignore
+    } finally {
+      setRefreshingStatus(false);
     }
   };
 
@@ -388,8 +396,21 @@ export default function InternshipApplyPage() {
       return;
     }
 
+    if (!formData.role_preference || !formData.role_preference.trim()) {
+      setErrorMsg("Please choose your Preferred Engineering Track / Domain before submitting.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (!formData.skills || !formData.skills.trim()) {
+      setErrorMsg("Please specify your technical skills (e.g. React, Python, SQL, Docker).");
+      setSubmitting(false);
+      return;
+    }
+
     if (!formData.resume_filename) {
       setResumeUploadError("Please upload your resume (PDF or DOC) before submitting.");
+      setSubmitting(false);
       return;
     }
 
@@ -412,7 +433,7 @@ export default function InternshipApplyPage() {
           college: formData.college,
           degree: formData.degree,
           year_of_study: formData.year_of_study,
-          skills: skillsArray.length > 0 ? skillsArray : ["AI & ML Engineering", "Full Stack Development"],
+          skills: skillsArray.length > 0 ? skillsArray : ["Full Stack Web Development"],
           duration: formData.duration,
           role_preference: formData.role_preference,
           linkedin_url: formData.linkedin_url || undefined,
@@ -522,7 +543,7 @@ export default function InternshipApplyPage() {
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
                 <p className="text-xs text-emerald-200 leading-relaxed max-w-xl">
-                  🎉 <strong>Congratulations!</strong> Your internship has been officially accepted. You now have access to your domain task allocations, weekly time-gated submissions, and 2-way doubt resolution desk.
+                  🎉 <strong>Congratulations!</strong> Your internship application has been officially accepted by InternVision Tech. Your engineering workspace with weekly task allocations, time-gated submissions desk, and 1:1 doubt support is now unlocked!
                 </p>
 
                 <Link
@@ -531,6 +552,46 @@ export default function InternshipApplyPage() {
                 >
                   <Sparkles className="w-4 h-4" /> Go To My Student Portal →
                 </Link>
+              </div>
+            </div>
+          ) : ((existingApplication.status || "").toLowerCase() === "rejected" || existingApplication.is_rejected) ? (
+            <div className="bg-red-950/40 border-2 border-red-500/50 p-6 sm:p-8 rounded-xl shadow-xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-500/20 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 font-bold shrink-0">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-red-400">
+                      Admissions Notice
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-white">
+                      {existingApplication.role_preference || "Virtual Internship Track"}
+                    </h3>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-red-500/20 text-red-300 border border-red-500/40 rounded text-xs font-bold uppercase tracking-wider">
+                    Review Concluded
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-ink-300 leading-relaxed">
+                Thank you for your interest in the InternVision Tech Virtual Internship Program. Our engineering panel has completed reviewing candidate submissions for this cycle, and the current cohort capacity has been reached. We encourage you to continue developing your projects and apply for upcoming tracks.
+              </p>
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExistingApplication(null);
+                    localStorage.removeItem("internship_application_submitted");
+                  }}
+                  className="px-4 py-2 bg-ink-900 hover:bg-ink-800 border border-ink-700 text-white text-xs font-bold rounded transition"
+                >
+                  Submit New Application
+                </button>
               </div>
             </div>
           ) : (
@@ -571,9 +632,28 @@ export default function InternshipApplyPage() {
                 </div>
               </div>
 
-              <p className="text-xs text-emerald-300/80 leading-relaxed pt-1">
-                Your application is active and being evaluated by our senior engineering mentors. You will receive an onboarding confirmation email once reviewed.
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                <p className="text-xs text-emerald-300/80 leading-relaxed">
+                  Your application is active and being evaluated by our senior engineering mentors. As soon as the admin approves your application, your tasks and workspace will unlock immediately.
+                </p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => currentUser && fetchLiveAppStatus(currentUser.user_email)}
+                    disabled={refreshingStatus}
+                    className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 border border-ink-700 text-xs font-medium text-ink-300 hover:text-white rounded transition flex items-center gap-1.5"
+                  >
+                    {refreshingStatus ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Clock className="w-3.5 h-3.5" />}
+                    Refresh Status
+                  </button>
+                  <Link
+                    href="/portal"
+                    className="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded transition"
+                  >
+                    View Portal →
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
         </FadeIn>
@@ -1049,11 +1129,14 @@ export default function InternshipApplyPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Python, PyTorch, LLMs, React, Next.js, FastAPI, Docker, PostgreSQL"
+                  placeholder="e.g. React, Node.js, Python, TypeScript, SQL, Git, Docker, PyTorch"
                   value={formData.skills}
                   onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-3 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
                 />
+                <p className="text-[11px] text-ink-500">
+                  List your core programming languages, frameworks, libraries, and developer tools separated by commas.
+                </p>
               </div>
 
               <div className="space-y-1.5">
@@ -1061,13 +1144,16 @@ export default function InternshipApplyPage() {
                   <FileText className="w-3.5 h-3.5 text-brand-400" /> Experience & Projects Description *
                 </label>
                 <textarea
-                  rows={4}
+                  rows={6}
                   required
-                  placeholder="Describe your prior coding experience, AI/ML models built, web applications deployed, or technical problem solving..."
+                  placeholder="Detail your practical engineering experience, notable projects you have developed or deployed (web apps, AI/ML pipelines, backend services, mobile apps), key architectural decisions, problem solving, and relevant GitHub repositories..."
                   value={formData.experience_description}
                   onChange={(e) => setFormData({ ...formData, experience_description: e.target.value })}
-                  className="w-full bg-ink-900 border border-ink-700 p-4 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
+                  className="w-full min-h-[140px] bg-ink-900 border border-ink-700 p-4 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
                 />
+                <p className="text-[11px] text-ink-500">
+                  Highlighting real projects and links helps our engineering mentors fast-track your admission.
+                </p>
               </div>
 
               <div className="space-y-1.5">
@@ -1075,11 +1161,11 @@ export default function InternshipApplyPage() {
                   <Sparkles className="w-3.5 h-3.5 text-brand-400" /> Statement of Purpose / Why InternVision Tech?
                 </label>
                 <textarea
-                  rows={3}
-                  placeholder="Tell us why you want to join our Virtual Internship Program and what goals you want to accomplish..."
+                  rows={5}
+                  placeholder="Explain why you want to join the InternVision Tech Virtual Internship Program, what technical milestones you aim to achieve, and how this fits into your engineering career roadmap..."
                   value={formData.cover_letter}
                   onChange={(e) => setFormData({ ...formData, cover_letter: e.target.value })}
-                  className="w-full bg-ink-900 border border-ink-700 p-4 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
+                  className="w-full min-h-[120px] bg-ink-900 border border-ink-700 p-4 text-sm text-white placeholder-ink-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition leading-relaxed"
                 />
               </div>
             </div>
@@ -1178,14 +1264,19 @@ export default function InternshipApplyPage() {
                 <select
                   value={formData.role_preference}
                   onChange={(e) => setFormData({ ...formData, role_preference: e.target.value })}
-                  className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition cursor-pointer"
+                  required
+                  className="w-full bg-ink-900 border border-ink-700 px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition cursor-pointer"
                 >
+                  <option value="" disabled>Choose your domain...</option>
                   <option value="AI & Machine Learning Engineering">AI & Machine Learning Engineering (PyTorch, LangChain & LLMs)</option>
                   <option value="Full Stack Web Development">Full Stack Web Development (Next.js 15, React 19 & FastAPI)</option>
+                  <option value="Python Developer">Python Developer (FastAPI, Web Scraping, AsyncIO & Microservices)</option>
+                  <option value="Java Developer">Java Developer (Spring Boot, Core Java & Microservices)</option>
                   <option value="Backend Engineering">Backend Engineering (FastAPI, Python, Spring Boot & PostgreSQL)</option>
                   <option value="Frontend Engineering">Frontend Engineering (React, TypeScript & Tailwind CSS)</option>
                   <option value="Cloud DevOps & Kubernetes">Cloud DevOps & Kubernetes (Docker, AWS & CI/CD)</option>
                   <option value="Cyber Security & Ethical Hacking">Cyber Security & Ethical Hacking</option>
+                  <option value="UI/UX Design & Frontend">UI/UX Design & Modern Frontend Engineering</option>
                 </select>
               </div>
 

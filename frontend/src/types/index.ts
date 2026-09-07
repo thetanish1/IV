@@ -75,6 +75,21 @@ export interface DashboardStats {
   successful_payments: number;
   pending_applications: number;
   total_users?: number;
+  total_contacts?: number;
+  new_contacts?: number;
+}
+
+export interface ContactQueryItem {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'read' | 'replied' | string;
+  admin_reply?: string | null;
+  replied_by?: string | null;
+  replied_at?: string | null;
+  created_at: string;
 }
 
 export interface PaginatedResult<T> {
@@ -196,6 +211,7 @@ export interface StudentDoubtItem {
 export interface PortalData {
   has_application: boolean;
   is_accepted?: boolean;
+  is_rejected?: boolean;
   id?: number;
   full_name?: string;
   email?: string;

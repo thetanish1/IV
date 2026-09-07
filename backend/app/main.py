@@ -22,6 +22,8 @@ from app.internship.portal_router import router as portal_router
 from app.mailer.router import router as mailer_router
 from app.certificates.models import Certificate
 from app.mailer.models import SentEmail
+from app.shared.contact_models import ContactQuery
+from app.shared.contact_router import router as contact_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -232,7 +234,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Feature Routers mounted under /api and root for total path compatibility
-for r in [auth_router, courses_router, internship_router, portal_router, payments_router, dashboard_router, export_router, certificates_router, mailer_router]:
+for r in [auth_router, courses_router, internship_router, portal_router, payments_router, dashboard_router, export_router, certificates_router, mailer_router, contact_router]:
     app.include_router(r, prefix="/api")
     app.include_router(r)
 

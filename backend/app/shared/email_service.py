@@ -826,3 +826,84 @@ def send_course_enrollment_rejection_email(
 
     text = f"""Dear {display_name},\n\nAll seats for '{course_title}' are currently full. Please reapply for the next cohort.\n\nBest regards,\nInternVision Tech Admissions"""
     return _send_smtp_email(student_email, subject, html, text)
+
+
+# ─── 9. CONTACT QUERY EMAILS ──────────────────────────────────────────────────
+
+def send_contact_received_admin_alert(
+    sender_name: str,
+    sender_email: str,
+    subject_text: str,
+    message_text: str
+) -> bool:
+    """Dispatched when a student/partner submits an inquiry on the Contact page."""
+    admin_recipient = "internvisiontechhr@gmail.com"
+    subject = f"📬 New Contact Inquiry: {subject_text} (from {sender_name})"
+
+    body_html = f"""
+    <p style="margin: 0 0 16px;">Hello Admin Team,</p>
+    <p style="margin: 0 0 18px;">
+      A new inquiry has been submitted on the InternVision Tech Contact desk:
+    </p>
+
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #4f46e5; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+      <p style="margin: 0 0 8px; font-size: 13px;"><strong>Sender:</strong> {escape(sender_name)} (&lt;{escape(sender_email)}&gt;)</p>
+      <p style="margin: 0 0 8px; font-size: 13px;"><strong>Subject:</strong> {escape(subject_text)}</p>
+      <p style="margin: 0; font-size: 13px; white-space: pre-wrap;"><strong>Message:</strong><br/>{escape(message_text)}</p>
+    </div>
+    """
+
+    html = _build_base_email_template(
+        badge_text="Contact Inquiry",
+        badge_color="#4f46e5",
+        title="New Website Contact Message",
+        body_content_html=body_html,
+        cta_text="View in Admin Dashboard →",
+        cta_url="https://iv-theta.vercel.app/admin/dashboard",
+        accent_color="#4f46e5"
+    )
+
+    text = f"""New Contact Inquiry\nSender: {sender_name} ({sender_email})\nSubject: {subject_text}\n\nMessage:\n{message_text}\n\nView in dashboard: https://iv-theta.vercel.app/admin/dashboard"""
+    return _send_smtp_email(admin_recipient, subject, html, text)
+
+
+def send_contact_reply_email(
+    recipient_email: str,
+    recipient_name: str,
+    original_subject: str,
+    reply_message: str,
+    admin_name: str = "InternVision Support Team"
+) -> bool:
+    """Dispatched when an admin replies to a student contact query."""
+    display_name = recipient_name or recipient_email.split("@")[0]
+    subject = f"Re: {original_subject} | InternVision Tech Support"
+
+    body_html = f"""
+    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 18px;">
+      Thank you for reaching out to InternVision Tech. Our support team has reviewed your query:
+    </p>
+
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+      <p style="margin: 0 0 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">Response from {escape(admin_name)}:</p>
+      <p style="margin: 0; font-size: 14px; color: #1e293b; line-height: 1.6; white-space: pre-wrap;">{escape(reply_message)}</p>
+    </div>
+
+    <p style="margin: 0 0 14px; font-size: 13px; color: #64748b;">
+      If you have further questions, feel free to reply to this email or submit a follow-up query.
+    </p>
+    """
+
+    html = _build_base_email_template(
+        badge_text="Support Reply",
+        badge_color="#10b981",
+        title="Response to Your Inquiry",
+        body_content_html=body_html,
+        cta_text="Visit InternVision Tech →",
+        cta_url="https://iv-theta.vercel.app",
+        accent_color="#10b981"
+    )
+
+    text = f"""Dear {display_name},\n\nThank you for contacting InternVision Tech regarding '{original_subject}'.\n\nResponse:\n{reply_message}\n\nBest regards,\n{admin_name}\nInternVision Tech"""
+    return _send_smtp_email(recipient_email, subject, html, text)
+

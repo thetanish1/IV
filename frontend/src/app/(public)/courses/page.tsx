@@ -102,37 +102,95 @@ const DEFAULT_COURSES: Course[] = [
 ];
 
 export default function CoursesPage() {
- const [courses, setCourses] = useState<Course[]>(DEFAULT_COURSES);
- const [loading, setLoading] = useState(false);
- const [search, setSearch] = useState("");
- const [levelFilter, setLevelFilter] = useState("all");
+  const [courses, setCourses] = useState<Course[]>(DEFAULT_COURSES);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [showCourses, setShowCourses] = useState<boolean | null>(null);
 
- useEffect(() => {
- fetchCourses();
- }, [levelFilter]);
+  useEffect(() => {
+    checkSettings();
+    window.addEventListener("site-settings-changed", checkSettings);
+    return () => window.removeEventListener("site-settings-changed", checkSettings);
+  }, []);
 
- const fetchCourses = async () => {
- try {
- let endpoint = "/courses";
- const params = new URLSearchParams();
- if (levelFilter !== "all") params.set("level", levelFilter);
- if (params.toString()) endpoint += `?${params.toString()}`;
+  const checkSettings = async () => {
+    try {
+      const data = await apiRequest<{ show_courses?: boolean | string }>("/settings");
+      if (data) {
+        const isEnabled = data.show_courses === true || data.show_courses === "true";
+        setShowCourses(isEnabled);
+      } else {
+        setShowCourses(false);
+      }
+    } catch {
+      setShowCourses(false);
+    }
+  };
 
- const data = await apiRequest<Course[]>(endpoint, {}, 5000);
- if (data && data.length > 0) {
- setCourses(data);
- }
- } catch (err) {
- console.error("Failed to load courses", err);
- } finally {
- setLoading(false);
- }
- };
+  useEffect(() => {
+    if (showCourses) {
+      fetchCourses();
+    } else if (showCourses === false) {
+      setLoading(false);
+    }
+  }, [levelFilter, showCourses]);
 
- const filteredCourses = courses.filter((c) =>
- c.title.toLowerCase().includes(search.toLowerCase()) ||
- c.description.toLowerCase().includes(search.toLowerCase())
- );
+  const fetchCourses = async () => {
+    setLoading(true);
+    try {
+      let endpoint = "/courses";
+      const params = new URLSearchParams();
+      if (levelFilter !== "all") params.set("level", levelFilter);
+      if (params.toString()) endpoint += `?${params.toString()}`;
+
+      const data = await apiRequest<Course[]>(endpoint, {}, 5000);
+      if (data && data.length > 0) {
+        setCourses(data);
+      }
+    } catch (err) {
+      console.error("Failed to load courses", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (showCourses === false) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-28 text-center space-y-6">
+        <div className="w-16 h-16 bg-ink-900 border border-ink-800 text-ink-400 flex items-center justify-center mx-auto">
+          <BookOpen className="w-8 h-8 text-ink-500" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-white uppercase tracking-tight">
+            Course Catalog Offline
+          </h1>
+          <p className="text-ink-400 text-sm max-w-lg mx-auto">
+            Bootcamp courses and enrollment tracks are currently disabled or undergoing curriculum updates. Please check back later.
+          </p>
+        </div>
+        <div className="flex justify-center gap-4 pt-4">
+          <a
+            href="/"
+            className="px-6 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold border border-ink-700 transition"
+          >
+            Return Home
+          </a>
+          <a
+            href="/apply"
+            className="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow-brand-600/30"
+          >
+            Apply for Internship
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredCourses = courses.filter((c) =>
+    c.title.toLowerCase().includes(search.toLowerCase()) ||
+    c.description.toLowerCase().includes(search.toLowerCase())
+  );
 
  return (
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 space-y-16">

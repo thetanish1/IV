@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, U
 from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import cloudinary
 import cloudinary.uploader
 
@@ -440,7 +441,7 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
     """
     clean_email = email.strip().lower()
     app = db.query(InternshipApplication)\
-            .filter((InternshipApplication.email == clean_email) | (InternshipApplication.google_email == clean_email))\
+            .filter((func.lower(InternshipApplication.email) == clean_email) | (func.lower(InternshipApplication.google_email) == clean_email))\
             .order_by(InternshipApplication.created_at.desc())\
             .first()
 
@@ -448,10 +449,14 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
         return {
             "has_application": False,
             "status": "none",
+            "is_accepted": False,
+            "is_rejected": False,
             "message": "No internship application found. Apply to get started."
         }
 
-    is_accepted = (app.status or "").lower() in ("accepted", "approved")
+    raw_status = (app.status or "pending").strip().lower()
+    is_accepted = raw_status in ("accepted", "approved")
+    is_rejected = raw_status in ("rejected", "declined")
     
     if not is_accepted:
         return {
@@ -464,7 +469,8 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             "status": app.status,
             "created_at": app.created_at.isoformat() if app.created_at else None,
             "is_accepted": False,
-            "message": "Your application is currently under admissions review."
+            "is_rejected": is_rejected,
+            "message": "Your application was not selected for this cohort." if is_rejected else "Your application is currently under admissions review."
         }
 
     # Calculate days elapsed since acceptance/creation safely with tzinfo

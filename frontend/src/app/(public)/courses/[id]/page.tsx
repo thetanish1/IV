@@ -377,6 +377,27 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     student_phone: "",
     college: "",
   });
+  const [showCourses, setShowCourses] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    checkSettings();
+    window.addEventListener("site-settings-changed", checkSettings);
+    return () => window.removeEventListener("site-settings-changed", checkSettings);
+  }, []);
+
+  const checkSettings = async () => {
+    try {
+      const data = await apiRequest<{ show_courses?: boolean | string }>("/settings");
+      if (data) {
+        const isEnabled = data.show_courses === true || data.show_courses === "true";
+        setShowCourses(isEnabled);
+      } else {
+        setShowCourses(false);
+      }
+    } catch {
+      setShowCourses(false);
+    }
+  };
 
   // Pre-fill user data from localStorage and check applied state
   useEffect(() => {
@@ -400,8 +421,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   }, [resolvedParams, course]);
 
   useEffect(() => {
-    fetchCourseDetails();
-  }, [resolvedParams.id]);
+    if (showCourses) {
+      fetchCourseDetails();
+    } else if (showCourses === false) {
+      setLoading(false);
+    }
+  }, [resolvedParams.id, showCourses]);
 
   const fetchCourseDetails = async () => {
     try {
@@ -439,32 +464,60 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
           student_name: formData.student_name.trim(),
           student_email: formData.student_email.trim().toLowerCase(),
           student_phone: formData.student_phone.trim(),
-          college: formData.college?.trim() || undefined,
+          college: formData.college.trim(),
         }),
       });
 
-      // Persist applied status locally
+      setSubmittedSuccess(true);
+      setIsAlreadyApplied(true);
+
+      // Save to localStorage
       try {
         const appliedList: string[] = JSON.parse(localStorage.getItem("applied_courses") || "[]");
-        const currentSlug = course?.slug || resolvedParams.id;
-        if (!appliedList.includes(currentSlug)) {
-          appliedList.push(currentSlug);
+        const slugToAdd = course?.slug || resolvedParams.id;
+        if (!appliedList.includes(slugToAdd)) {
+          appliedList.push(slugToAdd);
           localStorage.setItem("applied_courses", JSON.stringify(appliedList));
         }
       } catch {}
-
-      setIsAlreadyApplied(true);
-      setSubmittedSuccess(true);
     } catch (err: any) {
-      if (err.name === "AbortError") {
-        setErrorMsg("Server is waking up from sleep mode. Please try clicking Submit once more.");
-      } else {
-        setErrorMsg(err.message || "Failed to submit enrollment request. Please try again.");
-      }
+      setErrorMsg(err.message || "Enrollment request failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (showCourses === false) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-28 text-center space-y-6">
+        <div className="w-16 h-16 bg-ink-900 border border-ink-800 text-ink-400 flex items-center justify-center mx-auto">
+          <BookOpen className="w-8 h-8 text-ink-500" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-white uppercase tracking-tight">
+            Course Catalog Offline
+          </h1>
+          <p className="text-ink-400 text-sm max-w-lg mx-auto">
+            Bootcamp courses and enrollment tracks are currently disabled or undergoing curriculum updates. Please check back later.
+          </p>
+        </div>
+        <div className="flex justify-center gap-4 pt-4">
+          <a
+            href="/"
+            className="px-6 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold border border-ink-700 transition"
+          >
+            Return Home
+          </a>
+          <a
+            href="/apply"
+            className="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow-brand-600/30"
+          >
+            Apply for Internship
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -479,8 +532,8 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
         <h2 className="text-3xl font-black text-white">Bootcamp Not Found</h2>
         <p className="text-ink-400 text-sm">The course you are looking for does not exist or has been moved.</p>
-        <Link href="/courses" className="inline-flex items-center gap-2 text-brand-400 font-bold text-sm">
-          <ArrowLeft className="w-4 h-4" /> Back to All Bootcamps
+        <Link href="/" className="inline-flex items-center gap-2 text-brand-400 font-bold text-sm">
+          <ArrowLeft className="w-4 h-4" /> Return Home
         </Link>
       </div>
     );

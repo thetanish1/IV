@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -12,11 +13,13 @@ from app.shared.email_service import (
     send_internship_rejection_email,
     send_submission_reviewed_email,
     send_doubt_answered_email,
+    send_contact_reply_email,
 )
 from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
 from app.courses.models import Course, CourseRegistration
 from app.payments.models import Payment
 from app.shared.settings_models import SiteSetting
+from app.shared.contact_models import ContactQuery
 from app.dashboard.schemas import DashboardStats
 from app.internship.schemas import ApplicationResponse
 from app.payments.schemas import PaymentResponse
@@ -61,6 +64,8 @@ def get_dashboard_stats(
     successful_pmts = db.query(func.count(Payment.id)).filter(Payment.status == "captured").scalar()
     pending_apps = db.query(func.count(InternshipApplication.id)).filter(InternshipApplication.status == "pending").scalar()
     total_users = db.query(func.count(SiteUser.id)).scalar()
+    total_contacts = db.query(func.count(ContactQuery.id)).scalar()
+    new_contacts = db.query(func.count(ContactQuery.id)).filter(ContactQuery.status == "new").scalar()
 
     return DashboardStats(
         total_revenue_inr=int(total_revenue),
@@ -69,7 +74,9 @@ def get_dashboard_stats(
         total_payments=total_pmts,
         successful_payments=successful_pmts,
         pending_applications=pending_apps,
-        total_users=total_users or 0
+        total_users=total_users or 0,
+        total_contacts=total_contacts or 0,
+        new_contacts=new_contacts or 0
     )
 
 @router.get("/users")
@@ -162,6 +169,60 @@ def update_application_status(
         )
 
     return ApplicationResponse.model_validate(app).model_dump()
+
+@router.delete("/applications/all")
+def delete_all_applications(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin endpoint to delete all internship applications and cascading records."""
+    count = db.query(InternshipApplication).count()
+    db.query(StudentDoubt).delete(synchronize_session=False)
+    db.query(TaskUnlockRequest).delete(synchronize_session=False)
+    db.query(InternshipSubmission).delete(synchronize_session=False)
+    db.query(InternshipApplication).delete(synchronize_session=False)
+    db.commit()
+    return {
+        "success": True,
+        "message": f"Successfully deleted all {count} internship applications and related records.",
+        "deleted_count": count
+    }
+
+@router.delete("/applications/{application_id}")
+def delete_application(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin endpoint to delete a specific internship application and its cascading records."""
+    app = db.query(InternshipApplication).filter(InternshipApplication.id == application_id).first()
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    user_email = (app.email or "").strip().lower()
+    google_email = (app.google_email or "").strip().lower()
+
+    # Clean up associated submissions, unlock requests, doubts for this application/student
+    emails = [e for e in [user_email, google_email] if e]
+    if emails:
+        db.query(InternshipSubmission).filter(
+            (InternshipSubmission.application_id == app.id) | (func.lower(InternshipSubmission.student_email).in_(emails))
+        ).delete(synchronize_session=False)
+        db.query(TaskUnlockRequest).filter(
+            (TaskUnlockRequest.application_id == app.id) | (func.lower(TaskUnlockRequest.student_email).in_(emails))
+        ).delete(synchronize_session=False)
+        db.query(StudentDoubt).filter(
+            (StudentDoubt.application_id == app.id) | (func.lower(StudentDoubt.student_email).in_(emails))
+        ).delete(synchronize_session=False)
+    else:
+        db.query(InternshipSubmission).filter(InternshipSubmission.application_id == app.id).delete(synchronize_session=False)
+        db.query(TaskUnlockRequest).filter(TaskUnlockRequest.application_id == app.id).delete(synchronize_session=False)
+        db.query(StudentDoubt).filter(StudentDoubt.application_id == app.id).delete(synchronize_session=False)
+
+    db.delete(app)
+    db.commit()
+    return {"success": True, "message": f"Application #{application_id} for '{app.full_name}' deleted successfully."}
+
 
 @router.get("/applications")
 def get_applications(
@@ -665,4 +726,150 @@ def reply_to_student_doubt(
     )
 
     return {"success": True, "message": "Reply posted successfully", "doubt_id": doubt.id}
+
+
+class ContactReplyBody(BaseModel):
+    admin_reply: str
+
+
+@router.get("/contacts")
+def get_contact_queries(
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    limit: int = Query(15, ge=1, le=100),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin-only endpoint to list all contact queries with search & filters."""
+    query = db.query(ContactQuery)
+
+    if q:
+        search_fmt = f"%{q}%"
+        query = query.filter(
+            ContactQuery.name.ilike(search_fmt) |
+            ContactQuery.email.ilike(search_fmt) |
+            ContactQuery.subject.ilike(search_fmt) |
+            ContactQuery.message.ilike(search_fmt)
+        )
+
+    if status and status != "all":
+        query = query.filter(ContactQuery.status == status)
+
+    total = query.count()
+    items = query.order_by(ContactQuery.created_at.desc())\
+                 .offset((page - 1) * limit)\
+                 .limit(limit)\
+                 .all()
+
+    items_list = [
+        {
+            "id": c.id,
+            "name": c.name,
+            "email": c.email,
+            "subject": c.subject,
+            "message": c.message,
+            "status": c.status,
+            "admin_reply": c.admin_reply,
+            "replied_by": c.replied_by,
+            "replied_at": c.replied_at.isoformat() if c.replied_at else None,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+        }
+        for c in items
+    ]
+
+    total_pages = math.ceil(total / limit) if total > 0 else 1
+
+    return {
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages,
+        "items": items_list
+    }
+
+
+@router.patch("/contacts/{contact_id}/status")
+def update_contact_query_status(
+    contact_id: int,
+    body: StatusUpdateBody,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Mark contact query as read/new/replied."""
+    contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact query not found")
+
+    contact.status = body.status
+    db.commit()
+    return {"success": True, "message": f"Status updated to {body.status}", "id": contact.id}
+
+
+@router.post("/contacts/{contact_id}/reply")
+def reply_to_contact_query(
+    contact_id: int,
+    body: ContactReplyBody,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Admin writes a reply to a candidate/client contact message and sends email."""
+    contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact query not found")
+
+    contact.admin_reply = body.admin_reply.strip()
+    contact.replied_by = current_admin.full_name or "InternVision Support Team"
+    contact.replied_at = datetime.utcnow()
+    contact.status = "replied"
+
+    db.commit()
+    db.refresh(contact)
+
+    # Queue email reply to sender
+    background_tasks.add_task(
+        send_contact_reply_email,
+        contact.email,
+        contact.name,
+        contact.subject,
+        contact.message,
+        contact.admin_reply,
+        contact.replied_by
+    )
+
+    return {"success": True, "message": "Reply sent successfully", "id": contact.id}
+
+
+@router.delete("/contacts/{contact_id}")
+def delete_single_contact_query(
+    contact_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Delete a single contact query."""
+    contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact query not found")
+
+    db.delete(contact)
+    db.commit()
+    return {"success": True, "message": "Contact query deleted successfully"}
+
+
+@router.delete("/contacts/all")
+def delete_all_contact_queries(
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    """Delete all contact queries, optionally filtered by status."""
+    query = db.query(ContactQuery)
+    if status and status != "all":
+        query = query.filter(ContactQuery.status == status)
+
+    deleted_count = query.delete(synchronize_session=False)
+    db.commit()
+    return {"success": True, "deleted_count": deleted_count, "message": f"Deleted {deleted_count} contact inquiries."}
+
 
