@@ -172,7 +172,9 @@ export default function BrandedMailerTab() {
   const [showApplicantPicker, setShowApplicantPicker] = useState(false);
   const [applicants, setApplicants] = useState<ApplicantRecipientItem[]>([]);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
-  const [applicantFilter, setApplicantFilter] = useState<"all" | "internship" | "course" | "accepted">("all");
+  const [applicantFilter, setApplicantFilter] = useState<
+    "all" | "internship" | "course" | "accepted" | "1 Month" | "3 Months" | "6 Months"
+  >("all");
   const [applicantSearch, setApplicantSearch] = useState("");
   const [selectedApplicants, setSelectedApplicants] = useState<Set<string>>(new Set());
 
@@ -323,12 +325,16 @@ export default function BrandedMailerTab() {
     if (applicantFilter === "internship" && a.type !== "internship") return false;
     if (applicantFilter === "course" && a.type !== "course") return false;
     if (applicantFilter === "accepted" && (a.status || "").toLowerCase() !== "accepted") return false;
+    if (applicantFilter === "1 Month" && a.duration !== "1 Month") return false;
+    if (applicantFilter === "3 Months" && a.duration !== "3 Months") return false;
+    if (applicantFilter === "6 Months" && a.duration !== "6 Months") return false;
     if (applicantSearch) {
       const q = applicantSearch.toLowerCase();
       return (
         a.name.toLowerCase().includes(q) ||
         a.email.toLowerCase().includes(q) ||
-        (a.role_preference || "").toLowerCase().includes(q)
+        (a.role_preference || "").toLowerCase().includes(q) ||
+        (a.duration || "").toLowerCase().includes(q)
       );
     }
     return true;
@@ -981,15 +987,15 @@ export default function BrandedMailerTab() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-                {(["all", "accepted", "internship", "course"] as const).map((f) => (
+              <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
+                {(["all", "accepted", "internship", "course", "1 Month", "3 Months", "6 Months"] as const).map((f) => (
                   <button
                     key={f}
                     type="button"
                     onClick={() => setApplicantFilter(f)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
                       applicantFilter === f
-                        ? "bg-brand-600 text-white"
+                        ? "bg-brand-600 text-white shadow-sm"
                         : "bg-ink-950 border border-ink-800 text-ink-300 hover:bg-ink-800"
                     }`}
                   >

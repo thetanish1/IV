@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, JSON
 from app.shared.database import Base
 
 class Admin(Base):
@@ -10,5 +10,9 @@ class Admin(Base):
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
+    role = Column(String(50), default="super_admin")  # "super_admin", "internship_manager", "technical_mentor", "course_coordinator", "support_desk", "custom"
+    permissions = Column(JSON, default=list)  # ["overview", "applications", "submissions", "unlocks", "doubts", "users", "enrollments", "payments", "certificates", "contacts", "mailer", "settings"]
+    created_by = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+

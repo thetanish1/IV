@@ -13,19 +13,28 @@ CREATE TABLE IF NOT EXISTS admins (
     hashed_password VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    role VARCHAR(50) DEFAULT 'super_admin',
+    permissions JSONB DEFAULT '["overview", "applications", "submissions", "unlocks", "doubts", "users", "enrollments", "payments", "certificates", "contacts", "mailer", "settings"]'::jsonb,
+    created_by VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'super_admin';
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '["overview", "applications", "submissions", "unlocks", "doubts", "users", "enrollments", "payments", "certificates", "contacts", "mailer", "settings"]'::jsonb;
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+
 -- Seed Default Superadmin (Password: Admin@123456)
-INSERT INTO admins (email, hashed_password, full_name, is_active)
+INSERT INTO admins (email, hashed_password, full_name, is_active, role, permissions)
 VALUES (
     'tanishdewase222@gmail.com',
     '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
     'Tanish Dewase (Admin)',
-    TRUE
+    TRUE,
+    'super_admin',
+    '["overview", "applications", "submissions", "unlocks", "doubts", "users", "enrollments", "payments", "certificates", "contacts", "mailer", "settings"]'::jsonb
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET role = 'super_admin';
 
 -- 3. Site Users Table (Firebase Google & Email/Password Applicants)
 CREATE TABLE IF NOT EXISTS site_users (

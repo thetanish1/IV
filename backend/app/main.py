@@ -37,6 +37,24 @@ app = FastAPI(
 def startup_event():
     db = SessionLocal()
     try:
+        # Check / add missing IAM columns to admins table for existing SQLite/Postgres DBs
+        for col_def in [
+            "ALTER TABLE admins ADD COLUMN role VARCHAR(50) DEFAULT 'super_admin'",
+            "ALTER TABLE admins ADD COLUMN permissions JSON DEFAULT '[]'",
+            "ALTER TABLE admins ADD COLUMN created_by VARCHAR(255)"
+        ]:
+            try:
+                db.execute(text(col_def))
+                db.commit()
+            except Exception:
+                db.rollback()
+
+        all_modules = [
+            "overview", "applications", "submissions", "unlocks", "doubts",
+            "users", "enrollments", "payments", "certificates", "contacts",
+            "mailer", "settings"
+        ]
+
         admins_to_seed = [
             ("tanishdewase222@gmail.com", "Tanish Dewase (Admin)"),
             ("admin@internvision.tech", "InternVision Admin")
@@ -48,9 +66,25 @@ def startup_event():
                     email=email,
                     hashed_password=get_password_hash("Admin@123456"),
                     full_name=name,
-                    is_active=True
+                    is_active=True,
+                    role="super_admin",
+                    permissions=all_modules,
                 )
                 db.add(new_admin)
+            else:
+                if not admin.role:
+                    admin.role = "super_admin"
+                if not admin.permissions or len(admin.permissions) == 0:
+                    admin.permissions = all_modules
+
+        # Ensure all existing admins without role default to super_admin
+        existing_admins = db.query(Admin).all()
+        for a in existing_admins:
+            if not getattr(a, "role", None):
+                a.role = "super_admin"
+            if not getattr(a, "permissions", None) or len(a.permissions) == 0:
+                a.permissions = all_modules
+        db.commit()
 
         # Seed all 7 standard bootcamps if not in database
         from app.courses.models import Course

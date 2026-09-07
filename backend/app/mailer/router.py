@@ -166,6 +166,7 @@ def get_applicant_recipients(db: Session = Depends(get_db)):
                 "name": app.full_name or em.split("@")[0],
                 "type": "internship",
                 "role_preference": app.role_preference or "Internship",
+                "duration": app.duration or "",
                 "status": app.status or "submitted",
                 "college": app.college or "",
                 "created_at": app.created_at.isoformat() if app.created_at else None,

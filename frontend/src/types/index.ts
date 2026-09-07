@@ -198,6 +198,7 @@ export interface StudentDoubtItem {
   student_email: string;
   student_name: string;
   domain_track: string;
+  duration?: string;
   module_name: string;
   subject: string;
   question: string;
@@ -258,6 +259,8 @@ export interface UnlockRequestAdminItem {
   application_id?: number;
   student_email: string;
   student_name: string;
+  role_preference?: string;
+  duration?: string;
   task_key: string;
   task_title: string;
   reason: string;
@@ -277,6 +280,7 @@ export interface ApplicantRecipientItem {
   name: string;
   type: "internship" | "course" | "user";
   role_preference: string;
+  duration?: string;
   status: string;
   college?: string;
   created_at?: string | null;
@@ -296,5 +300,52 @@ export interface SentEmailItem {
   attachment_names: string[];
   created_at?: string | null;
 }
+
+export type AdminRole =
+  | "super_admin"
+  | "internship_manager"
+  | "technical_mentor"
+  | "course_coordinator"
+  | "support_desk"
+  | "custom";
+
+export type AdminPermission =
+  | "overview"
+  | "applications"
+  | "submissions"
+  | "unlocks"
+  | "doubts"
+  | "users"
+  | "enrollments"
+  | "payments"
+  | "certificates"
+  | "contacts"
+  | "mailer"
+  | "settings";
+
+export interface AdminAccountItem {
+  id: number;
+  email: string;
+  full_name: string;
+  role: AdminRole | string;
+  permissions: AdminPermission[] | string[];
+  is_active: boolean;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface CurrentAdminProfile {
+  id: number;
+  email: string;
+  full_name: string;
+  role: AdminRole | string;
+  permissions: string[];
+  is_active: boolean;
+  is_super_admin: boolean;
+  created_by?: string | null;
+  created_at?: string | null;
+}
+
 
 

@@ -56,6 +56,16 @@ import {
   FolderGit2,
   Image as ImageIcon,
   ZoomIn,
+  UserPlus,
+  UserCog,
+  KeyRound,
+  Crown,
+  Fingerprint,
+  Settings as SettingsIcon,
+  CheckSquare,
+  Square,
+  AlertTriangle,
+  Briefcase,
 } from "lucide-react";
 import {
   DashboardStats,
@@ -70,6 +80,10 @@ import {
   UnlockRequestAdminItem,
   StudentDoubtItem,
   ContactQueryItem,
+  AdminRole,
+  AdminPermission,
+  AdminAccountItem,
+  CurrentAdminProfile,
 } from "@/types";
 import { apiRequest, getImageUrl } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
@@ -89,11 +103,129 @@ const getResumeUrl = (filename?: string | null) => {
   return `${apiBase}/applications/resume/${filename}`;
 };
 
+const ROLE_DEFINITIONS: {
+  role: AdminRole;
+  label: string;
+  badgeColor: string;
+  description: string;
+  defaultPermissions: AdminPermission[];
+}[] = [
+  {
+    role: "super_admin",
+    label: "Super Admin",
+    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    description: "Unrestricted master access across all 12 modules, IAM user management, database controls, and site settings.",
+    defaultPermissions: [
+      "overview",
+      "applications",
+      "submissions",
+      "unlocks",
+      "doubts",
+      "users",
+      "enrollments",
+      "payments",
+      "certificates",
+      "contacts",
+      "mailer",
+      "settings",
+    ],
+  },
+  {
+    role: "internship_manager",
+    label: "Internship Manager",
+    badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/40",
+    description: "Full control over student applications, submissions grading, deadline unlocks, doubts helpdesk, and certificates.",
+    defaultPermissions: [
+      "overview",
+      "applications",
+      "submissions",
+      "unlocks",
+      "doubts",
+      "certificates",
+    ],
+  },
+  {
+    role: "technical_mentor",
+    label: "Technical Mentor",
+    badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+    description: "Dedicated to student task evaluations, GitHub PR reviews, unlock desk, and technical code doubts resolution.",
+    defaultPermissions: ["submissions", "unlocks", "doubts"],
+  },
+  {
+    role: "course_coordinator",
+    label: "Course Coordinator",
+    badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    description: "Manages Bootcamp student registrations, payment verification, transaction auditing, and credentials.",
+    defaultPermissions: ["overview", "enrollments", "payments", "certificates"],
+  },
+  {
+    role: "support_desk",
+    label: "Support Desk",
+    badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+    description: "Direct candidate inquiries and mentor doubts resolution desk.",
+    defaultPermissions: ["doubts", "contacts"],
+  },
+  {
+    role: "custom",
+    label: "Custom RBAC",
+    badgeColor: "bg-ink-800 text-ink-300 border-ink-700",
+    description: "Tailor-made access matrix configured by the Super Admin.",
+    defaultPermissions: ["overview"],
+  },
+];
+
+const PERMISSIONS_CATALOG: {
+  key: AdminPermission;
+  label: string;
+  category: string;
+  description: string;
+}[] = [
+  { key: "overview", label: "Overview & Analytics", category: "Analytics", description: "View platform revenue, counts, and performance telemetry." },
+  { key: "applications", label: "Internship Applications", category: "Internships", description: "Review, approve, reject, and export candidate applications." },
+  { key: "submissions", label: "Task & Project Submissions", category: "Internships", description: "Grade weekly tasks, view code/demos, and provide mentor feedback." },
+  { key: "unlocks", label: "Task Unlock Requests", category: "Internships", description: "Grant or reject student deadline unlock requests." },
+  { key: "doubts", label: "Doubts & Code Helpdesk", category: "Mentorship", description: "Answer student code questions, debug snippets, and error screenshots." },
+  { key: "contacts", label: "Contact Inquiries", category: "Communications", description: "Review candidate messages and dispatch direct email replies." },
+  { key: "users", label: "Site User Accounts", category: "Users", description: "View registered Google/email user accounts and login activity." },
+  { key: "enrollments", label: "Course Enrollments", category: "Courses", description: "Review and approve Bootcamp free scholarship registrations." },
+  { key: "payments", label: "Financial Transactions", category: "Finance", description: "Audit captured payments, orders, and transaction receipts." },
+  { key: "certificates", label: "Verifiable Certificates", category: "Credentials", description: "Issue, generate, and revoke cryptographic QR certificates." },
+  { key: "mailer", label: "Branded Email Broadcaster", category: "Communications", description: "Dispatch single or bulk announcements with custom attachments." },
+  { key: "settings", label: "System & IAM Settings", category: "Admin Controls", description: "Manage sub-admins, grant/revoke access, and feature toggles." },
+];
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts" | "contacts" | "mailer"
+    "overview" | "applications" | "users" | "enrollments" | "payments" | "certificates" | "submissions" | "unlocks" | "doubts" | "contacts" | "mailer" | "settings"
   >("overview");
+
+  // Admin IAM Profile State
+  const [adminProfile, setAdminProfile] = useState<CurrentAdminProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  // Sub-Admins IAM State
+  const [subAdminsList, setSubAdminsList] = useState<AdminAccountItem[]>([]);
+  const [loadingSubAdmins, setLoadingSubAdmins] = useState(false);
+  const [showSubAdminModal, setShowSubAdminModal] = useState(false);
+  const [editingSubAdmin, setEditingSubAdmin] = useState<AdminAccountItem | null>(null);
+  const [subAdminForm, setSubAdminForm] = useState<{
+    full_name: string;
+    email: string;
+    password: string;
+    role: AdminRole;
+    permissions: string[];
+  }>({
+    full_name: "",
+    email: "",
+    password: "",
+    role: "internship_manager",
+    permissions: ["overview", "applications", "submissions", "unlocks", "doubts", "certificates"],
+  });
+  const [savingSubAdmin, setSavingSubAdmin] = useState(false);
+  const [subAdminError, setSubAdminError] = useState("");
+  const [togglingAdminId, setTogglingAdminId] = useState<number | null>(null);
+  const [deletingAdminId, setDeletingAdminId] = useState<number | null>(null);
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
@@ -111,27 +243,30 @@ export default function AdminDashboardPage() {
   });
   const [updatingSettings, setUpdatingSettings] = useState(false);
 
-  // Submissions State
+  // Submissions State with Duration Filter
   const [submissionsList, setSubmissionsList] = useState<SubmissionAdminItem[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const [subSearch, setSubSearch] = useState("");
   const [subStatusFilter, setSubStatusFilter] = useState("all");
+  const [subDurationFilter, setSubDurationFilter] = useState("all");
   const [selectedSub, setSelectedSub] = useState<SubmissionAdminItem | null>(null);
   const [reviewStatus, setReviewStatus] = useState("approved");
   const [reviewFeedback, setReviewFeedback] = useState("");
   const [reviewUnlocked, setReviewUnlocked] = useState(true);
   const [savingReview, setSavingReview] = useState(false);
 
-  // Unlock Requests State
+  // Unlock Requests State with Duration Filter
   const [unlockRequests, setUnlockRequests] = useState<UnlockRequestAdminItem[]>([]);
   const [loadingUnlocks, setLoadingUnlocks] = useState(false);
   const [unlockFilter, setUnlockFilter] = useState("all");
+  const [unlockDurationFilter, setUnlockDurationFilter] = useState("all");
   const [actioningUnlockId, setActioningUnlockId] = useState<number | null>(null);
 
-  // Student Doubts Helpdesk State
+  // Student Doubts Helpdesk State with Duration Filter
   const [doubtsList, setDoubtsList] = useState<StudentDoubtItem[]>([]);
   const [loadingDoubts, setLoadingDoubts] = useState(false);
   const [doubtFilter, setDoubtFilter] = useState("all");
+  const [doubtDurationFilter, setDoubtDurationFilter] = useState("all");
   const [replyingDoubt, setReplyingDoubt] = useState<StudentDoubtItem | null>(null);
   const [doubtReplyText, setDoubtReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
@@ -150,7 +285,7 @@ export default function AdminDashboardPage() {
   const [deletingContactId, setDeletingContactId] = useState<number | null>(null);
   const [deletingAllContacts, setDeletingAllContacts] = useState(false);
 
-  // Applications Table State
+  // Applications Table State with Duration Filter
   const [appsData, setAppsData] = useState<PaginatedResult<InternshipApplicationResponse>>({
     total: 0,
     page: 1,
@@ -234,13 +369,8 @@ export default function AdminDashboardPage() {
   };
   const [newCertForm, setNewCertForm] = useState(initialCertForm);
 
-  const apiBase = (
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "http://localhost:8000/api"
-  ).replace(/\/$/, "");
-
   useEffect(() => {
+    fetchAdminProfile();
     fetchStats();
     fetchSiteSettings();
   }, []);
@@ -273,6 +403,10 @@ export default function AdminDashboardPage() {
     if (activeTab === "contacts" || activeTab === "overview") {
       fetchContacts();
     }
+    if (activeTab === "settings") {
+      fetchSiteSettings();
+      fetchSubAdmins();
+    }
   }, [
     activeTab,
     appsSearch,
@@ -289,8 +423,11 @@ export default function AdminDashboardPage() {
     pmtPage,
     certSearch,
     subStatusFilter,
+    subDurationFilter,
     unlockFilter,
+    unlockDurationFilter,
     doubtFilter,
+    doubtDurationFilter,
     contactFilter,
     contactSearch,
     contactPage,
@@ -602,12 +739,171 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const fetchAdminProfile = async () => {
+    setLoadingProfile(true);
+    try {
+      const data = await apiRequest<CurrentAdminProfile>("/admin/me");
+      if (data) {
+        setAdminProfile(data);
+      }
+    } catch (err) {
+      console.error("Failed to load admin profile", err);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  const fetchSubAdmins = async () => {
+    setLoadingSubAdmins(true);
+    try {
+      const data = await apiRequest<AdminAccountItem[]>("/admin/admins");
+      setSubAdminsList(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load sub-admin accounts", err);
+      setSubAdminsList([]);
+    } finally {
+      setLoadingSubAdmins(false);
+    }
+  };
+
+  const handleOpenCreateSubAdmin = () => {
+    setEditingSubAdmin(null);
+    setSubAdminForm({
+      full_name: "",
+      email: "",
+      password: "",
+      role: "internship_manager",
+      permissions: ["overview", "applications", "submissions", "unlocks", "doubts", "certificates"],
+    });
+    setSubAdminError("");
+    setShowSubAdminModal(true);
+  };
+
+  const handleOpenEditSubAdmin = (subAdmin: AdminAccountItem) => {
+    setEditingSubAdmin(subAdmin);
+    setSubAdminForm({
+      full_name: subAdmin.full_name,
+      email: subAdmin.email,
+      password: "",
+      role: (subAdmin.role || "custom") as AdminRole,
+      permissions: (subAdmin.permissions || []) as string[],
+    });
+    setSubAdminError("");
+    setShowSubAdminModal(true);
+  };
+
+  const handleRolePresetSelect = (roleKey: AdminRole) => {
+    const preset = ROLE_DEFINITIONS.find((r) => r.role === roleKey);
+    setSubAdminForm((prev) => ({
+      ...prev,
+      role: roleKey,
+      permissions: preset ? preset.defaultPermissions : prev.permissions,
+    }));
+  };
+
+  const handleTogglePermission = (permKey: string) => {
+    setSubAdminForm((prev) => {
+      const perms = prev.permissions.includes(permKey)
+        ? prev.permissions.filter((p) => p !== permKey)
+        : [...prev.permissions, permKey];
+      return {
+        ...prev,
+        role: "custom",
+        permissions: perms,
+      };
+    });
+  };
+
+  const handleSaveSubAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subAdminForm.full_name.trim() || !subAdminForm.email.trim()) {
+      setSubAdminError("Full name and email are required.");
+      return;
+    }
+    if (!editingSubAdmin && !subAdminForm.password.trim()) {
+      setSubAdminError("Password is required for new sub-admin accounts.");
+      return;
+    }
+    setSavingSubAdmin(true);
+    setSubAdminError("");
+    try {
+      if (editingSubAdmin) {
+        const payload: any = {
+          full_name: subAdminForm.full_name.trim(),
+          role: subAdminForm.role,
+          permissions: subAdminForm.permissions,
+        };
+        if (subAdminForm.password.trim()) {
+          payload.password = subAdminForm.password.trim();
+        }
+        await apiRequest(`/admin/admins/${editingSubAdmin.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+      } else {
+        await apiRequest("/admin/admins", {
+          method: "POST",
+          body: JSON.stringify({
+            full_name: subAdminForm.full_name.trim(),
+            email: subAdminForm.email.trim().toLowerCase(),
+            password: subAdminForm.password.trim(),
+            role: subAdminForm.role,
+            permissions: subAdminForm.permissions,
+          }),
+        });
+      }
+      setShowSubAdminModal(false);
+      fetchSubAdmins();
+    } catch (err: any) {
+      setSubAdminError(err.message || "Failed to save sub-admin account.");
+    } finally {
+      setSavingSubAdmin(false);
+    }
+  };
+
+  const handleToggleAdminActive = async (adminItem: AdminAccountItem) => {
+    const nextStatus = !adminItem.is_active;
+    const actionText = nextStatus ? "grant full access back to" : "REVOKE all access for";
+    if (!confirm(`Are you sure you want to ${actionText} "${adminItem.full_name}" (${adminItem.email})?`)) return;
+
+    setTogglingAdminId(adminItem.id);
+    try {
+      await apiRequest(`/admin/admins/${adminItem.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ is_active: nextStatus }),
+      });
+      setSubAdminsList((prev) =>
+        prev.map((a) => (a.id === adminItem.id ? { ...a, is_active: nextStatus } : a))
+      );
+    } catch (err) {
+      console.error("Failed to toggle admin status", err);
+      alert("Failed to update access status.");
+    } finally {
+      setTogglingAdminId(null);
+    }
+  };
+
+  const handleDeleteSubAdmin = async (id: number, name: string) => {
+    if (!confirm(`Are you sure you want to permanently delete Sub-Admin "${name}"? This cannot be undone.`)) return;
+    setDeletingAdminId(id);
+    try {
+      await apiRequest(`/admin/admins/${id}`, { method: "DELETE" });
+      setSubAdminsList((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      console.error("Failed to delete sub-admin", err);
+      alert("Failed to delete sub-admin account.");
+    } finally {
+      setDeletingAdminId(null);
+    }
+  };
+
   const fetchSubmissions = async () => {
     setLoadingSubmissions(true);
     try {
       const params = new URLSearchParams();
       if (subStatusFilter !== "all") params.set("status", subStatusFilter);
-      if (subSearch) params.set("search", subSearch);
+      if (subDurationFilter !== "all") params.set("duration", subDurationFilter);
+      if (subSearch) params.set("q", subSearch);
       const data = await apiRequest<{ items: SubmissionAdminItem[]; total: number } | SubmissionAdminItem[]>(`/admin/submissions?${params.toString()}`);
       const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
       setSubmissionsList(list);
@@ -652,6 +948,7 @@ export default function AdminDashboardPage() {
     try {
       const params = new URLSearchParams();
       if (unlockFilter !== "all") params.set("status", unlockFilter);
+      if (unlockDurationFilter !== "all") params.set("duration", unlockDurationFilter);
       const endpoint = params.toString() ? `/admin/unlock-requests?${params.toString()}` : "/admin/unlock-requests";
       const data = await apiRequest<{ items: UnlockRequestAdminItem[]; total: number } | UnlockRequestAdminItem[]>(endpoint);
       const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
@@ -689,6 +986,7 @@ export default function AdminDashboardPage() {
     try {
       const params = new URLSearchParams();
       if (doubtFilter !== "all") params.set("status", doubtFilter);
+      if (doubtDurationFilter !== "all") params.set("duration", doubtDurationFilter);
       const data = await apiRequest<{ items: StudentDoubtItem[]; total: number } | StudentDoubtItem[]>(`/admin/doubts?${params.toString()}`);
       const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
       setDoubtsList(list);
@@ -872,6 +1170,12 @@ export default function AdminDashboardPage() {
   const newContactsCount = stats?.new_contacts !== undefined ? stats.new_contacts : (Array.isArray(contactsList) ? contactsList : []).filter((c) => c?.status === "new").length;
   const totalContactsCount = stats?.total_contacts !== undefined ? stats.total_contacts : contactTotalCount;
 
+  const canAccessTab = (tabKey: string): boolean => {
+    if (!adminProfile) return true;
+    if (adminProfile.is_super_admin || (adminProfile.role || "").toLowerCase() === "super_admin") return true;
+    return (adminProfile.permissions || []).includes(tabKey);
+  };
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-black text-ink-50 font-sans selection:bg-brand-500/30 pb-20">
@@ -882,58 +1186,88 @@ export default function AdminDashboardPage() {
               <div className="w-8 h-8 rounded bg-brand-600/20 border border-brand-500/40 flex items-center justify-center text-brand-400">
                 <Shield className="w-4 h-4" />
               </div>
-              <span className="font-bold text-sm tracking-tight text-white uppercase">
-                InternVision <span className="text-brand-400">Admin Control</span>
-              </span>
+              <div>
+                <span className="font-bold text-sm tracking-tight text-white uppercase">
+                  InternVision <span className="text-brand-400">Admin Control</span>
+                </span>
+                {adminProfile && (
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {adminProfile.is_super_admin ? (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider">
+                        <Crown className="w-2.5 h-2.5 text-amber-400" /> Super Admin
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40 uppercase tracking-wider">
+                        <UserCog className="w-2.5 h-2.5 text-blue-400" /> {adminProfile.role.replace("_", " ")}
+                      </span>
+                    )}
+                    <span className="text-[11px] text-ink-400 hidden sm:inline">({adminProfile.email})</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Feature Toggles: Courses & Careers */}
-            <div className="hidden md:flex items-center gap-3">
+            {/* Feature Toggles: Courses & Careers + Settings & Logout */}
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={updatingSettings}
+                  onClick={() => handleToggleSetting("show_courses")}
+                  className={`px-3 py-1.5 rounded text-xs font-semibold border flex items-center gap-1.5 transition ${
+                    siteSettings.show_courses
+                      ? "bg-brand-500/10 text-brand-400 border-brand-500/30 hover:bg-brand-500/20"
+                      : "bg-ink-900 text-ink-400 border-ink-800 hover:text-ink-200"
+                  }`}
+                  title="Toggle Course Catalog visibility on frontend"
+                >
+                  {siteSettings.show_courses ? (
+                    <ToggleRight className="w-4 h-4 text-brand-400" />
+                  ) : (
+                    <ToggleLeft className="w-4 h-4 text-ink-500" />
+                  )}
+                  <span>Courses: {siteSettings.show_courses ? "ON" : "OFF"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={updatingSettings}
+                  onClick={() => handleToggleSetting("show_careers")}
+                  className={`px-3 py-1.5 rounded text-xs font-semibold border flex items-center gap-1.5 transition ${
+                    siteSettings.show_careers
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
+                      : "bg-ink-900 text-ink-400 border-ink-800 hover:text-ink-200"
+                  }`}
+                  title="Toggle Careers Page visibility on frontend"
+                >
+                  {siteSettings.show_careers ? (
+                    <ToggleRight className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <ToggleLeft className="w-4 h-4 text-ink-500" />
+                  )}
+                  <span>Careers: {siteSettings.show_careers ? "ON" : "OFF"}</span>
+                </button>
+              </div>
+
               <button
-                type="button"
-                disabled={updatingSettings}
-                onClick={() => handleToggleSetting("show_courses")}
-                className={`px-3 py-1.5 rounded text-xs font-semibold border flex items-center gap-1.5 transition ${
-                  siteSettings.show_courses
-                    ? "bg-brand-500/10 text-brand-400 border-brand-500/30 hover:bg-brand-500/20"
-                    : "bg-ink-900 text-ink-400 border-ink-800 hover:text-ink-200"
+                onClick={() => setActiveTab("settings")}
+                className={`text-xs font-medium transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded border ${
+                  activeTab === "settings"
+                    ? "bg-indigo-600/30 text-indigo-300 border-indigo-500/50"
+                    : "bg-ink-900 text-ink-300 border-ink-800 hover:border-ink-700 hover:text-white"
                 }`}
-                title="Toggle Course Catalog visibility on frontend"
+                title="Open Settings & IAM Sub-Admin Management"
               >
-                {siteSettings.show_courses ? (
-                  <ToggleRight className="w-4 h-4 text-brand-400" />
-                ) : (
-                  <ToggleLeft className="w-4 h-4 text-ink-500" />
-                )}
-                <span>Courses: {siteSettings.show_courses ? "ON" : "OFF"}</span>
+                <Sliders className="w-3.5 h-3.5 text-indigo-400" /> Settings
               </button>
 
               <button
-                type="button"
-                disabled={updatingSettings}
-                onClick={() => handleToggleSetting("show_careers")}
-                className={`px-3 py-1.5 rounded text-xs font-semibold border flex items-center gap-1.5 transition ${
-                  siteSettings.show_careers
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                    : "bg-ink-900 text-ink-400 border-ink-800 hover:text-ink-200"
-                }`}
-                title="Toggle Careers Page visibility on frontend"
+                onClick={handleLogout}
+                className="text-xs font-medium text-ink-400 hover:text-white transition-colors flex items-center gap-2 px-3 py-1.5 bg-ink-900 border border-ink-800 rounded hover:border-ink-700"
               >
-                {siteSettings.show_careers ? (
-                  <ToggleRight className="w-4 h-4 text-emerald-400" />
-                ) : (
-                  <ToggleLeft className="w-4 h-4 text-ink-500" />
-                )}
-                <span>Careers: {siteSettings.show_careers ? "ON" : "OFF"}</span>
+                <LogOut className="w-3.5 h-3.5" /> Logout
               </button>
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="text-xs font-medium text-ink-400 hover:text-white transition-colors flex items-center gap-2 px-3 py-1.5 bg-ink-900 border border-ink-800 rounded hover:border-ink-700"
-            >
-              <LogOut className="w-3.5 h-3.5" /> Logout
-            </button>
           </div>
         </header>
 
@@ -1013,161 +1347,211 @@ export default function AdminDashboardPage() {
             </div>
           </FadeIn>
 
-          {/* NAVIGATION TABS */}
+          {/* NAVIGATION TABS (ROLE PROTECTED) */}
           <div className="flex items-center gap-6 border-b border-ink-800 overflow-x-auto pb-0.5">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap relative ${
-                activeTab === "overview" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              Overview
-              {activeTab === "overview" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("applications")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "applications" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              Applicants
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-300">
-                {stats?.total_applications || 0}
-              </span>
-              {activeTab === "applications" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("submissions")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "submissions" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              <FolderGit2 className="w-3.5 h-3.5 text-blue-400" />
-              Submissions
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-blue-600/20 text-blue-400 border border-blue-500/30">
-                {submissionsList.length}
-              </span>
-              {activeTab === "submissions" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("unlocks")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "unlocks" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              <Unlock className="w-3.5 h-3.5 text-amber-400" />
-              Unlock Requests
-              {pendingUnlocksCount > 0 ? (
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse">
-                  {pendingUnlocksCount} PENDING
+            {canAccessTab("overview") && (
+              <button
+                onClick={() => setActiveTab("overview")}
+                className={`pb-3 text-sm font-medium transition-colors whitespace-nowrap relative ${
+                  activeTab === "overview" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                Overview
+                {activeTab === "overview" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("applications") && (
+              <button
+                onClick={() => setActiveTab("applications")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "applications" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                Applicants
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-300">
+                  {stats?.total_applications || 0}
                 </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
-                  {unlockRequests.length}
+                {activeTab === "applications" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("submissions") && (
+              <button
+                onClick={() => setActiveTab("submissions")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "submissions" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <FolderGit2 className="w-3.5 h-3.5 text-blue-400" />
+                Submissions
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-blue-600/20 text-blue-400 border border-blue-500/30">
+                  {submissionsList.length}
                 </span>
-              )}
-              {activeTab === "unlocks" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("doubts")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "doubts" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
-              Doubts Helpdesk
-              {openDoubtsCount > 0 ? (
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-pink-500/20 text-pink-400 border border-pink-500/30 animate-pulse">
-                  {openDoubtsCount} OPEN
+                {activeTab === "submissions" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("unlocks") && (
+              <button
+                onClick={() => setActiveTab("unlocks")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "unlocks" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <Unlock className="w-3.5 h-3.5 text-amber-400" />
+                Unlock Requests
+                {pendingUnlocksCount > 0 ? (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse">
+                    {pendingUnlocksCount} PENDING
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
+                    {unlockRequests.length}
+                  </span>
+                )}
+                {activeTab === "unlocks" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("doubts") && (
+              <button
+                onClick={() => setActiveTab("doubts")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "doubts" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-pink-400" />
+                Doubts Helpdesk
+                {openDoubtsCount > 0 ? (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-pink-500/20 text-pink-400 border border-pink-500/30 animate-pulse">
+                    {openDoubtsCount} OPEN
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
+                    {doubtsList.length}
+                  </span>
+                )}
+                {activeTab === "doubts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("contacts") && (
+              <button
+                onClick={() => setActiveTab("contacts")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "contacts" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                Contact Queries
+                {newContactsCount > 0 ? (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
+                    {newContactsCount} NEW
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
+                    {totalContactsCount}
+                  </span>
+                )}
+                {activeTab === "contacts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("users") && (
+              <button
+                onClick={() => setActiveTab("users")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "users" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                User Accounts
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-brand-600/20 text-brand-400 border border-brand-500/30">
+                  {stats?.total_users || 0}
                 </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
-                  {doubtsList.length}
+                {activeTab === "users" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("enrollments") && (
+              <button
+                onClick={() => setActiveTab("enrollments")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "enrollments" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                Course Enrollments
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-purple-600/20 text-purple-400 border border-purple-500/30">
+                  {stats?.total_registrations || 0}
                 </span>
-              )}
-              {activeTab === "doubts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("contacts")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "contacts" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              <Mail className="w-3.5 h-3.5 text-cyan-400" />
-              Contact Queries
-              {newContactsCount > 0 ? (
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
-                  {newContactsCount} NEW
+                {activeTab === "enrollments" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("payments") && (
+              <button
+                onClick={() => setActiveTab("payments")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "payments" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                Payments
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-300">
+                  {stats?.total_payments || 0}
                 </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-400">
-                  {totalContactsCount}
+                {activeTab === "payments" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("certificates") && (
+              <button
+                onClick={() => setActiveTab("certificates")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "certificates" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <Award className="w-3.5 h-3.5 text-emerald-400" />
+                Certificates
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
+                  {certificatesList.length}
                 </span>
-              )}
-              {activeTab === "contacts" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("users")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "users" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              User Accounts
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-brand-600/20 text-brand-400 border border-brand-500/30">
-                {stats?.total_users || 0}
-              </span>
-              {activeTab === "users" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("enrollments")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "enrollments" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              Course Enrollments
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-purple-600/20 text-purple-400 border border-purple-500/30">
-                {stats?.total_registrations || 0}
-              </span>
-              {activeTab === "enrollments" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("payments")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "payments" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              Payments
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-ink-800 text-ink-300">
-                {stats?.total_payments || 0}
-              </span>
-              {activeTab === "payments" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("certificates")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "certificates" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              <Award className="w-3.5 h-3.5 text-emerald-400" />
-              Certificates
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
-                {certificatesList.length}
-              </span>
-              {activeTab === "certificates" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
-            <button
-              onClick={() => setActiveTab("mailer")}
-              className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
-                activeTab === "mailer" ? "text-white" : "text-ink-400 hover:text-ink-200"
-              }`}
-            >
-              <Mail className="w-3.5 h-3.5 text-brand-400" />
-              Branded Mailer
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">
-                SMTP
-              </span>
-              {activeTab === "mailer" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
-            </button>
+                {activeTab === "certificates" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("mailer") && (
+              <button
+                onClick={() => setActiveTab("mailer")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "mailer" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <Mail className="w-3.5 h-3.5 text-brand-400" />
+                Branded Mailer
+                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                  SMTP
+                </span>
+                {activeTab === "mailer" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
+
+            {canAccessTab("settings") && (
+              <button
+                onClick={() => setActiveTab("settings")}
+                className={`pb-3 text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap relative ${
+                  activeTab === "settings" ? "text-white" : "text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+                Settings & IAM
+                {adminProfile?.is_super_admin && (
+                  <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    MASTER
+                  </span>
+                )}
+                {activeTab === "settings" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-500 rounded-t-full" />}
+              </button>
+            )}
           </div>
 
           {/* ─────────────────── USERS SECTION (REQUIREMENT 2) ─────────────────── */}
@@ -2012,6 +2396,16 @@ export default function AdminDashboardPage() {
                       <option value="approved">Approved</option>
                       <option value="needs_revision">Needs Revision</option>
                     </select>
+                    <select
+                      value={subDurationFilter}
+                      onChange={(e) => setSubDurationFilter(e.target.value)}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Durations</option>
+                      <option value="1 Month">1 Month Track</option>
+                      <option value="3 Months">3 Months Track</option>
+                      <option value="6 Months">6 Months Track</option>
+                    </select>
                     <button
                       onClick={fetchSubmissions}
                       className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
@@ -2176,6 +2570,16 @@ export default function AdminDashboardPage() {
                       <option value="approved">Approved / Form Active (ON)</option>
                       <option value="rejected">Rejected / Form Locked (OFF)</option>
                     </select>
+                    <select
+                      value={unlockDurationFilter}
+                      onChange={(e) => setUnlockDurationFilter(e.target.value)}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Durations</option>
+                      <option value="1 Month">1 Month Track</option>
+                      <option value="3 Months">3 Months Track</option>
+                      <option value="6 Months">6 Months Track</option>
+                    </select>
                     <button
                       onClick={fetchUnlockRequests}
                       className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition self-start sm:self-auto"
@@ -2334,6 +2738,16 @@ export default function AdminDashboardPage() {
                       <option value="all">All Queries</option>
                       <option value="open">Open / Unanswered</option>
                       <option value="answered">Resolved / Answered</option>
+                    </select>
+                    <select
+                      value={doubtDurationFilter}
+                      onChange={(e) => setDoubtDurationFilter(e.target.value)}
+                      className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
+                    >
+                      <option value="all">All Durations</option>
+                      <option value="1 Month">1 Month Track</option>
+                      <option value="3 Months">3 Months Track</option>
+                      <option value="6 Months">6 Months Track</option>
                     </select>
                     <button
                       onClick={fetchDoubts}
@@ -2665,6 +3079,404 @@ export default function AdminDashboardPage() {
           {activeTab === "mailer" && (
             <FadeIn delay={0.1} direction="up">
               <BrandedMailerTab />
+            </FadeIn>
+          )}
+
+          {/* ─────────────────── SETTINGS & IAM SECTION ─────────────────── */}
+          {activeTab === "settings" && (
+            <FadeIn delay={0.1} direction="up">
+              <div className="space-y-8 pt-2">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-ink-800 pb-6">
+                  <div>
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
+                      <Sliders className="w-5 h-5 text-indigo-400" /> Settings & Identity & Access Management (IAM)
+                    </h2>
+                    <p className="text-xs text-ink-400 mt-1">
+                      Manage site-wide platform feature toggles, administrative accounts, sub-admin role assignments, and granular module permissions.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        fetchSiteSettings();
+                        fetchSubAdmins();
+                      }}
+                      className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+                      title="Refresh Settings & IAM List"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                    {adminProfile?.is_super_admin && (
+                      <button
+                        onClick={handleOpenCreateSubAdmin}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-indigo-600/20"
+                      >
+                        <UserPlus className="w-4 h-4" /> Create Sub-Admin
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Section 1: Platform Feature Switches */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-ink-300 flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-brand-400" /> Platform Feature Toggles
+                    </h3>
+                    <p className="text-xs text-ink-500 mt-0.5">
+                      Control visibility of public sections on the main website navigation and footer in real-time.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Courses Toggle Card */}
+                    <div className="p-5 rounded-xl border border-ink-800 bg-ink-950/40 space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="text-sm font-bold text-white flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-purple-400" /> Course Catalog & Bootcamp Routing
+                          </div>
+                          <p className="text-xs text-ink-400 mt-1 leading-relaxed">
+                            When disabled, the Courses section is hidden from the header/footer and all course routes redirect automatically.
+                          </p>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                            siteSettings.show_courses
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              : "bg-ink-800 text-ink-400 border-ink-700"
+                          }`}
+                        >
+                          {siteSettings.show_courses ? "ENABLED (ON)" : "DISABLED (OFF)"}
+                        </span>
+                      </div>
+
+                      <div className="pt-2 border-t border-ink-800/60 flex items-center justify-between">
+                        <span className="text-xs text-ink-500">Instant toggle for all site visitors</span>
+                        <button
+                          type="button"
+                          disabled={updatingSettings}
+                          onClick={() => handleToggleSetting("show_courses")}
+                          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition ${
+                            siteSettings.show_courses
+                              ? "bg-purple-600/20 text-purple-300 border-purple-500/40 hover:bg-purple-600/30"
+                              : "bg-ink-900 text-ink-300 border-ink-700 hover:border-ink-600 hover:text-white"
+                          }`}
+                        >
+                          {siteSettings.show_courses ? (
+                            <>
+                              <ToggleRight className="w-4 h-4 text-purple-400" /> Switch Courses OFF
+                            </>
+                          ) : (
+                            <>
+                              <ToggleLeft className="w-4 h-4 text-ink-400" /> Switch Courses ON
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Careers Toggle Card */}
+                    <div className="p-5 rounded-xl border border-ink-800 bg-ink-950/40 space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="text-sm font-bold text-white flex items-center gap-2">
+                            <Briefcase className="w-4 h-4 text-emerald-400" /> Careers & Job Openings Page
+                          </div>
+                          <p className="text-xs text-ink-400 mt-1 leading-relaxed">
+                            When enabled, public visitors can view hiring roles and submit direct internal job applications.
+                          </p>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                            siteSettings.show_careers
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                              : "bg-ink-800 text-ink-400 border-ink-700"
+                          }`}
+                        >
+                          {siteSettings.show_careers ? "ENABLED (ON)" : "DISABLED (OFF)"}
+                        </span>
+                      </div>
+
+                      <div className="pt-2 border-t border-ink-800/60 flex items-center justify-between">
+                        <span className="text-xs text-ink-500">Instant toggle for all site visitors</span>
+                        <button
+                          type="button"
+                          disabled={updatingSettings}
+                          onClick={() => handleToggleSetting("show_careers")}
+                          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition ${
+                            siteSettings.show_careers
+                              ? "bg-emerald-600/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-600/30"
+                              : "bg-ink-900 text-ink-300 border-ink-700 hover:border-ink-600 hover:text-white"
+                          }`}
+                        >
+                          {siteSettings.show_careers ? (
+                            <>
+                              <ToggleRight className="w-4 h-4 text-emerald-400" /> Switch Careers OFF
+                            </>
+                          ) : (
+                            <>
+                              <ToggleLeft className="w-4 h-4 text-ink-400" /> Switch Careers ON
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: IAM Sub-Admins Management */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-ink-300 flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-indigo-400" /> Identity & Access Management (Sub-Admins)
+                      </h3>
+                      <p className="text-xs text-ink-500 mt-0.5">
+                        Only the Super Admin can create Sub-Admins, assign customized roles, grant access, or instantly revoke access.
+                      </p>
+                    </div>
+
+                    {!adminProfile?.is_super_admin && (
+                      <span className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded">
+                        ℹ Read-Only: Sub-admin IAM changes require Super Admin privileges
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/40 shadow-xl">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-sm whitespace-nowrap">
+                        <thead className="bg-ink-900/60 text-ink-400 font-medium border-b border-ink-800 text-xs uppercase tracking-wider">
+                          <tr>
+                            <th className="px-5 py-3.5 font-medium">Administrator</th>
+                            <th className="px-5 py-3.5 font-medium">Assigned Role</th>
+                            <th className="px-5 py-3.5 font-medium">Granted Module Permissions</th>
+                            <th className="px-5 py-3.5 font-medium">Access Status</th>
+                            <th className="px-5 py-3.5 font-medium">Created On</th>
+                            <th className="px-5 py-3.5 font-medium text-right">Access Controls & IAM Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-ink-800/50">
+                          {loadingSubAdmins ? (
+                            <tr>
+                              <td colSpan={6} className="text-center py-12">
+                                <Loader2 className="w-5 h-5 animate-spin mx-auto text-indigo-400" />
+                              </td>
+                            </tr>
+                          ) : subAdminsList.length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="text-center py-12 text-ink-500 text-sm">
+                                No admin accounts found.
+                              </td>
+                            </tr>
+                          ) : (
+                            subAdminsList.map((adminItem) => {
+                              const isSelf = adminProfile?.id === adminItem.id;
+                              const isPrimarySuper = adminItem.role === "super_admin" || adminItem.id === 1;
+                              const roleDef = ROLE_DEFINITIONS.find((r) => r.role === adminItem.role);
+
+                              return (
+                                <tr key={adminItem.id} className="hover:bg-ink-900/40 transition-colors">
+                                  <td className="px-5 py-4">
+                                    <div className="font-semibold text-white flex items-center gap-2">
+                                      {adminItem.full_name}
+                                      {isSelf && (
+                                        <span className="px-1.5 py-0.2 rounded text-[10px] bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                                          YOU
+                                        </span>
+                                      )}
+                                      {isPrimarySuper && (
+                                        <span title="Primary Master Account">
+                                          <Crown className="w-3.5 h-3.5 text-amber-400" />
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-xs text-ink-400 font-mono">{adminItem.email}</div>
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    <span
+                                      className={`px-2.5 py-1 rounded text-xs font-bold border inline-flex items-center gap-1.5 ${
+                                        roleDef ? roleDef.badgeColor : "bg-ink-800 text-ink-300 border-ink-700"
+                                      }`}
+                                    >
+                                      {adminItem.role === "super_admin" ? (
+                                        <Crown className="w-3 h-3 text-amber-400" />
+                                      ) : (
+                                        <UserCog className="w-3 h-3" />
+                                      )}
+                                      {roleDef ? roleDef.label : (adminItem.role || "Sub Admin").replace("_", " ")}
+                                    </span>
+                                  </td>
+                                  <td className="px-5 py-4 max-w-xs truncate">
+                                    {adminItem.role === "super_admin" ? (
+                                      <span className="text-xs text-amber-300 font-semibold">
+                                        ✦ Full Platform Access (12 Modules)
+                                      </span>
+                                    ) : Array.isArray(adminItem.permissions) && adminItem.permissions.length > 0 ? (
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        {adminItem.permissions.slice(0, 4).map((p) => (
+                                          <span
+                                            key={p}
+                                            className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-ink-900 text-ink-300 border border-ink-800"
+                                          >
+                                            {p}
+                                          </span>
+                                        ))}
+                                        {adminItem.permissions.length > 4 && (
+                                          <span className="text-[10px] text-ink-500 font-medium">
+                                            +{adminItem.permissions.length - 4} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <span className="text-xs text-ink-500 italic">No modules assigned</span>
+                                    )}
+                                  </td>
+                                  <td className="px-5 py-4">
+                                    <span
+                                      className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border inline-flex items-center gap-1.5 ${
+                                        adminItem.is_active
+                                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                                          : "bg-red-500/10 text-red-400 border-red-500/30"
+                                      }`}
+                                    >
+                                      {adminItem.is_active ? (
+                                        <>
+                                          <CheckCircle className="w-3 h-3 text-emerald-400" /> ACTIVE / GRANTED
+                                        </>
+                                      ) : (
+                                        <>
+                                          <XCircle className="w-3 h-3 text-red-400" /> ACCESS REVOKED
+                                        </>
+                                      )}
+                                    </span>
+                                  </td>
+                                  <td className="px-5 py-4 text-xs text-ink-400">
+                                    {adminItem.created_at ? new Date(adminItem.created_at).toLocaleDateString() : "—"}
+                                  </td>
+                                  <td className="px-5 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      {adminProfile?.is_super_admin && !isPrimarySuper && !isSelf && (
+                                        <>
+                                          {/* Instant Revoke / Grant Button */}
+                                          <button
+                                            type="button"
+                                            disabled={togglingAdminId === adminItem.id}
+                                            onClick={() => handleToggleAdminActive(adminItem)}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 transition disabled:opacity-50 ${
+                                              adminItem.is_active
+                                                ? "bg-red-500/10 text-red-300 border-red-500/30 hover:bg-red-500/20"
+                                                : "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
+                                            }`}
+                                            title={adminItem.is_active ? "Revoke sub-admin login and API access immediately" : "Re-activate sub-admin access"}
+                                          >
+                                            {togglingAdminId === adminItem.id ? (
+                                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                            ) : adminItem.is_active ? (
+                                              <>
+                                                <Lock className="w-3.5 h-3.5 text-red-400" /> Revoke Access
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Unlock className="w-3.5 h-3.5 text-emerald-400" /> Grant Access
+                                              </>
+                                            )}
+                                          </button>
+
+                                          {/* Edit Role & Permissions Button */}
+                                          <button
+                                            type="button"
+                                            onClick={() => handleOpenEditSubAdmin(adminItem)}
+                                            className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-ink-200 border border-ink-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+                                            title="Edit roles and module access permissions"
+                                          >
+                                            <KeyRound className="w-3.5 h-3.5 text-indigo-400" /> Permissions
+                                          </button>
+
+                                          {/* Delete Sub-Admin Button */}
+                                          <button
+                                            type="button"
+                                            disabled={deletingAdminId === adminItem.id}
+                                            onClick={() => handleDeleteSubAdmin(adminItem.id, adminItem.full_name)}
+                                            className="p-1.5 text-ink-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition"
+                                            title="Permanently delete sub-admin account"
+                                          >
+                                            {deletingAdminId === adminItem.id ? (
+                                              <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                                            ) : (
+                                              <Trash2 className="w-4 h-4" />
+                                            )}
+                                          </button>
+                                        </>
+                                      )}
+
+                                      {isPrimarySuper && (
+                                        <span className="text-[11px] text-amber-400/80 font-mono italic">
+                                          Master Account (Protected)
+                                        </span>
+                                      )}
+
+                                      {isSelf && !isPrimarySuper && (
+                                        <span className="text-[11px] text-ink-500 font-mono">
+                                          Active Session
+                                        </span>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: RBAC Roles & Permissions Reference */}
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-ink-300 flex items-center gap-2">
+                      <Fingerprint className="w-4 h-4 text-cyan-400" /> Role-Based Access Control (RBAC) Matrix Reference
+                    </h3>
+                    <p className="text-xs text-ink-500 mt-0.5">
+                      Tailored administrative roles mapped to functional platform departments.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {ROLE_DEFINITIONS.map((def) => (
+                      <div
+                        key={def.role}
+                        className="p-4 rounded-xl border border-ink-800 bg-ink-950/30 hover:border-ink-700 transition space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`px-2.5 py-0.5 rounded text-xs font-bold border ${def.badgeColor}`}>
+                            {def.label}
+                          </span>
+                          <span className="text-[10px] font-mono text-ink-500">
+                            {def.defaultPermissions.length} modules
+                          </span>
+                        </div>
+                        <p className="text-xs text-ink-400 leading-relaxed">{def.description}</p>
+                        <div className="pt-2 border-t border-ink-800/60 flex flex-wrap gap-1">
+                          {def.defaultPermissions.map((perm) => (
+                            <span
+                              key={perm}
+                              className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-ink-900 text-ink-300 border border-ink-800"
+                            >
+                              {perm}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </FadeIn>
           )}
         </div>
@@ -3600,6 +4412,230 @@ export default function AdminDashboardPage() {
                   <ExternalLink className="w-3.5 h-3.5" /> Open Full Resolution in New Tab
                 </a>
               </div>
+            </div>
+          </div>
+        )}
+        {/* ─────────────────── SUB-ADMIN IAM CREATE / EDIT MODAL ─────────────────── */}
+        {showSubAdminModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            onClick={() => setShowSubAdminModal(false)}
+          >
+            <div
+              className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-ink-950 border-2 border-indigo-500/40 p-6 sm:p-8 shadow-2xl space-y-6 rounded-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setShowSubAdminModal(false)}
+                className="absolute top-5 right-5 p-2 text-ink-400 hover:text-white transition rounded-lg hover:bg-ink-900"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Modal Header */}
+              <div className="border-b border-ink-800 pb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider rounded-lg">
+                  <Shield className="w-3.5 h-3.5 text-indigo-400" /> Identity & Access Management (IAM)
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mt-2">
+                  {editingSubAdmin ? `Edit Sub-Admin: ${editingSubAdmin.full_name}` : "Create New Sub-Admin Account"}
+                </h2>
+                <p className="text-xs text-ink-400 mt-1">
+                  Assign a designated departmental role and customize granular access to platform modules.
+                </p>
+              </div>
+
+              {/* Error Alert */}
+              {subAdminError && (
+                <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-300 text-xs rounded-xl flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{subAdminError}</span>
+                </div>
+              )}
+
+              {/* Sub-Admin Form */}
+              <form onSubmit={handleSaveSubAdmin} className="space-y-6 text-sm">
+                {/* Account Details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-ink-300 uppercase tracking-wider">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Priya Nair"
+                      value={subAdminForm.full_name}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, full_name: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded-lg px-3.5 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-ink-300 uppercase tracking-wider">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. mentor@ivtech.com"
+                      value={subAdminForm.email}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, email: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded-lg px-3.5 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="text-xs font-bold text-ink-300 uppercase tracking-wider">
+                      {editingSubAdmin ? "Password (Leave blank to keep unchanged)" : "Account Password *"}
+                    </label>
+                    <input
+                      type="password"
+                      required={!editingSubAdmin}
+                      placeholder={editingSubAdmin ? "•••••••• (Unchanged)" : "Enter secure password (min 6 characters)"}
+                      value={subAdminForm.password}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, password: e.target.value })}
+                      className="w-full bg-ink-900 border border-ink-800 rounded-lg px-3.5 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Role Preset Selector */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-bold text-ink-300 uppercase tracking-wider block">
+                    Choose Role Preset
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    {ROLE_DEFINITIONS.map((roleItem) => {
+                      const isSelected = subAdminForm.role === roleItem.role;
+                      return (
+                        <button
+                          key={roleItem.role}
+                          type="button"
+                          onClick={() => handleRolePresetSelect(roleItem.role)}
+                          className={`p-3 rounded-xl text-left border transition ${
+                            isSelected
+                              ? "bg-indigo-600/20 border-indigo-500 text-white shadow-sm shadow-indigo-500/20"
+                              : "bg-ink-900/60 border-ink-800 text-ink-300 hover:border-ink-700 hover:text-white"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold">{roleItem.label}</span>
+                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />}
+                          </div>
+                          <p className="text-[11px] text-ink-400 mt-1 line-clamp-2 leading-relaxed">
+                            {roleItem.description}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Granular Permissions Selection Checklist */}
+                <div className="space-y-3 pt-2 border-t border-ink-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-xs font-bold text-ink-300 uppercase tracking-wider block">
+                        Module Access Permissions ({subAdminForm.permissions.length} of {PERMISSIONS_CATALOG.length} granted)
+                      </label>
+                      <p className="text-[11px] text-ink-500">
+                        Check or uncheck individual platform tabs to grant custom access.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSubAdminForm((prev) => ({
+                            ...prev,
+                            role: "super_admin",
+                            permissions: PERMISSIONS_CATALOG.map((p) => p.key),
+                          }))
+                        }
+                        className="text-[11px] text-indigo-400 hover:text-indigo-300 underline"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-ink-600 text-xs">•</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSubAdminForm((prev) => ({
+                            ...prev,
+                            role: "custom",
+                            permissions: [],
+                          }))
+                        }
+                        className="text-[11px] text-ink-400 hover:text-white underline"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {PERMISSIONS_CATALOG.map((perm) => {
+                      const isGranted = subAdminForm.permissions.includes(perm.key);
+                      return (
+                        <div
+                          key={perm.key}
+                          onClick={() => handleTogglePermission(perm.key)}
+                          className={`p-3 rounded-xl border cursor-pointer select-none transition flex items-start gap-3 ${
+                            isGranted
+                              ? "bg-indigo-950/20 border-indigo-500/40 text-white"
+                              : "bg-ink-900/40 border-ink-800/80 text-ink-400 hover:border-ink-700"
+                          }`}
+                        >
+                          <div className="mt-0.5">
+                            {isGranted ? (
+                              <CheckSquare className="w-4 h-4 text-indigo-400" />
+                            ) : (
+                              <Square className="w-4 h-4 text-ink-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white">{perm.label}</span>
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-ink-800 text-ink-400">
+                                {perm.category}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-ink-400 mt-0.5 leading-relaxed">
+                              {perm.description}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Actions Footer */}
+                <div className="pt-4 border-t border-ink-800 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowSubAdminModal(false)}
+                    className="px-4 py-2 bg-ink-900 hover:bg-ink-800 text-ink-300 rounded-lg text-xs font-bold transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingSubAdmin}
+                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition disabled:opacity-50 shadow-lg shadow-indigo-600/30"
+                  >
+                    {savingSubAdmin ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Saving Sub-Admin...
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="w-4 h-4" /> {editingSubAdmin ? "Save Changes" : "Create Sub-Admin"}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

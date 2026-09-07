@@ -1,3 +1,5 @@
+from typing import Optional, List, Any
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 class Token(BaseModel):
@@ -13,5 +15,10 @@ class AdminResponse(BaseModel):
     email: str
     full_name: str
     is_active: bool
+    role: Optional[str] = "super_admin"
+    permissions: Optional[List[str]] = []
+    created_by: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
+
