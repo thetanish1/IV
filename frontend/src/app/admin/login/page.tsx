@@ -115,7 +115,7 @@ export default function AdminLoginPage() {
         const payload = JSON.parse(atob(data.access_token.split(".")[1]));
         if (payload.sub) localStorage.setItem("admin_email", payload.sub);
       } catch {
-        localStorage.setItem("admin_email", "tanishdewase222@gmail.com");
+        localStorage.setItem("admin_email", "admin");
       }
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new Event("user-auth-change"));

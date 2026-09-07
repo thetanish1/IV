@@ -171,11 +171,8 @@ def delete_sub_admin_account(
         raise HTTPException(status_code=400, detail="You cannot delete your own active Super Admin account.")
 
     admin_obj = db.query(Admin).filter(Admin.id == admin_id).first()
-    if not admin_obj:
-        raise HTTPException(status_code=404, detail="Sub-Admin account not found.")
-
-    if admin_obj.email in ("admin@internvision.com", "tanishdewase222@gmail.com"):
-        raise HTTPException(status_code=400, detail="Primary master accounts cannot be deleted.")
+    if admin_obj.role == "super_admin" and admin_obj.created_by is None:
+        raise HTTPException(status_code=400, detail="Primary root Super Admin accounts cannot be deleted.")
 
     db.delete(admin_obj)
     db.commit()

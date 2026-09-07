@@ -492,3 +492,49 @@ def reply_to_student_doubt(
         "answered_by": doubt.answered_by,
         "answered_at": doubt.answered_at.isoformat()
     }
+
+
+@router.delete("/submissions/{sub_id}")
+def delete_submission(
+    sub_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("submissions"))
+):
+    """Admin endpoint to permanently delete a submission deliverable."""
+    sub = db.query(InternshipSubmission).filter(InternshipSubmission.id == sub_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    db.delete(sub)
+    db.commit()
+    return {"success": True, "message": f"Submission #{sub_id} deleted successfully."}
+
+
+@router.delete("/unlock-requests/{req_id}")
+def delete_unlock_request(
+    req_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("unlocks"))
+):
+    """Admin endpoint to permanently delete an unlock request."""
+    req = db.query(TaskUnlockRequest).filter(TaskUnlockRequest.id == req_id).first()
+    if not req:
+        raise HTTPException(status_code=404, detail="Unlock request not found")
+    db.delete(req)
+    db.commit()
+    return {"success": True, "message": f"Unlock request #{req_id} deleted successfully."}
+
+
+@router.delete("/doubts/{doubt_id}")
+def delete_student_doubt(
+    doubt_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("doubts"))
+):
+    """Admin endpoint to permanently delete a student doubt ticket."""
+    doubt = db.query(StudentDoubt).filter(StudentDoubt.id == doubt_id).first()
+    if not doubt:
+        raise HTTPException(status_code=404, detail="Student doubt ticket not found")
+    db.delete(doubt)
+    db.commit()
+    return {"success": True, "message": f"Doubt ticket #{doubt_id} deleted successfully."}
+

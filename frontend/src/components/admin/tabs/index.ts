@@ -8,5 +8,5 @@ export { default as CertificatesTab } from "./CertificatesTab";
 export { UsersTab } from "./UsersTab";
 export { CourseEnrollmentsTab } from "./CourseEnrollmentsTab";
 export { PaymentsAuditTab } from "./PaymentsAuditTab";
-export { BrandedMailerTab } from "./BrandedMailerTab";
+export { default as BrandedMailerTab } from "./BrandedMailerTab";
 export { SettingsIAMTab } from "./SettingsIAMTab";

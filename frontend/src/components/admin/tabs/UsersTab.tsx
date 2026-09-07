@@ -2,15 +2,19 @@
 
 import React, { useState, useMemo } from "react";
 import { Pagination, AdminSearchBar, StatusBadge } from "../common";
-import { User, Shield, Eye, EyeOff, Key, Mail, Calendar } from "lucide-react";
+import { User, Shield, Eye, EyeOff, Key, Mail, Calendar, Trash2, UserCheck, ShieldAlert } from "lucide-react";
 
 interface UsersTabProps {
   users: any[];
+  onDeleteUser?: (userId: string | number) => Promise<void>;
+  onUpdateUserRole?: (userId: string | number, newRole: string) => Promise<void>;
   itemsPerPage?: number;
 }
 
 export const UsersTab: React.FC<UsersTabProps> = ({
   users,
+  onDeleteUser,
+  onUpdateUserRole,
   itemsPerPage = 10,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,6 +22,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   const [providerFilter, setProviderFilter] = useState("ALL");
   const [revealedPasswords, setRevealedPasswords] = useState<{ [key: string]: boolean }>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [deletingId, setDeletingId] = useState<string | number | null>(null);
 
   const togglePasswordReveal = (userId: string) => {
     setRevealedPasswords((prev) => ({
@@ -33,17 +38,17 @@ export const UsersTab: React.FC<UsersTabProps> = ({
         !q ||
         u.full_name?.toLowerCase().includes(q) ||
         u.email?.toLowerCase().includes(q) ||
-        u.id?.toLowerCase().includes(q);
+        String(u.id)?.toLowerCase().includes(q);
 
       const matchRole =
         roleFilter === "ALL" ||
         (roleFilter === "ADMIN" && (u.role === "admin" || u.role === "super_admin")) ||
-        (roleFilter === "STUDENT" && u.role === "student");
+        (roleFilter === "STUDENT" && (u.role === "student" || !u.role || u.role === "user"));
 
       const matchProvider =
         providerFilter === "ALL" ||
-        (providerFilter === "GOOGLE" && (u.auth_provider === "google" || !u.is_password_set)) ||
-        (providerFilter === "PASSWORD" && u.auth_provider !== "google" && u.is_password_set);
+        (providerFilter === "GOOGLE" && (u.auth_provider === "google" || u.provider === "google" || !u.is_password_set)) ||
+        (providerFilter === "PASSWORD" && u.auth_provider !== "google" && u.provider !== "google" && u.is_password_set);
 
       return matchSearch && matchRole && matchProvider;
     });
@@ -54,6 +59,18 @@ export const UsersTab: React.FC<UsersTabProps> = ({
     const start = (currentPage - 1) * itemsPerPage;
     return filteredUsers.slice(start, start + itemsPerPage);
   }, [filteredUsers, currentPage, itemsPerPage]);
+
+  const handleDelete = async (userId: string | number, userEmail: string) => {
+    if (!onDeleteUser) return;
+    if (confirm(`Are you sure you want to permanently delete user account '${userEmail}'?`)) {
+      try {
+        setDeletingId(userId);
+        await onDeleteUser(userId);
+      } finally {
+        setDeletingId(null);
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -96,7 +113,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
           >
             <option value="ALL">All Auth Providers</option>
             <option value="PASSWORD">Email & Password</option>
-            <option value="GOOGLE">Google OAuth</option>
+            <option value="GOOGLE">Google SSO</option>
           </select>
         </div>
       </div>
@@ -112,18 +129,22 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                 <th className="py-4 px-6">Auth Method</th>
                 <th className="py-4 px-6">Security / Credential</th>
                 <th className="py-4 px-6">Joined Date</th>
+                <th className="py-4 px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 font-normal">
               {paginatedUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     No registered user accounts match the current filter.
                   </td>
                 </tr>
               ) : (
                 paginatedUsers.map((u) => {
                   const isPasswordRevealed = !!revealedPasswords[u.id];
+                  const isGoogle = u.auth_provider === "google" || u.provider === "google";
+                  const isSuper = u.role === "super_admin";
+
                   return (
                     <tr
                       key={u.id}
@@ -149,7 +170,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
 
                       {/* Role */}
                       <td className="py-4 px-6">
-                        {u.role === "super_admin" ? (
+                        {isSuper ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
                             <Shield className="w-3 h-3 text-amber-400" /> Super Admin
                           </span>
@@ -166,7 +187,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
 
                       {/* Auth Method */}
                       <td className="py-4 px-6">
-                        {u.auth_provider === "google" ? (
+                        {isGoogle ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-300 border border-red-500/20">
                             Google SSO
                           </span>
@@ -179,7 +200,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
 
                       {/* Security / Credential */}
                       <td className="py-4 px-6">
-                        {u.auth_provider === "google" ? (
+                        {isGoogle ? (
                           <span className="text-xs text-slate-500 italic">
                             Managed by Google OAuth
                           </span>
@@ -220,6 +241,21 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                               })
                             : "N/A"}
                         </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-6 text-right">
+                        {!isSuper && onDeleteUser && (
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(u.id, u.email)}
+                            disabled={deletingId === u.id}
+                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                            title="Delete User Account"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

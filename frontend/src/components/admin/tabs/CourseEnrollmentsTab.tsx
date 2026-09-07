@@ -7,12 +7,14 @@ import { BookOpen, CheckCircle, XCircle, Clock, Mail, ShieldCheck } from "lucide
 interface CourseEnrollmentsTabProps {
   registrations: any[];
   onStatusChange: (regId: string, status: "approved" | "rejected") => Promise<void>;
+  onDeleteRegistration?: (regId: string | number) => Promise<void>;
   itemsPerPage?: number;
 }
 
 export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
   registrations,
   onStatusChange,
+  onDeleteRegistration,
   itemsPerPage = 10,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -165,28 +167,44 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
 
                       {/* Actions */}
                       <td className="py-4 px-6 text-right">
-                        {isPending ? (
-                          <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-2">
+                          {isPending ? (
+                            <>
+                              <button
+                                onClick={() => handleAction(r.id, "approved")}
+                                disabled={isActionLoading}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Approve
+                              </button>
+                              <button
+                                onClick={() => handleAction(r.id, "rejected")}
+                                disabled={isActionLoading}
+                                className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                              >
+                                <XCircle className="w-3.5 h-3.5" /> Reject
+                              </button>
+                            </>
+                          ) : (
+                            <span className="text-xs text-slate-500 italic">
+                              Decided ({r.status})
+                            </span>
+                          )}
+
+                          {onDeleteRegistration && (
                             <button
-                              onClick={() => handleAction(r.id, "approved")}
-                              disabled={isActionLoading}
-                              className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete registration record #${r.id}?`)) {
+                                  onDeleteRegistration(r.id);
+                                }
+                              }}
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors"
+                              title="Delete Record"
                             >
-                              <CheckCircle className="w-3.5 h-3.5" /> Approve
+                              <XCircle className="w-4 h-4" />
                             </button>
-                            <button
-                              onClick={() => handleAction(r.id, "rejected")}
-                              disabled={isActionLoading}
-                              className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
-                            >
-                              <XCircle className="w-3.5 h-3.5" /> Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-500 italic">
-                            Decided ({r.status})
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

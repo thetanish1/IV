@@ -2,15 +2,17 @@
 
 import React, { useState, useMemo } from "react";
 import { Pagination, AdminSearchBar, StatusBadge } from "../common";
-import { CreditCard, ArrowUpRight, DollarSign, Calendar, ShieldCheck } from "lucide-react";
+import { CreditCard, ArrowUpRight, DollarSign, Calendar, ShieldCheck, Trash2 } from "lucide-react";
 
 interface PaymentsAuditTabProps {
   payments: any[];
+  onDeletePayment?: (pmtId: string | number) => Promise<void>;
   itemsPerPage?: number;
 }
 
 export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
   payments,
+  onDeletePayment,
   itemsPerPage = 10,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -138,12 +140,13 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
                 <th className="py-4 px-6">Gateway Identifiers</th>
                 <th className="py-4 px-6">Status</th>
                 <th className="py-4 px-6">Timestamp</th>
+                <th className="py-4 px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 font-normal">
               {paginatedPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     No transactions match your query criteria.
                   </td>
                 </tr>
@@ -209,6 +212,24 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
                             })
                           : "N/A"}
                       </div>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-4 px-6 text-right">
+                      {onDeletePayment && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete payment record #${p.id}?`)) {
+                              onDeletePayment(p.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                          title="Delete Payment Record"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

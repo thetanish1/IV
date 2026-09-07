@@ -244,11 +244,33 @@ export default function AdminDashboardPage() {
     fetchAllData();
   };
 
-  const handleSendEmail = async (emailData: any) => {
-    await apiRequest(`/admin/send-email`, {
-      method: "POST",
-      body: JSON.stringify(emailData),
+  const handleDeleteUser = async (userId: string | number) => {
+    await apiRequest(`/admin/users/${userId}`, {
+      method: "DELETE",
     });
+    fetchAllData();
+  };
+
+  const handleUpdateUserRole = async (userId: string | number, newRole: string) => {
+    await apiRequest(`/admin/users/${userId}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role: newRole }),
+    });
+    fetchAllData();
+  };
+
+  const handleDeleteRegistration = async (regId: string | number) => {
+    await apiRequest(`/admin/registrations/${regId}`, {
+      method: "DELETE",
+    });
+    fetchAllData();
+  };
+
+  const handleDeletePayment = async (pmtId: string | number) => {
+    await apiRequest(`/admin/payments/${pmtId}`, {
+      method: "DELETE",
+    });
+    fetchAllData();
   };
 
   const handleLogout = () => {
@@ -422,20 +444,30 @@ export default function AdminDashboardPage() {
 
               {activeTab === "certificates" && <CertificatesTab />}
 
-              {activeTab === "users" && <UsersTab users={users} />}
+              {activeTab === "users" && (
+                <UsersTab
+                  users={users}
+                  onDeleteUser={handleDeleteUser}
+                  onUpdateUserRole={handleUpdateUserRole}
+                />
+              )}
 
               {activeTab === "enrollments" && (
                 <CourseEnrollmentsTab
                   registrations={registrations}
                   onStatusChange={handleRegistrationStatusChange}
+                  onDeleteRegistration={handleDeleteRegistration}
                 />
               )}
 
-              {activeTab === "payments" && <PaymentsAuditTab payments={payments} />}
-
-              {activeTab === "mailer" && (
-                <BrandedMailerTab onSendEmail={handleSendEmail} />
+              {activeTab === "payments" && (
+                <PaymentsAuditTab
+                  payments={payments}
+                  onDeletePayment={handleDeletePayment}
+                />
               )}
+
+              {activeTab === "mailer" && <BrandedMailerTab />}
 
               {activeTab === "settings" && (
                 <SettingsIAMTab

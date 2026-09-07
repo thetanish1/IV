@@ -45,29 +45,26 @@ export default function Navbar() {
 
   const checkAuth = () => {
     // Check for Admin authentication
-    const adminToken = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("token") || localStorage.getItem("admin_token");
     const adminEmail = localStorage.getItem("admin_email") || "";
     
-    // Check if logged-in admin is tanishdewase222@gmail.com
-    let isSuperAdmin = false;
+    let isUserAdmin = false;
     if (adminToken) {
-      if (adminEmail.toLowerCase() === "tanishdewase222@gmail.com") {
-        isSuperAdmin = true;
-      } else {
-        try {
-          const parts = adminToken.split(".");
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]));
-            if (payload.sub && payload.sub.toLowerCase() === "tanishdewase222@gmail.com") {
-              isSuperAdmin = true;
-            }
+      try {
+        const parts = adminToken.split(".");
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.role === "admin" || payload.role === "super_admin" || adminEmail) {
+            isUserAdmin = true;
           }
-        } catch {
-          // fallback
+        } else if (adminEmail) {
+          isUserAdmin = true;
         }
+      } catch {
+        if (adminEmail) isUserAdmin = true;
       }
     }
-    setIsAdmin(isSuperAdmin);
+    setIsAdmin(isUserAdmin);
 
     // Check for Public User authentication
     const publicUserEmail = localStorage.getItem("user_email");
@@ -256,12 +253,12 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            {/* Admin Portal is ONLY visible when logged in as tanishdewase222@gmail.com */}
+            {/* Admin Portal is visible when logged in as admin */}
             {isAdmin && (
               <Link
                 href="/admin/dashboard"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-brand-600/20 hover:bg-brand-600/30 text-brand-400 border border-brand-500/40 transition rounded shadow-sm"
-                title="Admin Portal (tanishdewase222@gmail.com)"
+                title="Admin Dashboard Portal"
               >
                 <Shield className="w-3.5 h-3.5 text-brand-400" />
                 Admin Portal

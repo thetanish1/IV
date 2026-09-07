@@ -411,3 +411,68 @@ def delete_contact_query(
     db.delete(contact)
     db.commit()
     return {"success": True, "message": "Contact inquiry deleted successfully."}
+
+
+# ─── 6. Additional Full CRUD Operations for Admin Entities ──────────────────
+
+@router.delete("/users/{user_id}")
+def delete_site_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("users"))
+):
+    """Admin endpoint to permanently delete a registered user account."""
+    user = db.query(SiteUser).filter(SiteUser.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User account not found")
+    db.delete(user)
+    db.commit()
+    return {"success": True, "message": f"User account '{user.email}' has been deleted."}
+
+
+@router.patch("/users/{user_id}/role")
+def update_site_user_role(
+    user_id: int,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("users"))
+):
+    """Admin endpoint to update a user's account role."""
+    new_role = payload.get("role", "student")
+    user = db.query(SiteUser).filter(SiteUser.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User account not found")
+    user.role = new_role
+    db.commit()
+    return {"success": True, "message": f"User '{user.email}' role updated to '{new_role}'."}
+
+
+@router.delete("/registrations/{reg_id}")
+def delete_course_registration(
+    reg_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("enrollments"))
+):
+    """Admin endpoint to permanently delete a course enrollment record."""
+    reg = db.query(CourseRegistration).filter(CourseRegistration.id == reg_id).first()
+    if not reg:
+        raise HTTPException(status_code=404, detail="Registration record not found")
+    db.delete(reg)
+    db.commit()
+    return {"success": True, "message": f"Course registration #{reg_id} has been deleted."}
+
+
+@router.delete("/payments/{payment_id}")
+def delete_payment_record(
+    payment_id: int,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("payments"))
+):
+    """Admin endpoint to delete/archive a payment transaction record."""
+    pmt = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not pmt:
+        raise HTTPException(status_code=404, detail="Payment record not found")
+    db.delete(pmt)
+    db.commit()
+    return {"success": True, "message": f"Payment transaction #{payment_id} has been deleted."}
+
