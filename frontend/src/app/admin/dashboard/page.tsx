@@ -606,8 +606,9 @@ export default function AdminDashboardPage() {
       const params = new URLSearchParams();
       if (subStatusFilter !== "all") params.set("status", subStatusFilter);
       if (subSearch) params.set("search", subSearch);
-      const data = await apiRequest<SubmissionAdminItem[]>(`/admin/submissions?${params.toString()}`);
-      setSubmissionsList(Array.isArray(data) ? data : []);
+      const data = await apiRequest<{ items: SubmissionAdminItem[]; total: number } | SubmissionAdminItem[]>(`/admin/submissions?${params.toString()}`);
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+      setSubmissionsList(list);
     } catch (err) {
       console.error("Failed to fetch submissions", err);
       setSubmissionsList([]);
@@ -647,8 +648,9 @@ export default function AdminDashboardPage() {
   const fetchUnlockRequests = async () => {
     setLoadingUnlocks(true);
     try {
-      const data = await apiRequest<UnlockRequestAdminItem[]>("/admin/unlock-requests");
-      setUnlockRequests(Array.isArray(data) ? data : []);
+      const data = await apiRequest<{ items: UnlockRequestAdminItem[]; total: number } | UnlockRequestAdminItem[]>("/admin/unlock-requests");
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+      setUnlockRequests(list);
     } catch (err) {
       console.error("Failed to load unlock requests", err);
       setUnlockRequests([]);
@@ -683,8 +685,9 @@ export default function AdminDashboardPage() {
     try {
       const params = new URLSearchParams();
       if (doubtFilter !== "all") params.set("status", doubtFilter);
-      const data = await apiRequest<StudentDoubtItem[]>(`/admin/doubts?${params.toString()}`);
-      setDoubtsList(Array.isArray(data) ? data : []);
+      const data = await apiRequest<{ items: StudentDoubtItem[]; total: number } | StudentDoubtItem[]>(`/admin/doubts?${params.toString()}`);
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+      setDoubtsList(list);
     } catch (err) {
       console.error("Failed to load doubts", err);
       setDoubtsList([]);

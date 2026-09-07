@@ -637,8 +637,15 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
         }
 
     # Fetch doubts
+    email_filters = [StudentDoubt.student_email == clean_email, StudentDoubt.application_id == app.id]
+    if app.email:
+        email_filters.append(StudentDoubt.student_email == app.email.strip().lower())
+    if app.google_email:
+        email_filters.append(StudentDoubt.student_email == app.google_email.strip().lower())
+
+    from sqlalchemy import or_
     doubts = db.query(StudentDoubt)\
-               .filter(StudentDoubt.student_email == clean_email)\
+               .filter(or_(*email_filters))\
                .order_by(StudentDoubt.created_at.desc())\
                .all()
 
