@@ -1,7 +1,7 @@
 import base64
 import smtplib
 import logging
-from typing import Optional
+from typing import Optional, List
 from html import escape
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -1000,3 +1000,82 @@ def send_unlock_request_received_email(
 
     text = f"""Dear {display_name},\n\nYour unlock request for '{task_title}' has been logged.\nReason: {reason}\n\nBest regards,\nInternVision Tech Mentorship Team"""
     return _send_smtp_email(student_email, subject, html, text)
+
+
+# ─── 12. SUB-ADMIN IAM PROVISIONING EMAIL ────────────────────────────────────
+
+def send_sub_admin_provisioned_email(
+    admin_email: str,
+    admin_name: str,
+    role: str,
+    temporary_password: str,
+    permissions: List[str],
+    created_by: str = "Super Administrator"
+) -> bool:
+    """Dispatched when a Super Admin provisions a new sub-admin account."""
+    display_name = admin_name or admin_email.split("@")[0]
+    role_label = role.replace("_", " ").title()
+    subject = f"🔐 Admin Credentials & Access Granted: [{role_label}] | InternVision Tech"
+
+    perms_badges = "".join(
+        f'<span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin: 2px 4px 2px 0;">{escape(p.capitalize())}</span>'
+        for p in (permissions or [])
+    ) or '<span style="color: #64748b; font-style: italic;">Standard Operations</span>'
+
+    body_html = f"""
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
+      You have been officially provisioned as an administrator for the <strong>InternVision Tech Operational Portal</strong> by {escape(created_by)}.
+    </p>
+
+    <!-- Credentials Card -->
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #4f46e5; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #312e81; text-transform: uppercase; letter-spacing: 0.5px;">
+        Administrative Access Credentials
+      </h3>
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #1e293b; line-height: 1.8;">
+        <tr>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Login Portal:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;"><a href="https://iv-theta.vercel.app/admin/login" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">https://iv-theta.vercel.app/admin/login</a></td>
+        </tr>
+        <tr>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Admin Email:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; font-family: monospace; font-weight: bold; color: #0f172a;">{escape(admin_email)}</td>
+        </tr>
+        <tr>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Assigned Role:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #4f46e5; font-weight: bold;">{escape(role_label)}</td>
+        </tr>
+        <tr>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Temporary Password:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; font-family: monospace; font-weight: bold; color: #e11d48; background: #ffe4e6; padding: 2px 6px; border-radius: 4px; display: inline-block;">{escape(temporary_password)}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Permissions Module Overview -->
+    <div style="background-color: #ffffff; border: 1px solid #cbd5e1; padding: 14px 16px; border-radius: 8px; margin: 16px 0; box-sizing: border-box; width: 100%;">
+      <h4 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
+        Granted Operational Module Access:
+      </h4>
+      <div>{perms_badges}</div>
+    </div>
+
+    <p style="font-size: 12px; color: #64748b; line-height: 1.6; margin-top: 14px;">
+      ⚠️ Please keep your administrative credentials strictly confidential. You are granted operational privileges according to your designated organization role.
+    </p>
+    """
+
+    html = _build_base_email_template(
+        badge_text="Staff Access Granted",
+        badge_color="#4f46e5",
+        title="Admin Account Provisioned",
+        body_content_html=body_html,
+        cta_text="Access Admin Portal →",
+        cta_url="https://iv-theta.vercel.app/admin/login",
+        accent_color="#4f46e5"
+    )
+
+    text = f"""Dear {display_name},\n\nYou have been provisioned as an administrator ({role_label}) on InternVision Tech.\nPortal: https://iv-theta.vercel.app/admin/login\nEmail: {admin_email}\nTemporary Password: {temporary_password}\n\nBest regards,\nInternVision Tech Super Admin"""
+    return _send_smtp_email(admin_email, subject, html, text)
+

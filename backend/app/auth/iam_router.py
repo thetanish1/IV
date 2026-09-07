@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.shared.database import get_db
 from app.shared.dependencies import (
@@ -10,6 +10,7 @@ from app.shared.dependencies import (
     ROLE_PERMISSIONS_MAP,
 )
 from app.shared.security import get_password_hash
+from app.shared.email_service import send_sub_admin_provisioned_email
 from app.auth.models import Admin
 from app.auth.schemas import AdminCreateBody, AdminUpdateBody
 
@@ -62,10 +63,11 @@ def list_sub_admins(
 @router.post("/admins")
 def create_sub_admin_account(
     body: AdminCreateBody,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(require_super_admin)
 ):
-    """Super Admin creates a new sub-admin account with assigned roles & permissions."""
+    """Super Admin creates a new sub-admin account with assigned roles & permissions and sends automated credentials email."""
     clean_email = body.email.strip().lower()
     if not clean_email or not body.password or not body.full_name.strip():
         raise HTTPException(status_code=400, detail="Name, email, and password are required.")
@@ -93,9 +95,20 @@ def create_sub_admin_account(
     db.commit()
     db.refresh(new_admin)
 
+    # Automatically dispatch administrative onboarding & credentials email to the specified email textbox
+    background_tasks.add_task(
+        send_sub_admin_provisioned_email,
+        admin_email=new_admin.email,
+        admin_name=new_admin.full_name,
+        role=new_admin.role,
+        temporary_password=body.password,
+        permissions=new_admin.permissions or [],
+        created_by=current_admin.full_name or current_admin.email
+    )
+
     return {
         "success": True,
-        "message": f"Sub-Admin account for '{new_admin.full_name}' created successfully.",
+        "message": f"Sub-Admin account for '{new_admin.full_name}' created successfully. Onboarding email sent to {new_admin.email}.",
         "admin": {
             "id": new_admin.id,
             "email": new_admin.email,

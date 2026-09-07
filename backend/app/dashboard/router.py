@@ -81,13 +81,13 @@ def get_stats(
 @router.get("/users")
 def get_site_users(
     page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=500),
     q: Optional[str] = None,
     provider: Optional[str] = None,
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(require_permission("users"))
 ):
-    """Admin endpoint to list registered platform users."""
+    """Admin endpoint to list all registered platform users."""
     try:
         query = db.query(SiteUser)
         if q:
@@ -105,19 +105,27 @@ def get_site_users(
                      .limit(limit)\
                      .all()
 
-        user_items = [
-            {
+        user_items = []
+        for u in items:
+            raw_pwd = getattr(u, "raw_password", None)
+            has_pwd = bool(raw_pwd or getattr(u, "hashed_password", None))
+            prov = getattr(u, "provider", None) or ("google" if getattr(u, "google_sub", None) else ("email" if has_pwd else "google"))
+            user_items.append({
                 "id": u.id,
                 "email": u.email,
-                "full_name": u.full_name,
-                "provider": u.provider,
-                "avatar_url": u.avatar_url,
-                "is_active": u.is_active,
+                "full_name": u.full_name or u.email.split("@")[0],
+                "provider": prov,
+                "auth_provider": prov,
+                "avatar_url": getattr(u, "picture", None),
+                "picture": getattr(u, "picture", None),
+                "is_active": True,
+                "is_password_set": has_pwd,
                 "created_at": u.created_at.isoformat() if u.created_at else None,
-                "plain_password": u.plain_password if hasattr(u, "plain_password") else None,
-            }
-            for u in items
-        ]
+                "plain_password": raw_pwd,
+                "raw_password": raw_pwd,
+                "role": "student",
+            })
+
         return {
             "total": total,
             "page": page,
@@ -126,6 +134,7 @@ def get_site_users(
             "items": user_items
         }
     except Exception as e:
+        logger.error(f"Error fetching registered users: {e}", exc_info=True)
         return {"total": 0, "page": page, "limit": limit, "total_pages": 1, "items": []}
 
 
