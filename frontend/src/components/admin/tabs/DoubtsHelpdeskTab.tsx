@@ -1,0 +1,227 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { MessageSquare, RefreshCw, Loader2, Image as ImageIcon, ZoomIn } from "lucide-react";
+import { StudentDoubtItem } from "@/types";
+import { apiRequest, getImageUrl } from "@/lib/api-client";
+import { FadeIn } from "@/components/animations/FadeIn";
+import StatusBadge from "../common/StatusBadge";
+import DurationFilterSelect from "../common/DurationFilterSelect";
+import DoubtReplyModal from "./DoubtReplyModal";
+
+interface DoubtsHelpdeskTabProps {
+  onZoomImage: (url: string) => void;
+}
+
+export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProps) {
+  const [doubtsList, setDoubtsList] = useState<StudentDoubtItem[]>([]);
+  const [loadingDoubts, setLoadingDoubts] = useState(false);
+  const [doubtFilter, setDoubtFilter] = useState("all");
+  const [doubtDurationFilter, setDoubtDurationFilter] = useState("all");
+
+  const [replyingDoubt, setReplyingDoubt] = useState<StudentDoubtItem | null>(null);
+  const [doubtReplyText, setDoubtReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
+
+  const fetchDoubts = useCallback(async () => {
+    setLoadingDoubts(true);
+    try {
+      const params = new URLSearchParams();
+      if (doubtFilter !== "all") params.set("status", doubtFilter);
+      if (doubtDurationFilter !== "all") params.set("duration", doubtDurationFilter);
+
+      const data = await apiRequest<{ items: StudentDoubtItem[]; total: number } | StudentDoubtItem[]>(
+        `/admin/doubts?${params.toString()}`
+      );
+      const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : []);
+      setDoubtsList(list);
+    } catch (err) {
+      console.error("Failed to load doubts", err);
+      setDoubtsList([]);
+    } finally {
+      setLoadingDoubts(false);
+    }
+  }, [doubtFilter, doubtDurationFilter]);
+
+  useEffect(() => {
+    fetchDoubts();
+  }, [fetchDoubts]);
+
+  const handleSendDoubtReply = async () => {
+    if (!replyingDoubt || !doubtReplyText.trim()) return;
+    setSendingReply(true);
+    try {
+      await apiRequest<StudentDoubtItem>(`/admin/doubts/${replyingDoubt.id}/reply`, {
+        method: "POST",
+        body: JSON.stringify({
+          admin_reply: doubtReplyText.trim(),
+        }),
+      });
+      setDoubtsList((prev) =>
+        (Array.isArray(prev) ? prev : []).map((d) =>
+          d.id === replyingDoubt.id ? { ...d, admin_reply: doubtReplyText.trim(), status: "answered" } : d
+        )
+      );
+      setReplyingDoubt(null);
+      setDoubtReplyText("");
+    } catch (err) {
+      console.error("Failed to send doubt reply", err);
+      alert("Failed to send reply. Please check your network connection.");
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  return (
+    <FadeIn delay={0.2} direction="up">
+      <div className="space-y-4 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-pink-400" /> Technical Doubts & Mentor Desk
+            </h2>
+            <p className="text-xs text-ink-400 mt-0.5">
+              Direct 2-way query resolution desk for student code snippets, bugs, and module doubts.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <select
+              value={doubtFilter}
+              onChange={(e) => setDoubtFilter(e.target.value)}
+              className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
+            >
+              <option value="all">All Queries</option>
+              <option value="open">Open / Unanswered</option>
+              <option value="answered">Resolved / Answered</option>
+            </select>
+            <DurationFilterSelect
+              value={doubtDurationFilter}
+              onChange={(val) => setDoubtDurationFilter(val)}
+              accentColor="pink"
+            />
+            <button
+              type="button"
+              onClick={fetchDoubts}
+              className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+              title="Refresh Doubts"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {loadingDoubts ? (
+            <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30">
+              <Loader2 className="w-5 h-5 animate-spin mx-auto text-pink-400" />
+            </div>
+          ) : doubtsList.length === 0 ? (
+            <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30 text-ink-500 text-sm">
+              No student queries found.
+            </div>
+          ) : (
+            doubtsList.map((d) => (
+              <div
+                key={d.id}
+                className={`p-5 rounded-xl border transition-all ${
+                  d.status === "open"
+                    ? "bg-pink-950/10 border-pink-500/30"
+                    : "bg-ink-950/30 border-ink-800 hover:border-ink-700"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-ink-800/60">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <StatusBadge status={d.status} type="doubt" />
+                      <span className="text-xs font-semibold text-brand-400">{d.domain_track}</span>
+                      <span className="text-xs text-ink-500">•</span>
+                      <span className="text-xs text-ink-300 font-mono">{d.module_name}</span>
+                    </div>
+                    <h3 className="text-base font-bold text-white mt-1.5">{d.subject}</h3>
+                    <div className="text-xs text-ink-400 mt-0.5">
+                      From: <strong className="text-ink-200">{d.student_name}</strong> ({d.student_email}) •{" "}
+                      {new Date(d.created_at).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplyingDoubt(d);
+                      setDoubtReplyText(d.admin_reply || "");
+                    }}
+                    className="px-3.5 py-1.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition self-start whitespace-nowrap"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    {d.admin_reply ? "Edit Reply" : "Answer Query"}
+                  </button>
+                </div>
+
+                {/* Question body */}
+                <p className="text-sm text-ink-200 mt-3 whitespace-pre-wrap leading-relaxed">{d.question}</p>
+
+                {/* Code snippet if any */}
+                {d.code_snippet && (
+                  <div className="mt-3 p-3 bg-black/70 border border-ink-800 rounded-lg font-mono text-xs text-ink-200 overflow-x-auto">
+                    <pre>{d.code_snippet}</pre>
+                  </div>
+                )}
+
+                {/* Attached Error Screenshot */}
+                {d.image_url && (
+                  <div className="mt-3 flex items-center gap-3 p-2.5 bg-black/50 border border-ink-800 rounded-lg max-w-md">
+                    <img
+                      src={getImageUrl(d.image_url)}
+                      alt="Error Screenshot"
+                      className="w-14 h-14 object-cover rounded border border-ink-700 cursor-pointer hover:opacity-80 transition shrink-0"
+                      onClick={() => onZoomImage(getImageUrl(d.image_url))}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-pink-400 flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5" /> Error Screenshot Attached
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onZoomImage(getImageUrl(d.image_url))}
+                        className="text-[11px] text-ink-400 hover:text-white underline mt-1 flex items-center gap-1"
+                      >
+                        <ZoomIn className="w-3 h-3" /> Click to inspect visual error
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reply box if answered */}
+                {d.admin_reply && (
+                  <div className="mt-4 p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                      <span>✓ Mentor Resolution ({d.answered_by || "HR Team"})</span>
+                      {d.answered_at && (
+                        <span className="text-ink-500 font-normal">
+                          {new Date(d.answered_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-ink-200 whitespace-pre-wrap leading-relaxed">
+                      {d.admin_reply}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Doubt Reply Modal */}
+        <DoubtReplyModal
+          doubt={replyingDoubt}
+          replyText={doubtReplyText}
+          setReplyText={setDoubtReplyText}
+          sendingReply={sendingReply}
+          onClose={() => setReplyingDoubt(null)}
+          onSendReply={handleSendDoubtReply}
+          onZoomImage={onZoomImage}
+        />
+      </div>
+    </FadeIn>
+  );
+}

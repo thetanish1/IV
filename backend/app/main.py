@@ -12,18 +12,21 @@ from app.auth.user_models import SiteUser  # ensures site_users table is created
 from app.shared.security import get_password_hash
 from app.shared.database import Base, engine, get_db, SessionLocal
 from app.auth.router import router as auth_router
+from app.auth.iam_router import router as iam_router
 from app.courses.router import router as courses_router
 from app.internship.router import router as internship_router
+from app.internship.admin_router import router as internship_admin_router
+from app.internship.portal_router import router as portal_router
 from app.payments.router import router as payments_router
 from app.dashboard.router import router as dashboard_router
 from app.export.router import router as export_router
 from app.certificates.router import router as certificates_router
-from app.internship.portal_router import router as portal_router
 from app.mailer.router import router as mailer_router
 from app.certificates.models import Certificate
 from app.mailer.models import SentEmail
 from app.shared.contact_models import ContactQuery
 from app.shared.contact_router import router as contact_router
+from app.shared.settings_router import router as settings_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -268,7 +271,21 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Feature Routers mounted under /api and root for total path compatibility
-for r in [auth_router, courses_router, internship_router, portal_router, payments_router, dashboard_router, export_router, certificates_router, mailer_router, contact_router]:
+for r in [
+    auth_router,
+    iam_router,
+    courses_router,
+    internship_router,
+    internship_admin_router,
+    portal_router,
+    payments_router,
+    dashboard_router,
+    export_router,
+    certificates_router,
+    mailer_router,
+    contact_router,
+    settings_router,
+]:
     app.include_router(r, prefix="/api")
     app.include_router(r)
 

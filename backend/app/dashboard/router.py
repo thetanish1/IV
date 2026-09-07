@@ -1,346 +1,135 @@
 import math
 from datetime import datetime
 from typing import Optional, List, Any
-from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks, Body
 from sqlalchemy.orm import Session
-from sqlalchemy import func, select
+from sqlalchemy import func
 from app.shared.database import get_db
-from app.shared.dependencies import get_current_admin
-from app.shared.security import get_password_hash
+from app.shared.dependencies import (
+    get_current_admin,
+    require_permission,
+)
 from app.shared.email_service import (
     send_course_enrollment_acceptance_email,
     send_course_enrollment_rejection_email,
-    send_internship_acceptance_email,
-    send_internship_rejection_email,
-    send_submission_reviewed_email,
-    send_doubt_answered_email,
     send_contact_reply_email,
 )
-from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
+from app.internship.models import InternshipApplication, InternshipSubmission
 from app.courses.models import Course, CourseRegistration
 from app.payments.models import Payment
-from app.shared.settings_models import SiteSetting
+from app.auth.user_models import SiteUser
 from app.shared.contact_models import ContactQuery
 from app.dashboard.schemas import DashboardStats
-from app.internship.schemas import ApplicationResponse
 from app.payments.schemas import PaymentResponse
 from app.courses.schemas import RegistrationResponse
 from app.auth.models import Admin
 
-from pydantic import BaseModel, EmailStr
-from app.auth.user_models import SiteUser
+router = APIRouter(prefix="/admin", tags=["admin-dashboard"])
 
-router = APIRouter(prefix="/admin", tags=["Admin Dashboard"])
-
-class SettingsUpdateBody(BaseModel):
-    show_courses: Optional[bool] = None
-    show_careers: Optional[bool] = None
-
-class AdminCreateBody(BaseModel):
-    email: EmailStr
-    password: str
-    full_name: str
-    role: str = "custom"
-    permissions: Optional[List[str]] = []
-
-class AdminUpdateBody(BaseModel):
-    full_name: Optional[str] = None
-    password: Optional[str] = None
-    role: Optional[str] = None
-    permissions: Optional[List[str]] = None
-    is_active: Optional[bool] = None
-
-class SubmissionReviewBody(BaseModel):
-    status: Optional[str] = None
-    admin_feedback: Optional[str] = None
-    is_unlocked: Optional[bool] = None
-
-class UnlockActionBody(BaseModel):
-    action: str  # 'approve' or 'reject'
-
-class DoubtReplyBody(BaseModel):
-    admin_reply: str
-
-class StatusUpdateBody(BaseModel):
-    status: str
-
+# ─── 1. Dashboard Overview & Statistics ──────────────────────────────────────
 
 @router.get("/stats", response_model=DashboardStats)
-@router.get("/dashboard", response_model=DashboardStats)
-def get_dashboard_stats(
+def get_stats(
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
 ):
-    total_revenue = db.query(func.coalesce(func.sum(Payment.amount_inr), 0))\
-                      .filter(Payment.status == "captured").scalar()
+    """Platform KPI metrics and aggregate telemetry overview."""
+    total_apps = db.query(InternshipApplication).count()
+    total_regs = db.query(CourseRegistration).count()
+    
+    # Calculate captured revenue
+    total_rev = db.query(func.sum(Payment.amount_inr))\
+                  .filter(Payment.status.in_(["captured", "success"]))\
+                  .scalar() or 0.0
 
-    total_apps = db.query(func.count(InternshipApplication.id)).scalar()
-    total_regs = db.query(func.count(CourseRegistration.id)).scalar()
-    total_pmts = db.query(func.count(Payment.id)).scalar()
-    successful_pmts = db.query(func.count(Payment.id)).filter(Payment.status == "captured").scalar()
-    pending_apps = db.query(func.count(InternshipApplication.id)).filter(InternshipApplication.status == "pending").scalar()
-    total_users = db.query(func.count(SiteUser.id)).scalar()
-    total_contacts = db.query(func.count(ContactQuery.id)).scalar()
-    new_contacts = db.query(func.count(ContactQuery.id)).filter(ContactQuery.status == "new").scalar()
+    successful_pmts = db.query(Payment)\
+                        .filter(Payment.status.in_(["captured", "success"]))\
+                        .count()
+
+    total_pmts = db.query(Payment).count()
+
+    total_users_count = 0
+    try:
+        total_users_count = db.query(SiteUser).count()
+    except Exception:
+        pass
 
     return DashboardStats(
-        total_revenue_inr=int(total_revenue),
         total_applications=total_apps,
         total_registrations=total_regs,
-        total_payments=total_pmts,
+        total_revenue_inr=float(total_rev),
         successful_payments=successful_pmts,
-        pending_applications=pending_apps,
-        total_users=total_users or 0,
-        total_contacts=total_contacts or 0,
-        new_contacts=new_contacts or 0
+        total_payments=total_pmts,
+        total_users=total_users_count
     )
+
+
+# ─── 2. Registered Users Management ──────────────────────────────────────────
 
 @router.get("/users")
 def get_site_users(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     q: Optional[str] = None,
     provider: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("users"))
 ):
-    """Admin-only endpoint to view registered student/public user accounts."""
-    query = db.query(SiteUser)
+    """Admin endpoint to list registered platform users."""
+    try:
+        query = db.query(SiteUser)
+        if q:
+            query = query.filter(
+                SiteUser.full_name.ilike(f"%{q}%") |
+                SiteUser.email.ilike(f"%{q}%")
+            )
+        if provider and provider != "all":
+            query = query.filter(SiteUser.provider == provider)
 
-    if q:
-        query = query.filter(
-            SiteUser.full_name.ilike(f"%{q}%") |
-            SiteUser.email.ilike(f"%{q}%")
-        )
-    if provider and provider != "all":
-        query = query.filter(SiteUser.provider == provider)
+        total = query.count()
+        total_pages = math.ceil(total / limit) if total > 0 else 1
+        items = query.order_by(SiteUser.created_at.desc())\
+                     .offset((page - 1) * limit)\
+                     .limit(limit)\
+                     .all()
 
-    total = query.count()
-    users = query.order_by(SiteUser.created_at.desc())\
-                 .offset((page - 1) * limit)\
-                 .limit(limit)\
-                 .all()
-
-    # Calculate applications submitted per user
-    items = []
-    for u in users:
-        apps_count = db.query(func.count(InternshipApplication.id))\
-                       .filter((InternshipApplication.email == u.email) | (InternshipApplication.google_email == u.email))\
-                       .scalar() or 0
-        items.append({
-            "id": u.id,
-            "email": u.email,
-            "full_name": u.full_name,
-            "picture": u.picture,
-            "provider": getattr(u, "provider", "google"),
-            "password": getattr(u, "raw_password", None) or "—",
-            "created_at": u.created_at.isoformat() if u.created_at else None,
-            "last_login": u.last_login.isoformat() if u.last_login else None,
-            "applications_count": apps_count,
-        })
-
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "total_pages": total_pages,
-        "items": items
-    }
-
-@router.patch("/applications/{application_id}/status")
-def update_application_status(
-    application_id: int,
-    body: StatusUpdateBody,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    app = db.query(InternshipApplication).filter(InternshipApplication.id == application_id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Application not found")
-    
-    prev_status = (app.status or "").lower()
-    new_status = body.status.strip().lower()
-    app.status = body.status
-    db.commit()
-    db.refresh(app)
-
-    if new_status in ("accepted", "approved") and prev_status != "accepted":
-        background_tasks.add_task(
-            send_internship_acceptance_email,
-            app.email,
-            app.full_name,
-            app.duration,
-            app.role_preference
-        )
-    elif new_status in ("rejected", "declined") and prev_status != "rejected":
-        background_tasks.add_task(
-            send_internship_rejection_email,
-            app.email,
-            app.full_name,
-            app.duration,
-            app.role_preference
-        )
-
-    return ApplicationResponse.model_validate(app).model_dump()
-
-@router.delete("/applications/all")
-def delete_all_applications(
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin endpoint to delete all internship applications and cascading records."""
-    count = db.query(InternshipApplication).count()
-    db.query(StudentDoubt).delete(synchronize_session=False)
-    db.query(TaskUnlockRequest).delete(synchronize_session=False)
-    db.query(InternshipSubmission).delete(synchronize_session=False)
-    db.query(InternshipApplication).delete(synchronize_session=False)
-    db.commit()
-    return {
-        "success": True,
-        "message": f"Successfully deleted all {count} internship applications and related records.",
-        "deleted_count": count
-    }
-
-@router.delete("/applications/{application_id}")
-def delete_application(
-    application_id: int,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin endpoint to delete a specific internship application and its cascading records."""
-    app = db.query(InternshipApplication).filter(InternshipApplication.id == application_id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Application not found")
-
-    user_email = (app.email or "").strip().lower()
-    google_email = (app.google_email or "").strip().lower()
-
-    # Clean up associated submissions, unlock requests, doubts for this application/student
-    emails = [e for e in [user_email, google_email] if e]
-    if emails:
-        db.query(InternshipSubmission).filter(
-            (InternshipSubmission.application_id == app.id) | (func.lower(InternshipSubmission.student_email).in_(emails))
-        ).delete(synchronize_session=False)
-        db.query(TaskUnlockRequest).filter(
-            (TaskUnlockRequest.application_id == app.id) | (func.lower(TaskUnlockRequest.student_email).in_(emails))
-        ).delete(synchronize_session=False)
-        db.query(StudentDoubt).filter(
-            (StudentDoubt.application_id == app.id) | (func.lower(StudentDoubt.student_email).in_(emails))
-        ).delete(synchronize_session=False)
-    else:
-        db.query(InternshipSubmission).filter(InternshipSubmission.application_id == app.id).delete(synchronize_session=False)
-        db.query(TaskUnlockRequest).filter(TaskUnlockRequest.application_id == app.id).delete(synchronize_session=False)
-        db.query(StudentDoubt).filter(StudentDoubt.application_id == app.id).delete(synchronize_session=False)
-
-    db.delete(app)
-    db.commit()
-    return {"success": True, "message": f"Application #{application_id} for '{app.full_name}' deleted successfully."}
+        user_items = [
+            {
+                "id": u.id,
+                "email": u.email,
+                "full_name": u.full_name,
+                "provider": u.provider,
+                "avatar_url": u.avatar_url,
+                "is_active": u.is_active,
+                "created_at": u.created_at.isoformat() if u.created_at else None,
+                "plain_password": u.plain_password if hasattr(u, "plain_password") else None,
+            }
+            for u in items
+        ]
+        return {
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages,
+            "items": user_items
+        }
+    except Exception as e:
+        return {"total": 0, "page": page, "limit": limit, "total_pages": 1, "items": []}
 
 
-@router.get("/applications")
-def get_applications(
-    q: Optional[str] = None,
-    duration: Optional[str] = None,
-    status: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    query = db.query(InternshipApplication)
-
-    if q:
-        query = query.filter(
-            InternshipApplication.full_name.ilike(f"%{q}%") |
-            InternshipApplication.email.ilike(f"%{q}%") |
-            InternshipApplication.college.ilike(f"%{q}%")
-        )
-    if duration and duration != "all":
-        query = query.filter(InternshipApplication.duration == duration)
-    if status and status != "all":
-        query = query.filter(InternshipApplication.status == status)
-
-    total = query.count()
-    items = query.order_by(InternshipApplication.created_at.desc())\
-                 .offset((page - 1) * limit)\
-                 .limit(limit)\
-                 .all()
-
-    items_serialized = [ApplicationResponse.model_validate(item).model_dump() for item in items]
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "total_pages": total_pages,
-        "items": items_serialized
-    }
-
-@router.patch("/registrations/{registration_id}/status")
-def update_registration_status(
-    registration_id: int,
-    body: StatusUpdateBody,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    reg = db.query(CourseRegistration).filter(CourseRegistration.id == registration_id).first()
-    if not reg:
-        raise HTTPException(status_code=404, detail="Course registration not found")
-    
-    prev_status = (reg.status or "").lower()
-    new_status = body.status.strip().lower()
-    reg.status = body.status
-    db.commit()
-    db.refresh(reg)
-
-    course = db.query(Course).filter(Course.id == reg.course_id).first()
-    course_title = course.title if course else "Engineering Bootcamp"
-    course_duration = course.duration if course else "8 Weeks"
-
-    # When admin accepts the enrollment, send official congratulations email
-    if new_status in ("accepted", "approved") and prev_status != "accepted":
-        background_tasks.add_task(
-            send_course_enrollment_acceptance_email,
-            reg.student_email,
-            reg.student_name,
-            course_title,
-            course_duration
-        )
-    elif new_status in ("rejected", "declined") and prev_status != "rejected":
-        background_tasks.add_task(
-            send_course_enrollment_rejection_email,
-            reg.student_email,
-            reg.student_name,
-            course_title,
-            course_duration
-        )
-
-    return {
-        "id": reg.id,
-        "course_id": reg.course_id,
-        "student_name": reg.student_name,
-        "student_email": reg.student_email,
-        "student_phone": reg.student_phone,
-        "status": reg.status,
-        "created_at": reg.created_at.isoformat() if reg.created_at else None
-    }
+# ─── 3. Course Registrations / Scholarships ──────────────────────────────────
 
 @router.get("/registrations")
 def get_registrations(
-    q: Optional[str] = None,
-    status: Optional[str] = None,
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
+    q: Optional[str] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("enrollments"))
 ):
+    """Admin endpoint to view Bootcamp course registration requests."""
     query = db.query(CourseRegistration)
-
     if q:
         query = query.filter(
             CourseRegistration.student_name.ilike(f"%{q}%") |
@@ -350,821 +139,263 @@ def get_registrations(
         query = query.filter(CourseRegistration.status == status)
 
     total = query.count()
+    total_pages = math.ceil(total / limit) if total > 0 else 1
     items = query.order_by(CourseRegistration.created_at.desc())\
                  .offset((page - 1) * limit)\
                  .limit(limit)\
                  .all()
 
-    items_serialized = []
-    for item in items:
-        course = db.query(Course).filter(Course.id == item.course_id).first()
-        items_serialized.append({
-            "id": item.id,
-            "course_id": item.course_id,
-            "course_title": course.title if course else f"Course #{item.course_id}",
-            "course_slug": course.slug if course else None,
-            "student_name": item.student_name,
-            "student_email": item.student_email,
-            "student_phone": item.student_phone,
-            "status": item.status,
-            "created_at": item.created_at.isoformat() if item.created_at else None,
+    items_with_course = []
+    for reg in items:
+        course = db.query(Course).filter(Course.id == reg.course_id).first()
+        items_with_course.append({
+            "id": reg.id,
+            "course_id": reg.course_id,
+            "student_name": reg.student_name,
+            "student_email": reg.student_email,
+            "student_phone": reg.student_phone,
+            "status": reg.status,
+            "created_at": reg.created_at.isoformat() if reg.created_at else None,
+            "course_title": course.title if course else f"Course #{reg.course_id}",
         })
-
-    total_pages = math.ceil(total / limit) if total > 0 else 1
 
     return {
         "total": total,
         "page": page,
         "limit": limit,
         "total_pages": total_pages,
-        "items": items_serialized
+        "items": items_with_course
     }
+
+
+@router.patch("/registrations/{reg_id}/status")
+def update_registration_status(
+    reg_id: int,
+    background_tasks: BackgroundTasks,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("enrollments"))
+):
+    """Approve/reject course enrollment and dispatch onboarding email."""
+    status_val = payload.get("status")
+    if not status_val:
+        raise HTTPException(status_code=400, detail="Missing status field")
+
+    reg = db.query(CourseRegistration).filter(CourseRegistration.id == reg_id).first()
+    if not reg:
+        raise HTTPException(status_code=404, detail="Course registration not found")
+
+    reg.status = status_val
+    reg.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(reg)
+
+    course = db.query(Course).filter(Course.id == reg.course_id).first()
+    course_title = course.title if course else f"Bootcamp Program #{reg.course_id}"
+
+    if status_val == "accepted":
+        background_tasks.add_task(
+            send_course_enrollment_acceptance_email,
+            student_email=reg.student_email,
+            student_name=reg.student_name,
+            course_title=course_title
+        )
+    elif status_val == "rejected":
+        background_tasks.add_task(
+            send_course_enrollment_rejection_email,
+            student_email=reg.student_email,
+            student_name=reg.student_name,
+            course_title=course_title
+        )
+
+    return RegistrationResponse.from_orm(reg)
+
+
+# ─── 4. Payments Auditing ───────────────────────────────────────────────────
 
 @router.get("/payments")
 def get_payments(
-    q: Optional[str] = None,
-    status: Optional[str] = None,
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
+    q: Optional[str] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("payments"))
 ):
+    """Admin endpoint to audit financial transactions and orders."""
     query = db.query(Payment)
-
     if q:
         query = query.filter(
-            Payment.order_id.ilike(f"%{q}%") |
-            Payment.payment_id.ilike(f"%{q}%") |
-            Payment.student_email.ilike(f"%{q}%")
+            Payment.student_name.ilike(f"%{q}%") |
+            Payment.student_email.ilike(f"%{q}%") |
+            Payment.razorpay_payment_id.ilike(f"%{q}%")
         )
     if status and status != "all":
         query = query.filter(Payment.status == status)
 
     total = query.count()
+    total_pages = math.ceil(total / limit) if total > 0 else 1
     items = query.order_by(Payment.created_at.desc())\
                  .offset((page - 1) * limit)\
                  .limit(limit)\
                  .all()
 
-    items_serialized = [PaymentResponse.model_validate(item).model_dump() for item in items]
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
     return {
         "total": total,
         "page": page,
         "limit": limit,
         "total_pages": total_pages,
-        "items": items_serialized
+        "items": [PaymentResponse.from_orm(item) for item in items]
     }
 
 
-# ─── Site Feature Toggles (Courses & Careers visibility) ────────────────────
-
-@router.get("/settings")
-def get_site_settings(db: Session = Depends(get_db)):
-    """Public/Admin endpoint to get display settings for Courses and Careers."""
-    rows = db.query(SiteSetting).all()
-    settings_dict = {
-        "show_courses": False,
-        "show_careers": False,
-    }
-    for r in rows:
-        settings_dict[r.key] = r.value.lower() == "true"
-    return settings_dict
-
-@router.patch("/settings")
-def update_site_settings(
-    body: SettingsUpdateBody,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin endpoint to toggle display of Courses and Careers on homepage & navbar."""
-    if body.show_courses is not None:
-        setting = db.query(SiteSetting).filter(SiteSetting.key == "show_courses").first()
-        if not setting:
-            setting = SiteSetting(key="show_courses", value=str(body.show_courses).lower(), description="Toggle display of Courses section")
-            db.add(setting)
-        else:
-            setting.value = str(body.show_courses).lower()
-
-    if body.show_careers is not None:
-        setting = db.query(SiteSetting).filter(SiteSetting.key == "show_careers").first()
-        if not setting:
-            setting = SiteSetting(key="show_careers", value=str(body.show_careers).lower(), description="Toggle display of Careers link")
-            db.add(setting)
-        else:
-            setting.value = str(body.show_careers).lower()
-
-    db.commit()
-    return get_site_settings(db)
-
-
-# ─── Internship Submissions Management ──────────────────────────────────────
-
-@router.get("/submissions")
-def get_student_submissions(
-    q: Optional[str] = None,
-    status: Optional[str] = None,
-    duration: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin endpoint to view all student task and project submissions."""
-    query = db.query(InternshipSubmission)
-
-    if q:
-        query = query.filter(
-            InternshipSubmission.student_email.ilike(f"%{q}%") |
-            InternshipSubmission.title.ilike(f"%{q}%") |
-            InternshipSubmission.task_key.ilike(f"%{q}%")
-        )
-    if status and status != "all":
-        query = query.filter(InternshipSubmission.status == status)
-    if duration and duration != "all":
-        app_ids = select(InternshipApplication.id).filter(InternshipApplication.duration == duration)
-        app_emails = select(func.lower(InternshipApplication.email)).filter(InternshipApplication.duration == duration)
-        query = query.filter(
-            (InternshipSubmission.application_id.in_(app_ids)) |
-            (func.lower(InternshipSubmission.student_email).in_(app_emails))
-        )
-
-    total = query.count()
-    items = query.order_by(InternshipSubmission.submitted_at.desc())\
-                 .offset((page - 1) * limit)\
-                 .limit(limit)\
-                 .all()
-
-    items_list = []
-    for item in items:
-        app = db.query(InternshipApplication).filter(
-            (InternshipApplication.id == item.application_id) | (func.lower(InternshipApplication.email) == func.lower(item.student_email))
-        ).first()
-        items_list.append({
-            "id": item.id,
-            "application_id": item.application_id,
-            "student_email": item.student_email,
-            "student_name": app.full_name if app else item.student_email.split("@")[0],
-            "role_preference": app.role_preference if app else "—",
-            "duration": app.duration if app else "—",
-            "task_key": item.task_key,
-            "title": item.title,
-            "project_topic": item.project_topic,
-            "github_url": item.github_url,
-            "live_url": item.live_url,
-            "documentation_url": item.documentation_url,
-            "notes": item.notes,
-            "tools_used": item.tools_used or [],
-            "is_unlocked": bool(item.is_unlocked),
-            "status": item.status,
-            "admin_feedback": item.admin_feedback,
-            "submitted_at": item.submitted_at.isoformat() if item.submitted_at else None,
-            "updated_at": item.updated_at.isoformat() if item.updated_at else None,
-        })
-
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "total_pages": total_pages,
-        "items": items_list
-    }
-
-
-@router.patch("/submissions/{submission_id}")
-def review_student_submission(
-    submission_id: int,
-    body: SubmissionReviewBody,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin reviews student submission (approves, requests changes, sets mentor feedback or unlocks)."""
-    sub = db.query(InternshipSubmission).filter(InternshipSubmission.id == submission_id).first()
-    if not sub:
-        raise HTTPException(status_code=404, detail="Submission not found")
-
-    if body.status:
-        sub.status = body.status
-    if body.admin_feedback is not None:
-        sub.admin_feedback = body.admin_feedback
-    if body.is_unlocked is not None:
-        sub.is_unlocked = bool(body.is_unlocked)
-    sub.updated_at = datetime.utcnow()
-
-    db.commit()
-    db.refresh(sub)
-
-    # Queue review feedback email to student
-    app = db.query(InternshipApplication).filter(InternshipApplication.email == sub.student_email).first()
-    st_name = app.full_name if app else sub.student_email.split("@")[0]
-    background_tasks.add_task(
-        send_submission_reviewed_email,
-        sub.student_email,
-        st_name,
-        sub.title,
-        sub.status,
-        sub.admin_feedback or ""
-    )
-
-    return {"success": True, "message": "Submission updated successfully", "status": sub.status}
-
-
-# ─── Task Unlock Requests Management ─────────────────────────────────────────
-
-@router.get("/unlock-requests")
-def get_unlock_requests(
-    status: Optional[str] = None,
-    duration: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin endpoint to view student unlock requests."""
-    query = db.query(TaskUnlockRequest)
-    if status and status != "all":
-        query = query.filter(TaskUnlockRequest.status == status)
-    if duration and duration != "all":
-        app_ids = select(InternshipApplication.id).filter(InternshipApplication.duration == duration)
-        app_emails = select(func.lower(InternshipApplication.email)).filter(InternshipApplication.duration == duration)
-        query = query.filter(
-            (TaskUnlockRequest.application_id.in_(app_ids)) |
-            (func.lower(TaskUnlockRequest.student_email).in_(app_emails))
-        )
-
-    total = query.count()
-    items = query.order_by(TaskUnlockRequest.created_at.desc())\
-                 .offset((page - 1) * limit)\
-                 .limit(limit)\
-                 .all()
-
-    items_list = []
-    for u in items:
-        app = db.query(InternshipApplication).filter(
-            (InternshipApplication.id == u.application_id) | (func.lower(InternshipApplication.email) == func.lower(u.student_email))
-        ).first()
-        items_list.append({
-            "id": u.id,
-            "application_id": u.application_id,
-            "student_email": u.student_email,
-            "student_name": u.student_name,
-            "role_preference": app.role_preference if app else "—",
-            "duration": app.duration if app else "—",
-            "task_key": u.task_key,
-            "task_title": u.task_title,
-            "reason": u.reason,
-            "status": u.status,
-            "created_at": u.created_at.isoformat() if u.created_at else None,
-        })
-
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "total_pages": total_pages,
-        "items": items_list
-    }
-
-
-@router.post("/unlock-requests/{request_id}/action")
-def handle_unlock_request(
-    request_id: int,
-    body: UnlockActionBody,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin approves (unlocks) or rejects/locks a task unlock request, turning the student submission slot on or off."""
-    req = db.query(TaskUnlockRequest).filter(TaskUnlockRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="Unlock request not found")
-
-    action_lower = body.action.strip().lower()
-
-    if action_lower in ("approve", "approved", "unlock", "open", "on"):
-        req.status = "approved"
-        # Ensure submission record is marked unlocked
-        sub = db.query(InternshipSubmission)\
-                .filter(
-                    (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
-                    InternshipSubmission.task_key == req.task_key
-                )\
-                .first()
-        if sub:
-            sub.is_unlocked = True
-        else:
-            new_sub = InternshipSubmission(
-                application_id=req.application_id,
-                student_email=req.student_email,
-                task_key=req.task_key,
-                title=req.task_title,
-                is_unlocked=True,
-                status="unlocked"
-            )
-            db.add(new_sub)
-
-    elif action_lower in ("toggle", "switch"):
-        if req.status == "approved":
-            req.status = "rejected"
-            sub = db.query(InternshipSubmission)\
-                    .filter(
-                        (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
-                        InternshipSubmission.task_key == req.task_key
-                    )\
-                    .first()
-            if sub:
-                sub.is_unlocked = False
-        else:
-            req.status = "approved"
-            sub = db.query(InternshipSubmission)\
-                    .filter(
-                        (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
-                        InternshipSubmission.task_key == req.task_key
-                    )\
-                    .first()
-            if sub:
-                sub.is_unlocked = True
-            else:
-                new_sub = InternshipSubmission(
-                    application_id=req.application_id,
-                    student_email=req.student_email,
-                    task_key=req.task_key,
-                    title=req.task_title,
-                    is_unlocked=True,
-                    status="unlocked"
-                )
-                db.add(new_sub)
-
-    else:
-        req.status = "rejected"
-        sub = db.query(InternshipSubmission)\
-                .filter(
-                    (func.lower(InternshipSubmission.student_email) == func.lower(req.student_email)) | (InternshipSubmission.application_id == req.application_id),
-                    InternshipSubmission.task_key == req.task_key
-                )\
-                .first()
-        if sub:
-            sub.is_unlocked = False
-
-    req.updated_at = datetime.utcnow()
-    db.commit()
-    return {"success": True, "status": req.status, "message": f"Task submission slot is now {req.status}"}
-
-
-# ─── Student Doubts & Query Helpdesk ─────────────────────────────────────────
-
-@router.get("/doubts")
-def get_student_doubts(
-    status: Optional[str] = None,
-    duration: Optional[str] = None,
-    q: Optional[str] = None,
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin endpoint to view all student doubts and questions."""
-    query = db.query(StudentDoubt)
-    if status and status != "all":
-        query = query.filter(StudentDoubt.status == status)
-    if duration and duration != "all":
-        app_ids = select(InternshipApplication.id).filter(InternshipApplication.duration == duration)
-        app_emails = select(func.lower(InternshipApplication.email)).filter(InternshipApplication.duration == duration)
-        query = query.filter(
-            (StudentDoubt.application_id.in_(app_ids)) |
-            (func.lower(StudentDoubt.student_email).in_(app_emails))
-        )
-    if q:
-        query = query.filter(
-            StudentDoubt.student_email.ilike(f"%{q}%") |
-            StudentDoubt.student_name.ilike(f"%{q}%") |
-            StudentDoubt.subject.ilike(f"%{q}%") |
-            StudentDoubt.module_name.ilike(f"%{q}%")
-        )
-
-    total = query.count()
-    items = query.order_by(StudentDoubt.created_at.desc())\
-                 .offset((page - 1) * limit)\
-                 .limit(limit)\
-                 .all()
-
-    items_list = []
-    for d in items:
-        app = db.query(InternshipApplication).filter(
-            (InternshipApplication.id == d.application_id) | (func.lower(InternshipApplication.email) == func.lower(d.student_email))
-        ).first()
-        items_list.append({
-            "id": d.id,
-            "application_id": d.application_id,
-            "student_email": d.student_email,
-            "student_name": d.student_name,
-            "domain_track": d.domain_track or (app.role_preference if app else "—"),
-            "duration": app.duration if app else "—",
-            "module_name": d.module_name,
-            "subject": d.subject,
-            "question": d.question,
-            "code_snippet": d.code_snippet,
-            "image_url": d.image_url,
-            "status": d.status,
-            "admin_reply": d.admin_reply,
-            "answered_by": d.answered_by,
-            "answered_at": d.answered_at.isoformat() if d.answered_at else None,
-            "created_at": d.created_at.isoformat() if d.created_at else None,
-        })
-
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "total_pages": total_pages,
-        "items": items_list
-    }
-
-
-@router.post("/doubts/{doubt_id}/reply")
-def reply_to_student_doubt(
-    doubt_id: int,
-    body: DoubtReplyBody,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Admin writes a technical reply to a student doubt."""
-    doubt = db.query(StudentDoubt).filter(StudentDoubt.id == doubt_id).first()
-    if not doubt:
-        raise HTTPException(status_code=404, detail="Doubt not found")
-
-    doubt.admin_reply = body.admin_reply.strip()
-    doubt.answered_by = current_admin.full_name or "Senior Technical Mentor"
-    doubt.answered_at = datetime.utcnow()
-    doubt.status = "answered"
-
-    db.commit()
-    db.refresh(doubt)
-
-    # Queue email notification to student
-    background_tasks.add_task(
-        send_doubt_answered_email,
-        doubt.student_email,
-        doubt.student_name,
-        doubt.module_name or doubt.subject or "Technical Question",
-        doubt.question,
-        doubt.admin_reply,
-        doubt.answered_by
-    )
-
-    return {"success": True, "message": "Reply posted successfully", "doubt_id": doubt.id}
-
-
-class ContactReplyBody(BaseModel):
-    admin_reply: str
-
+# ─── 5. Contact Inquiries & Inbound Messages ────────────────────────────────
 
 @router.get("/contacts")
 def get_contact_queries(
-    q: Optional[str] = None,
-    status: Optional[str] = None,
     page: int = Query(1, ge=1),
     limit: int = Query(15, ge=1, le=100),
+    q: Optional[str] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("contacts"))
 ):
-    """Admin-only endpoint to list all contact queries with search & filters."""
+    """Admin endpoint to list candidate inquiries sent via contact desk."""
     query = db.query(ContactQuery)
-
     if q:
-        search_fmt = f"%{q}%"
         query = query.filter(
-            ContactQuery.name.ilike(search_fmt) |
-            ContactQuery.email.ilike(search_fmt) |
-            ContactQuery.subject.ilike(search_fmt) |
-            ContactQuery.message.ilike(search_fmt)
+            ContactQuery.name.ilike(f"%{q}%") |
+            ContactQuery.email.ilike(f"%{q}%") |
+            ContactQuery.subject.ilike(f"%{q}%") |
+            ContactQuery.message.ilike(f"%{q}%")
         )
-
     if status and status != "all":
         query = query.filter(ContactQuery.status == status)
 
     total = query.count()
+    total_pages = math.ceil(total / limit) if total > 0 else 1
     items = query.order_by(ContactQuery.created_at.desc())\
                  .offset((page - 1) * limit)\
                  .limit(limit)\
                  .all()
 
-    items_list = [
-        {
-            "id": c.id,
-            "name": c.name,
-            "email": c.email,
-            "subject": c.subject,
-            "message": c.message,
-            "status": c.status,
-            "admin_reply": c.admin_reply,
-            "replied_by": c.replied_by,
-            "replied_at": c.replied_at.isoformat() if c.replied_at else None,
-            "created_at": c.created_at.isoformat() if c.created_at else None,
-        }
-        for c in items
-    ]
-
-    total_pages = math.ceil(total / limit) if total > 0 else 1
-
     return {
         "total": total,
         "page": page,
         "limit": limit,
         "total_pages": total_pages,
-        "items": items_list
+        "items": [
+            {
+                "id": c.id,
+                "name": c.name,
+                "email": c.email,
+                "phone": c.phone,
+                "subject": c.subject,
+                "message": c.message,
+                "status": c.status,
+                "admin_reply": c.admin_reply,
+                "replied_by": c.replied_by,
+                "replied_at": c.replied_at.isoformat() if c.replied_at else None,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+            }
+            for c in items
+        ]
     }
 
 
 @router.patch("/contacts/{contact_id}/status")
 def update_contact_query_status(
     contact_id: int,
-    body: StatusUpdateBody,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("contacts"))
 ):
-    """Mark contact query as read/new/replied."""
+    """Update contact inquiry status."""
+    status_val = payload.get("status")
+    if not status_val:
+        raise HTTPException(status_code=400, detail="Status is required")
+
     contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
     if not contact:
-        raise HTTPException(status_code=404, detail="Contact query not found")
+        raise HTTPException(status_code=404, detail="Contact inquiry not found")
 
-    contact.status = body.status
+    contact.status = status_val
+    contact.updated_at = datetime.utcnow()
     db.commit()
-    return {"success": True, "message": f"Status updated to {body.status}", "id": contact.id}
+    db.refresh(contact)
+    return {"success": True, "status": contact.status}
 
 
 @router.post("/contacts/{contact_id}/reply")
-def reply_to_contact_query(
+def reply_contact_query(
     contact_id: int,
-    body: ContactReplyBody,
     background_tasks: BackgroundTasks,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("contacts"))
 ):
-    """Admin writes a reply to a candidate/client contact message and sends email."""
+    """Admin dispatches email reply to contact query."""
+    admin_reply = payload.get("admin_reply", "").strip()
+    if not admin_reply:
+        raise HTTPException(status_code=400, detail="Reply message cannot be empty")
+
     contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
     if not contact:
-        raise HTTPException(status_code=404, detail="Contact query not found")
+        raise HTTPException(status_code=404, detail="Contact inquiry not found")
 
-    contact.admin_reply = body.admin_reply.strip()
-    contact.replied_by = current_admin.full_name or "InternVision Support Team"
-    contact.replied_at = datetime.utcnow()
+    contact.admin_reply = admin_reply
     contact.status = "replied"
-
+    contact.replied_by = current_admin.full_name or current_admin.email
+    contact.replied_at = datetime.utcnow()
+    contact.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(contact)
 
-    # Queue email reply to sender
     background_tasks.add_task(
         send_contact_reply_email,
-        contact.email,
-        contact.name,
-        contact.subject,
-        contact.message,
-        contact.admin_reply,
-        contact.replied_by
+        recipient_email=contact.email,
+        recipient_name=contact.name,
+        subject=contact.subject,
+        user_message=contact.message,
+        admin_reply=admin_reply,
+        replied_by=contact.replied_by
     )
 
-    return {"success": True, "message": "Reply sent successfully", "id": contact.id}
-
-
-@router.delete("/contacts/{contact_id}")
-def delete_single_contact_query(
-    contact_id: int,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Delete a single contact query."""
-    contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
-    if not contact:
-        raise HTTPException(status_code=404, detail="Contact query not found")
-
-    db.delete(contact)
-    db.commit()
-    return {"success": True, "message": "Contact query deleted successfully"}
+    return {
+        "success": True,
+        "message": f"Reply dispatched to {contact.email}",
+        "contact": {
+            "id": contact.id,
+            "status": contact.status,
+            "admin_reply": contact.admin_reply,
+            "replied_by": contact.replied_by,
+            "replied_at": contact.replied_at.isoformat() if contact.replied_at else None,
+        }
+    }
 
 
 @router.delete("/contacts/all")
-def delete_all_contact_queries(
-    status: Optional[str] = None,
+def delete_all_contacts(
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("contacts"))
 ):
-    """Delete all contact queries, optionally filtered by status."""
-    query = db.query(ContactQuery)
-    if status and status != "all":
-        query = query.filter(ContactQuery.status == status)
-
-    deleted_count = query.delete(synchronize_session=False)
+    """Permanently delete all contact queries."""
+    db.query(ContactQuery).delete()
     db.commit()
-    return {"success": True, "deleted_count": deleted_count, "message": f"Deleted {deleted_count} contact inquiries."}
+    return {"success": True, "message": "All contact inquiries have been deleted."}
 
 
-# ─── IAM (Identity & Access Management) & Sub-Admin Settings ────────────────
-
-ALL_PERMISSIONS_LIST = [
-    "overview",
-    "applications",
-    "submissions",
-    "unlocks",
-    "doubts",
-    "users",
-    "enrollments",
-    "payments",
-    "certificates",
-    "contacts",
-    "mailer",
-    "settings"
-]
-
-ROLE_PERMISSIONS_MAP = {
-    "super_admin": ALL_PERMISSIONS_LIST,
-    "internship_manager": ["overview", "applications", "submissions", "unlocks", "doubts", "certificates"],
-    "technical_mentor": ["submissions", "unlocks", "doubts"],
-    "course_coordinator": ["overview", "enrollments", "payments", "certificates"],
-    "support_desk": ["doubts", "contacts"],
-}
-
-@router.get("/me")
-def get_current_admin_profile(
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Returns the authenticated admin/sub-admin profile and permissions."""
-    role = (current_admin.role or "super_admin").lower()
-    perms = current_admin.permissions if (current_admin.permissions and len(current_admin.permissions) > 0) else ROLE_PERMISSIONS_MAP.get(role, ALL_PERMISSIONS_LIST if role == "super_admin" else [])
-    return {
-        "id": current_admin.id,
-        "email": current_admin.email,
-        "full_name": current_admin.full_name,
-        "role": role,
-        "permissions": perms,
-        "is_active": bool(current_admin.is_active),
-        "is_super_admin": role == "super_admin",
-        "created_by": current_admin.created_by,
-        "created_at": current_admin.created_at.isoformat() if current_admin.created_at else None,
-    }
-
-
-@router.get("/admins")
-def list_admin_accounts(
+@router.delete("/contacts/{contact_id}")
+def delete_contact_query(
+    contact_id: int,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("contacts"))
 ):
-    """Super Admin endpoint to list all admin and sub-admin IAM accounts."""
-    if (current_admin.role or "").lower() != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin privilege required to view IAM accounts.")
+    """Permanently delete a specific contact query."""
+    contact = db.query(ContactQuery).filter(ContactQuery.id == contact_id).first()
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact inquiry not found")
 
-    admins = db.query(Admin).order_by(Admin.created_at.desc()).all()
-    return [
-        {
-            "id": a.id,
-            "email": a.email,
-            "full_name": a.full_name,
-            "role": a.role or "super_admin",
-            "permissions": a.permissions or ROLE_PERMISSIONS_MAP.get((a.role or "super_admin").lower(), []),
-            "is_active": bool(a.is_active),
-            "created_by": a.created_by,
-            "created_at": a.created_at.isoformat() if a.created_at else None,
-            "updated_at": a.updated_at.isoformat() if a.updated_at else None,
-        }
-        for a in admins
-    ]
-
-
-@router.post("/admins")
-def create_sub_admin_account(
-    body: AdminCreateBody,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Super Admin creates a new sub-admin account with assigned roles & permissions."""
-    if (current_admin.role or "").lower() != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin privilege required to create sub-admin accounts.")
-
-    clean_email = body.email.strip().lower()
-    if not clean_email or not body.password or not body.full_name.strip():
-        raise HTTPException(status_code=400, detail="Name, email, and password are required.")
-
-    existing = db.query(Admin).filter(Admin.email == clean_email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail=f"Admin account with email '{clean_email}' already exists.")
-
-    role_lower = body.role.strip().lower()
-    permissions = body.permissions or []
-
-    if role_lower in ROLE_PERMISSIONS_MAP and (not permissions or len(permissions) == 0):
-        permissions = ROLE_PERMISSIONS_MAP[role_lower]
-
-    new_admin = Admin(
-        email=clean_email,
-        hashed_password=get_password_hash(body.password),
-        full_name=body.full_name.strip(),
-        role=role_lower,
-        permissions=permissions,
-        is_active=True,
-        created_by=current_admin.email,
-    )
-    db.add(new_admin)
+    db.delete(contact)
     db.commit()
-    db.refresh(new_admin)
-
-    return {
-        "success": True,
-        "message": f"Sub-Admin account for '{new_admin.full_name}' created successfully.",
-        "admin": {
-            "id": new_admin.id,
-            "email": new_admin.email,
-            "full_name": new_admin.full_name,
-            "role": new_admin.role,
-            "permissions": new_admin.permissions,
-            "is_active": new_admin.is_active,
-            "created_at": new_admin.created_at.isoformat() if new_admin.created_at else None,
-        }
-    }
-
-
-@router.patch("/admins/{admin_id}")
-def update_sub_admin_account(
-    admin_id: int,
-    body: AdminUpdateBody,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Super Admin updates sub-admin role, permissions, active status (grant/revoke access) or resets password."""
-    if (current_admin.role or "").lower() != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin privilege required to update IAM accounts.")
-
-    target_admin = db.query(Admin).filter(Admin.id == admin_id).first()
-    if not target_admin:
-        raise HTTPException(status_code=404, detail="Admin account not found")
-
-    # Prevent revoking oneself if super admin
-    if target_admin.id == current_admin.id and body.is_active is False:
-        raise HTTPException(status_code=400, detail="You cannot revoke your own Super Admin access.")
-
-    if body.full_name is not None and body.full_name.strip():
-        target_admin.full_name = body.full_name.strip()
-    if body.password is not None and body.password.strip():
-        target_admin.hashed_password = get_password_hash(body.password.strip())
-    if body.role is not None:
-        target_admin.role = body.role.strip().lower()
-        if body.permissions is None and target_admin.role in ROLE_PERMISSIONS_MAP:
-            target_admin.permissions = ROLE_PERMISSIONS_MAP[target_admin.role]
-    if body.permissions is not None:
-        target_admin.permissions = body.permissions
-    if body.is_active is not None:
-        target_admin.is_active = bool(body.is_active)
-
-    target_admin.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(target_admin)
-
-    status_msg = "active" if target_admin.is_active else "revoked"
-    return {
-        "success": True,
-        "message": f"Account '{target_admin.full_name}' updated. Access is now {status_msg}.",
-        "admin": {
-            "id": target_admin.id,
-            "email": target_admin.email,
-            "full_name": target_admin.full_name,
-            "role": target_admin.role,
-            "permissions": target_admin.permissions,
-            "is_active": target_admin.is_active,
-            "updated_at": target_admin.updated_at.isoformat() if target_admin.updated_at else None,
-        }
-    }
-
-
-@router.delete("/admins/{admin_id}")
-def delete_sub_admin_account(
-    admin_id: int,
-    db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
-):
-    """Super Admin deletes a sub-admin account."""
-    if (current_admin.role or "").lower() != "super_admin":
-        raise HTTPException(status_code=403, detail="Super Admin privilege required to delete accounts.")
-
-    target_admin = db.query(Admin).filter(Admin.id == admin_id).first()
-    if not target_admin:
-        raise HTTPException(status_code=404, detail="Admin account not found")
-
-    if target_admin.id == current_admin.id:
-        raise HTTPException(status_code=400, detail="You cannot delete your own account.")
-
-    if (target_admin.role or "").lower() == "super_admin" and target_admin.email in ("tanishdewase222@gmail.com", "admin@internvision.tech"):
-        raise HTTPException(status_code=400, detail="Primary Super Admin accounts cannot be deleted.")
-
-    db.delete(target_admin)
-    db.commit()
-    return {"success": True, "message": f"Sub-Admin '{target_admin.full_name}' ({target_admin.email}) has been removed."}
-
-
+    return {"success": True, "message": "Contact inquiry deleted successfully."}

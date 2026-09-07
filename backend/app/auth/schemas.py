@@ -10,6 +10,20 @@ class AdminLogin(BaseModel):
     email: EmailStr
     password: str
 
+class AdminCreateBody(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+    role: str = "internship_manager"
+    permissions: Optional[List[str]] = None
+
+class AdminUpdateBody(BaseModel):
+    full_name: Optional[str] = None
+    role: Optional[str] = None
+    permissions: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+    password: Optional[str] = None
+
 class AdminResponse(BaseModel):
     id: int
     email: str
@@ -21,4 +35,5 @@ class AdminResponse(BaseModel):
     created_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
+
 

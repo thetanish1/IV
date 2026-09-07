@@ -1,0 +1,12 @@
+export { default as OverviewTab } from "./OverviewTab";
+export { default as ApplicantsTab } from "./ApplicantsTab";
+export { default as SubmissionsTab } from "./SubmissionsTab";
+export { default as UnlockRequestsTab } from "./UnlockRequestsTab";
+export { default as DoubtsHelpdeskTab } from "./DoubtsHelpdeskTab";
+export { default as ContactsTab } from "./ContactsTab";
+export { default as CertificatesTab } from "./CertificatesTab";
+export { UsersTab } from "./UsersTab";
+export { CourseEnrollmentsTab } from "./CourseEnrollmentsTab";
+export { PaymentsAuditTab } from "./PaymentsAuditTab";
+export { BrandedMailerTab } from "./BrandedMailerTab";
+export { SettingsIAMTab } from "./SettingsIAMTab";
