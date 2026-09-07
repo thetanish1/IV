@@ -14,7 +14,11 @@ import cloudinary.uploader
 
 from app.shared.database import get_db
 from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
-from app.shared.email_service import _send_smtp_email
+from app.shared.email_service import (
+    _send_smtp_email,
+    send_submission_confirmation_email,
+    send_unlock_request_received_email,
+)
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -1222,6 +1226,7 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
 @router.post("/tasks/submit")
 def submit_task(
     payload: TaskSubmitRequest,
+    background_tasks: BackgroundTasks,
     email: str = Query(...),
     db: Session = Depends(get_db)
 ):
@@ -1252,6 +1257,16 @@ def submit_task(
         existing.updated_at = datetime.utcnow()
         db.commit()
         db.refresh(existing)
+
+        background_tasks.add_task(
+            send_submission_confirmation_email,
+            student_email=clean_email,
+            student_name=app.full_name,
+            task_title=payload.title,
+            github_url=payload.github_url,
+            live_url=payload.live_url,
+            is_resubmission=True
+        )
         return {"success": True, "message": "Task submission updated successfully", "id": existing.id}
     else:
         new_sub = InternshipSubmission(
@@ -1270,12 +1285,23 @@ def submit_task(
         db.add(new_sub)
         db.commit()
         db.refresh(new_sub)
+
+        background_tasks.add_task(
+            send_submission_confirmation_email,
+            student_email=clean_email,
+            student_name=app.full_name,
+            task_title=payload.title,
+            github_url=payload.github_url,
+            live_url=payload.live_url,
+            is_resubmission=False
+        )
         return {"success": True, "message": "Task submitted successfully", "id": new_sub.id}
 
 
 @router.post("/tasks/request-unlock")
 def request_task_unlock(
     payload: UnlockRequestPayload,
+    background_tasks: BackgroundTasks,
     email: str = Query(...),
     db: Session = Depends(get_db)
 ):
@@ -1306,6 +1332,14 @@ def request_task_unlock(
         existing.student_name = app.full_name
         existing.updated_at = datetime.utcnow()
         db.commit()
+
+        background_tasks.add_task(
+            send_unlock_request_received_email,
+            student_email=clean_email,
+            student_name=app.full_name,
+            task_title=payload.task_title,
+            reason=payload.reason
+        )
         return {"success": True, "message": "Unlock request updated and sent to admin"}
     else:
         req = TaskUnlockRequest(
@@ -1319,6 +1353,14 @@ def request_task_unlock(
         )
         db.add(req)
         db.commit()
+
+        background_tasks.add_task(
+            send_unlock_request_received_email,
+            student_email=clean_email,
+            student_name=app.full_name,
+            task_title=payload.task_title,
+            reason=payload.reason
+        )
         return {"success": True, "message": "Unlock request submitted to admin"}
 
 

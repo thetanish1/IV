@@ -322,10 +322,11 @@ async def send_branded_email(request: Request, db: Session = Depends(get_db)):
                 }
 
     # SMTP Configuration
+    from app.shared.email_service import _get_smtp_password
     smtp_host = settings.SMTP_HOST or "smtp-relay.brevo.com"
     smtp_port = int(settings.SMTP_PORT or 587)
     smtp_user = settings.SMTP_USER or "b06485001@smtp-brevo.com"
-    smtp_password = settings.SMTP_PASSWORD or ""
+    smtp_password = _get_smtp_password()
     from_email = settings.SMTP_FROM_EMAIL or "internvisiontechhr@gmail.com"
     from_name = brand_name or settings.SMTP_FROM_NAME or "InternVision Tech HR"
 
