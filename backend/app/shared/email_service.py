@@ -82,81 +82,113 @@ def _build_base_email_template(
     accent_color: str = "#2563eb",
 ) -> str:
     """
-    Renders an executive-grade, rich HTML email template with branded dark header,
-    color indicator blocks, structured cards, CTA button, and official credentials footer.
+    Renders an executive-grade, rich HTML email template with standard table wrapper,
+    strict box-sizing, table-layout fixed, and word-break wrapping to guarantee
+    zero layout overflow across all email clients.
     """
     cta_html = ""
     if cta_text and cta_url:
         cta_html = f"""
-        <div style="text-align: center; margin: 32px 0 16px;">
-          <a href="{cta_url}" target="_blank" rel="noopener noreferrer"
-             style="display: inline-block; background: {accent_color}; color: #ffffff !important; text-decoration: none;
-                    font-weight: 700; font-size: 15px; padding: 14px 38px; border-radius: 999px;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.2); letter-spacing: 0.3px;">
-            {escape(cta_text)}
-          </a>
-        </div>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 26px auto 10px auto;">
+          <tr>
+            <td align="center" bgcolor="{accent_color}" style="border-radius: 999px; padding: 0;">
+              <a href="{cta_url}" target="_blank" rel="noopener noreferrer"
+                 style="display: inline-block; padding: 13px 32px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; color: #ffffff !important; text-decoration: none; font-weight: 700; border-radius: 999px; letter-spacing: 0.3px; border: 1px solid {accent_color};">
+                {escape(cta_text)}
+              </a>
+            </td>
+          </tr>
+        </table>
         """
 
-    return f"""<!DOCTYPE html>
-<html>
+    return f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{escape(title)}</title>
+  <style type="text/css">
+    body, table, td, p, a, li, blockquote {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+    table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }}
+    table {{ border-collapse: collapse !important; }}
+    * {{ box-sizing: border-box !important; word-break: break-word !important; overflow-wrap: break-word !important; }}
+    @media only screen and (max-width: 600px) {{
+      .email-container {{ width: 100% !important; max-width: 100% !important; }}
+      .header-pad {{ padding: 20px 18px !important; }}
+      .content-pad {{ padding: 24px 18px 16px !important; }}
+      .footer-pad {{ padding: 18px 18px !important; }}
+    }}
+  </style>
 </head>
-<body style="margin: 0; padding: 24px 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <div style="max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
-    
-    <!-- BRANDED EXECUTIVE HEADER -->
-    <div style="background: #0f172a; padding: 26px 32px; border-bottom: 3px solid {accent_color};">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td style="vertical-align: middle;">
-            <span style="display: inline-block; width: 10px; height: 22px; background: #f4c542; margin-right: 3px; border-radius: 2px; vertical-align: middle;"></span>
-            <span style="display: inline-block; width: 10px; height: 16px; background: #3fbf61; margin-right: 3px; border-radius: 2px; vertical-align: middle;"></span>
-            <span style="display: inline-block; width: 10px; height: 26px; background: #38bdf8; margin-right: 12px; border-radius: 2px; vertical-align: middle;"></span>
-            <span style="color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; vertical-align: middle;">
-              InternVision <span style="color: {accent_color};">Tech</span>
-            </span>
-          </td>
-          <td style="text-align: right; vertical-align: middle;">
-            <span style="display: inline-block; background: {badge_color}; color: #ffffff; padding: 5px 12px; font-size: 10px; font-weight: 800; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.8px;">
-              {escape(badge_text)}
-            </span>
-          </td>
-        </tr>
-      </table>
-      <h1 style="color: #ffffff; margin: 18px 0 0 0; font-size: 22px; font-weight: 800; line-height: 1.3;">
-        {escape(title)}
-      </h1>
-    </div>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f1f5f9; table-layout: fixed;">
+    <tr>
+      <td align="center" style="padding: 24px 12px;">
+        
+        <!-- CONTAINER TABLE (600px max) -->
+        <table role="presentation" class="email-container" border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; table-layout: fixed; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+          
+          <!-- BRANDED EXECUTIVE HEADER -->
+          <tr>
+            <td class="header-pad" bgcolor="#0f172a" style="background-color: #0f172a; padding: 24px 28px; border-bottom: 3px solid {accent_color};">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout: fixed;">
+                <tr>
+                  <td style="vertical-align: middle; text-align: left;">
+                    <span style="display: inline-block; width: 8px; height: 18px; background: #f4c542; margin-right: 2px; border-radius: 2px; vertical-align: middle;"></span>
+                    <span style="display: inline-block; width: 8px; height: 14px; background: #3fbf61; margin-right: 2px; border-radius: 2px; vertical-align: middle;"></span>
+                    <span style="display: inline-block; width: 8px; height: 22px; background: #38bdf8; margin-right: 10px; border-radius: 2px; vertical-align: middle;"></span>
+                    <span style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; vertical-align: middle;">
+                      InternVision <span style="color: {accent_color};">Tech</span>
+                    </span>
+                  </td>
+                  <td style="text-align: right; vertical-align: middle; width: 45%;">
+                    <span style="display: inline-block; background: {badge_color}; color: #ffffff; padding: 4px 10px; font-size: 10px; font-weight: 800; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap;">
+                      {escape(badge_text)}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+              <h1 style="color: #ffffff; margin: 16px 0 0 0; font-size: 20px; font-weight: 800; line-height: 1.35; word-break: break-word;">
+                {escape(title)}
+              </h1>
+            </td>
+          </tr>
 
-    <!-- MAIN BODY CONTENT -->
-    <div style="padding: 36px 32px 20px; font-size: 15px; line-height: 1.7; color: #334155;">
-      {body_content_html}
-      {cta_html}
-    </div>
+          <!-- MAIN BODY CONTENT -->
+          <tr>
+            <td class="content-pad" style="padding: 30px 28px 20px; font-size: 14px; line-height: 1.7; color: #334155; word-break: break-word;">
+              {body_content_html}
+              {cta_html}
+            </td>
+          </tr>
 
-    <!-- SUPPORT & CONTACT NOTICE -->
-    <div style="padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.6;">
-      <p style="margin: 0;">
-        <strong>Need Technical or Admission Support?</strong> Reach out directly to our mentor desk at
-        <a href="mailto:internvisiontechhr@gmail.com" style="color: {accent_color}; text-decoration: underline; font-weight: 600;">internvisiontechhr@gmail.com</a>.
-      </p>
-    </div>
+          <!-- SUPPORT & CONTACT NOTICE -->
+          <tr>
+            <td style="padding: 14px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.6; word-break: break-word;">
+              <p style="margin: 0;">
+                <strong>Need Technical or Admission Support?</strong> Reach out directly to our mentor desk at
+                <a href="mailto:internvisiontechhr@gmail.com" style="color: {accent_color}; text-decoration: underline; font-weight: 600;">internvisiontechhr@gmail.com</a>.
+              </p>
+            </td>
+          </tr>
 
-    <!-- OFFICIAL VERIFIED FOOTER -->
-    <div style="padding: 24px 32px; background: #0f172a; font-size: 12px; color: #94a3b8; line-height: 1.6; text-align: center; border-top: 1px solid #1e293b;">
-      <p style="margin: 0 0 6px 0; color: #f8fafc; font-weight: 600;">
-        InternVision Tech Inc. • Virtual Pre-Hire Engineering Programs 2026
-      </p>
-      <p style="margin: 0; font-size: 11px; color: #64748b;">
-        Headquarters: Nagpur, Maharashtra, India • 100% Remote Engineering Tracks<br/>
-        All credentials, task submissions, and completion certificates are verifiable 24/7 online.
-      </p>
-    </div>
-  </div>
+          <!-- OFFICIAL VERIFIED FOOTER -->
+          <tr>
+            <td class="footer-pad" bgcolor="#0f172a" style="padding: 22px 28px; background-color: #0f172a; font-size: 11px; color: #94a3b8; line-height: 1.6; text-align: center; border-top: 1px solid #1e293b; word-break: break-word;">
+              <p style="margin: 0 0 4px 0; color: #f8fafc; font-weight: 600; font-size: 12px;">
+                InternVision Tech Inc. • Virtual Pre-Hire Engineering Programs 2026
+              </p>
+              <p style="margin: 0; color: #64748b; font-size: 11px;">
+                Headquarters: Nagpur, Maharashtra, India • 100% Remote Engineering Tracks<br/>
+                All credentials, task submissions, and completion certificates are verifiable 24/7 online.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
 </body>
 </html>"""
 
@@ -164,40 +196,38 @@ def _build_base_email_template(
 # ─── 1. WELCOME & LOGIN NOTIFICATION EMAIL ───────────────────────────────────
 
 def send_welcome_login_email(user_email: str, user_name: str) -> bool:
-    """
-    Dispatched when a student logs in or authenticates.
-    """
+    """Dispatched when a student logs in or authenticates."""
     display_name = user_name or user_email.split("@")[0]
     subject = "Welcome to InternVision Tech - Successful Login"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       You have successfully authenticated into the <strong>InternVision Tech Virtual Pre-Hire Portal</strong>.
     </p>
 
     <!-- Account Details Box -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">
         Account & Access Overview
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #475569; line-height: 1.8;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #475569; line-height: 1.8;">
         <tr>
-          <td width="38%" style="font-weight: 600;">Registered Email:</td>
-          <td style="color: #2563eb; font-family: monospace; font-weight: bold;">{escape(user_email)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Registered Email:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #2563eb; font-family: monospace; font-weight: bold; word-break: break-word;">{escape(user_email)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Account Status:</td>
-          <td style="color: #059669; font-weight: bold;">✓ Verified & Active</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Account Status:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #059669; font-weight: bold;">✓ Verified & Active</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Program Tracks:</td>
-          <td>1 Month, 3 Months, 6 Months Virtual Pre-Hire Internships</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Program Tracks:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">1 Month, 3 Months, 6 Months Tracks</td>
         </tr>
       </table>
     </div>
 
-    <p style="margin: 0 0 16px;">
+    <p style="margin: 0 0 14px;">
       You are now eligible to submit your internship application, track your admission progress, access weekly task briefs, and interact with senior engineering mentors.
     </p>
     """
@@ -225,13 +255,10 @@ def send_internship_application_email(
     role_preference: str,
     college: str = ""
 ) -> bool:
-    """
-    Dispatched immediately when a candidate submits an internship application.
-    """
+    """Dispatched immediately when a candidate submits an internship application."""
     display_name = user_name or user_email.split("@")[0]
     subject = f"Virtual Internship Application Received - {duration} Track | InternVision Tech"
 
-    # Specific curriculum summary based on duration
     if duration == "1 Month":
         program_summary = """
         • <strong>Month 1 (Weeks 1-4):</strong> 4 weekly milestone deliverables, hands-on production code, GitHub PR workflows, and completion certification.
@@ -239,67 +266,57 @@ def send_internship_application_email(
     elif duration == "3 Months":
         program_summary = """
         • <strong>Month 1:</strong> 4 weekly core technical foundation tasks with mentor reviews.<br/>
-        • <strong>Month 2:</strong> Full-scale industry project implementation (choose from enterprise SaaS catalog or custom proposal).<br/>
+        • <strong>Month 2:</strong> Full-scale industry project implementation.<br/>
         • <strong>Month 3:</strong> Build & deploy your personal engineering portfolio website showcasing your deliverables.
         """
-    else:  # 6 Months
+    else:
         program_summary = """
         • <strong>Month 1:</strong> 4 weekly core foundation deliverables and CI/CD pipelines.<br/>
         • <strong>Month 2:</strong> Full-scale production software project build.<br/>
         • <strong>Month 3:</strong> Developer personal portfolio deployment.<br/>
-        • <strong>Months 4 to 6:</strong> Assigned real-life production enterprise system (full-stack frontend, backend, AI integration, deployment, and direct pre-placement interview).
+        • <strong>Months 4 to 6:</strong> Assigned real-life production enterprise system and Pre-Placement Interview evaluation.
         """
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Thank you for applying to the <strong>InternVision Tech Virtual Pre-Hire Internship Program 2026</strong>. We have successfully received your candidate profile.
     </p>
 
     <!-- Application Summary Card -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 20px; border-radius: 8px; margin: 22px 0;">
-      <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">
         Candidate Application Summary
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #475569; line-height: 1.9;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #475569; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Applicant Name:</td>
-          <td style="color: #0f172a; font-weight: bold;">{escape(display_name)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Applicant Name:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #0f172a; font-weight: bold;">{escape(display_name)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Selected Track:</td>
-          <td style="color: #2563eb; font-weight: bold;">{escape(role_preference)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Selected Track:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #2563eb; font-weight: bold;">{escape(role_preference)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Program Duration:</td>
-          <td style="color: #059669; font-weight: bold;">{escape(duration)} Track</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Program Duration:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #059669; font-weight: bold;">{escape(duration)} Track</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Mode:</td>
-          <td>100% Virtual / Remote Engineering Program</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Mode:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">100% Virtual / Remote Engineering</td>
         </tr>
-        {f'<tr><td style="font-weight: 600;">Institution:</td><td>{escape(college)}</td></tr>' if college else ''}
+        {f'<tr><td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Institution:</td><td style="width: 62%; padding: 3px 0; vertical-align: top;">{escape(college)}</td></tr>' if college else ''}
       </table>
     </div>
 
     <!-- Program Structure Overview -->
-    <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 18px; border-radius: 8px; margin: 20px 0;">
+    <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
       <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
         Program Structure ({escape(duration)}):
       </h4>
       <div style="font-size: 13px; color: #475569; line-height: 1.7;">
         {program_summary}
       </div>
-    </div>
-
-    <!-- Next Steps Steps Box -->
-    <h3 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 24px 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-      Admissions Evaluation Process:
-    </h3>
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-size: 13px; color: #475569; line-height: 1.8;">
-      <p style="margin: 0 0 8px 0;"><strong>Step 1 • Technical Review:</strong> Our senior engineering mentors review your academic qualifications, resume, and technical domain selection.</p>
-      <p style="margin: 0 0 8px 0;"><strong>Step 2 • Official Offer Dispatch:</strong> Once accepted, your official Offer Letter & Curriculum Roadmap will be dispatched directly to your inbox.</p>
-      <p style="margin: 0;"><strong>Step 3 • Portal & Task Unlock:</strong> Your Student Workspace on the portal will unlock with Week 1 task instructions, submission forms, and Doubt Resolution Desk.</p>
     </div>
     """
 
@@ -325,136 +342,116 @@ def send_internship_acceptance_email(
     duration: str,
     role_preference: str
 ) -> bool:
-    """
-    Dispatched when an admin marks an internship application as ACCEPTED.
-    Provides complete roadmap details tailored specifically for 1 Month, 3 Months, and 6 Months.
-    """
+    """Dispatched when an admin marks an internship application as ACCEPTED."""
     display_name = student_name or student_email.split("@")[0]
     subject = f"🎉 Official Selection & Offer Letter: {role_preference} ({duration}) | InternVision Tech"
 
-    # Tailor detailed curriculum roadmap
     if duration == "1 Month":
         roadmap_html = """
         <div style="margin: 12px 0;">
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 10px;">
-            <strong style="color: #0f172a;">Week 1 • UI Architecture & Responsive Component Systems:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Design and build interactive component trees with clean state management and responsive layouts.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Week 1 • UI Architecture & Responsive Systems:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Design and build responsive component trees with clean state management.</div>
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 10px;">
-            <strong style="color: #0f172a;">Week 2 • RESTful Backend APIs & Database Relational Modeling:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Implement robust REST APIs, connect to PostgreSQL/MongoDB, and build validated CRUD endpoints.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Week 2 • RESTful APIs & Relational Modeling:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Implement robust REST APIs, connect databases, and build validated CRUD endpoints.</div>
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 10px;">
-            <strong style="color: #0f172a;">Week 3 • Authentication, Protected Routing & Cloud Uploads:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Implement JWT security, session cookies, route guards, and cloud asset storage pipelines.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Week 3 • Authentication & Cloud Uploads:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Implement JWT security, session tokens, route guards, and cloud asset storage.</div>
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px;">
-            <strong style="color: #0f172a;">Week 4 • Production Cloud Deployment, CI/CD & Final Video Demo:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Deploy live on cloud hosting, configure automated GitHub Actions CI/CD, and record demo presentation.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 6px;">
+            <strong style="color: #0f172a; font-size: 13px;">Week 4 • Production Cloud Deployment & CI/CD:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Deploy live on cloud hosting, configure automated GitHub Actions CI/CD pipelines.</div>
           </div>
         </div>
         """
     elif duration == "3 Months":
         roadmap_html = """
         <div style="margin: 12px 0;">
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 6px; margin-bottom: 10px;">
-            <strong style="color: #0f172a; font-size: 14px;">Month 1 • Core Domain Tasks (Weeks 1 to 4):</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Complete 4 foundational weekly engineering milestones covering architectural UI, API development, database schemas, and cloud deployment with mentor reviews.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 1 • Core Domain Tasks (Weeks 1 to 4):</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Complete 4 foundational weekly engineering milestones with mentor code reviews.</div>
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #3b82f6; padding: 14px 16px; border-radius: 6px; margin-bottom: 10px;">
-            <strong style="color: #0f172a; font-size: 14px;">Month 2 • Full-Scale Industry Capstone Project:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Choose from our curated enterprise project catalog (e.g. Enterprise Cloud SaaS, AI Document RAG Knowledge Agent, E-Commerce Marketplace, Real-Time Collaboration Board) or submit your custom project proposal.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #3b82f6; padding: 12px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 2 • Full-Scale Industry Capstone Project:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Implement a full enterprise capstone project from catalog or custom proposal.</div>
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #8b5cf6; padding: 14px 16px; border-radius: 6px;">
-            <strong style="color: #0f172a; font-size: 14px;">Month 3 • Personal Developer Portfolio & Live Showcase:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Build and deploy your personal engineering portfolio website showcasing all your internship deliverables, GitHub repos, technical achievements, and verified credentials.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #8b5cf6; padding: 12px 14px; border-radius: 6px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 3 • Personal Developer Portfolio & Live Showcase:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Build and deploy your personal portfolio showcasing your deliverables and verified credentials.</div>
           </div>
         </div>
         """
-    else:  # 6 Months
+    else:
         roadmap_html = """
         <div style="margin: 12px 0;">
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 6px; margin-bottom: 8px;">
-            <strong style="color: #0f172a;">Month 1 • Engineering Foundations:</strong> 4 weekly domain tasks with code reviews and automated CI/CD.
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 1 • Engineering Foundations:</strong> 4 weekly domain tasks with code reviews.
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 6px; margin-bottom: 8px;">
-            <strong style="color: #0f172a;">Month 2 • Industry Project Build:</strong> End-to-end full-stack / AI system implementation from our project catalog.
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #3b82f6; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 2 • Industry Project Build:</strong> End-to-end full-stack software system implementation.
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #8b5cf6; padding: 12px 16px; border-radius: 6px; margin-bottom: 8px;">
-            <strong style="color: #0f172a;">Month 3 • Personal Developer Portfolio:</strong> Live responsive portfolio deployed with verified badge.
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #8b5cf6; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 3 • Personal Developer Portfolio:</strong> Live responsive portfolio deployed with badges.
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #f59e0b; padding: 14px 16px; border-radius: 6px;">
-            <strong style="color: #0f172a; font-size: 14px;">Months 4 to 6 • Real-Life Enterprise Production Project:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">You will be assigned a comprehensive real-life commercial project to build from scratch — encompassing scalable backend microservices, modern frontend UI, AI capabilities, cloud infrastructure, monitoring, and direct Pre-Placement Interview (PPO) evaluation.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 6px;">
+            <strong style="color: #0f172a; font-size: 13px;">Months 4 to 6 • Real-Life Enterprise Production System:</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Commercial scalable project build, cloud microservices, and direct Pre-Placement Interview.</div>
           </div>
         </div>
         """
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       🎉 <strong>Congratulations!</strong> We are delighted to inform you that your application for the <strong>InternVision Tech Virtual Pre-Hire Internship Program</strong> has been <span style="color: #059669; font-weight: bold;">OFFICIALLY ACCEPTED</span>!
     </p>
 
     <!-- Offer Details Box -->
-    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin: 22px 0;">
-      <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px;">
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px;">
         Official Internship Offer Summary
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #1e293b; line-height: 1.9;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #1e293b; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Candidate Name:</td>
-          <td style="font-weight: bold;">{escape(display_name)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Candidate Name:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; font-weight: bold;">{escape(display_name)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Assigned Track:</td>
-          <td style="color: #2563eb; font-weight: bold;">{escape(role_preference)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Assigned Track:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #2563eb; font-weight: bold;">{escape(role_preference)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Program Duration:</td>
-          <td style="color: #059669; font-weight: bold;">{escape(duration)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Program Duration:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #059669; font-weight: bold;">{escape(duration)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Admission Status:</td>
-          <td style="color: #059669; font-weight: bold;">✓ ACCEPTED & CONFIRMED</td>
-        </tr>
-        <tr>
-          <td style="font-weight: 600;">Work Mode:</td>
-          <td>100% Virtual / Remote Pre-Hire Engineering Track</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Admission Status:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #059669; font-weight: bold;">✓ ACCEPTED & CONFIRMED</td>
         </tr>
       </table>
     </div>
 
     <!-- Curriculum Roadmap Header -->
-    <h3 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 26px 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-      Your Program Roadmap & Deliverables ({escape(duration)}):
+    <h3 style="font-size: 13px; font-weight: 700; color: #0f172a; margin: 22px 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">
+      Your Program Roadmap ({escape(duration)}):
     </h3>
     {roadmap_html}
-
-    <!-- Student Portal Desk Features -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 8px; margin: 24px 0 12px 0;">
-      <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
-        Activated Student Portal Features:
-      </h4>
-      <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.8;">
-        <li><strong>Task Allocations Desk:</strong> Direct access to objective statements, tech requirements, and time-gated unlocks.</li>
-        <li><strong>Weekly Submission Forms:</strong> Submit your live URLs, GitHub repositories, and mentor notes.</li>
-        <li><strong>2-Way Mentor Doubt Desk:</strong> Raise queries with code snippets for direct senior engineer assistance.</li>
-      </ul>
-    </div>
     """
 
     html = _build_base_email_template(
-        badge_text="Admission Granted & Active",
+        badge_text="Admission Granted",
         badge_color="#10b981",
         title="Official Internship Selection & Offer Letter",
         body_content_html=body_html,
-        cta_text="Go to My Student Portal →",
+        cta_text="Access Student Workspace →",
         cta_url="https://iv-theta.vercel.app/portal",
         accent_color="#10b981"
     )
 
-    text = f"""Dear {display_name},\n\nCongratulations! Your application for the {duration} Virtual Internship in {role_preference} has been ACCEPTED by InternVision Tech.\nAccess your task allocations and submissions desk at: https://iv-theta.vercel.app/portal\n\nBest regards,\nInternVision Tech HR"""
+    text = f"""Dear {display_name},\n\nCongratulations! Your application for the {role_preference} ({duration}) internship has been accepted.\nAccess your workspace: https://iv-theta.vercel.app/portal\n\nBest regards,\nInternVision Tech Talent Team"""
     return _send_smtp_email(student_email, subject, html, text)
 
 
@@ -468,57 +465,47 @@ def send_submission_due_reminder_email(
     duration: str = "1 Month",
     role_preference: str = "Virtual Internship"
 ) -> bool:
-    """
-    Dispatched on the day a weekly milestone or project submission is due.
-    """
+    """Dispatched on the day a weekly milestone submission is due."""
     display_name = student_name or student_email.split("@")[0]
     subject = f"⏰ Milestone Submission Due Today: {task_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       This is an automated reminder that your milestone deliverable for <strong>{escape(role_preference)}</strong> is <span style="color: #e11d48; font-weight: bold;">DUE TODAY</span>!
     </p>
 
     <!-- Task Due Box -->
-    <div style="background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #e11d48; padding: 20px; border-radius: 8px; margin: 22px 0;">
-      <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #9f1239; text-transform: uppercase; letter-spacing: 0.5px;">
+    <div style="background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #e11d48; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #9f1239; text-transform: uppercase; letter-spacing: 0.5px;">
         Due Milestone Summary
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #1e293b; line-height: 1.9;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #1e293b; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Current Deliverable:</td>
-          <td style="color: #0f172a; font-weight: bold;">{escape(task_title)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Current Deliverable:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #0f172a; font-weight: bold;">{escape(task_title)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Task Key:</td>
-          <td style="color: #e11d48; font-family: monospace; font-weight: bold;">{escape(task_key)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Task Key:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #e11d48; font-family: monospace; font-weight: bold;">{escape(task_key)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Deadline:</td>
-          <td style="color: #e11d48; font-weight: bold;">Today by 11:59 PM IST</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Deadline:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #e11d48; font-weight: bold;">Today by 11:59 PM IST</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Track:</td>
-          <td>{escape(role_preference)} ({escape(duration)})</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Track:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">{escape(role_preference)} ({escape(duration)})</td>
         </tr>
       </table>
     </div>
 
-    <!-- Submission Checklist -->
-    <h3 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 24px 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-      Deliverable Submission Checklist:
-    </h3>
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; font-size: 13px; color: #475569; line-height: 1.8;">
-      <p style="margin: 0 0 6px 0;">✓ <strong>GitHub Repository URL:</strong> Public repository containing your source code with clean commit messages and setup instructions in README.md.</p>
-      <p style="margin: 0 0 6px 0;">✓ <strong>Live Production URL:</strong> Deployed application link (e.g. Vercel, Render, Netlify, or Docker container demo).</p>
-      <p style="margin: 0 0 6px 0;">✓ <strong>Tech Stack Tags:</strong> List frameworks, languages, and database technologies used.</p>
-      <p style="margin: 0;">✓ <strong>Mentor Notes:</strong> Key architectural decisions or implementation highlights.</p>
+    <!-- Checklist -->
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 8px; font-size: 12px; color: #475569; line-height: 1.7; box-sizing: border-box; width: 100%;">
+      <p style="margin: 0 0 4px 0;">✓ <strong>GitHub Repository URL:</strong> Public repository containing your source code and documentation.</p>
+      <p style="margin: 0 0 4px 0;">✓ <strong>Live Production URL:</strong> Deployed live demo link (e.g. Vercel, Netlify, Render).</p>
+      <p style="margin: 0;">✓ <strong>Tech Stack & Notes:</strong> Frameworks, libraries, and mentor notes.</p>
     </div>
-
-    <p style="font-size: 13px; color: #64748b; margin-top: 18px;">
-      Submitting your deliverables on time is essential for maintaining your active internship status, receiving mentor feedback, and earning your distinction grade certificate.
-    </p>
     """
 
     html = _build_base_email_template(
@@ -544,9 +531,7 @@ def send_submission_reviewed_email(
     status: str,
     admin_feedback: str = ""
 ) -> bool:
-    """
-    Dispatched when an admin reviews and grades a student's task submission.
-    """
+    """Dispatched when an admin reviews and grades a student's task submission."""
     display_name = student_name or student_email.split("@")[0]
     is_approved = status.lower() in ("approved", "accepted")
     badge_color = "#10b981" if is_approved else "#f59e0b"
@@ -555,39 +540,39 @@ def send_submission_reviewed_email(
     subject = f"{'✓' if is_approved else '📋'} Milestone Reviewed: {task_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Your mentor has reviewed and graded your milestone deliverable: <strong>{escape(task_title)}</strong>.
     </p>
 
     <!-- Review Summary Box -->
-    <div style="background: {'#f0fdf4' if is_approved else '#fffbeb'}; border: 1px solid {'#bbf7d0' if is_approved else '#fde68a'}; border-left: 4px solid {badge_color}; padding: 20px; border-radius: 8px; margin: 22px 0;">
-      <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
+    <div style="background: {'#f0fdf4' if is_approved else '#fffbeb'}; border: 1px solid {'#bbf7d0' if is_approved else '#fde68a'}; border-left: 4px solid {badge_color}; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
         Mentor Assessment Details
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #1e293b; line-height: 1.9;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #1e293b; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Deliverable:</td>
-          <td>{escape(task_title)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Deliverable:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">{escape(task_title)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Review Status:</td>
-          <td style="color: {badge_color}; font-weight: bold; text-transform: uppercase;">{escape(status)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Review Status:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: {badge_color}; font-weight: bold; text-transform: uppercase;">{escape(status)}</td>
         </tr>
       </table>
 
       {f'''
-      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid {'#bbf7d0' if is_approved else '#fde68a'};">
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid {'#bbf7d0' if is_approved else '#fde68a'};">
         <strong style="color: #0f172a; font-size: 13px;">Mentor Feedback:</strong>
-        <p style="margin: 6px 0 0 0; font-size: 13px; color: #334155; line-height: 1.6; font-style: italic;">
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #334155; line-height: 1.6; font-style: italic;">
           "{escape(admin_feedback)}"
         </p>
       </div>
       ''' if admin_feedback else ''}
     </div>
 
-    <p style="margin: 0 0 16px;">
-      {'Your next milestone task is now accessible on your portal workspace.' if is_approved else 'Please review the mentor feedback and resubmit your updated deliverable when ready.'}
+    <p style="margin: 0 0 14px;">
+      {'Your next milestone task is now accessible on your portal workspace.' if is_approved else 'Please review the mentor feedback and update your deliverable on the portal.'}
     </p>
     """
 
@@ -615,30 +600,28 @@ def send_doubt_answered_email(
     mentor_reply: str,
     answered_by: str = "InternVision HR & Mentor Team"
 ) -> bool:
-    """
-    Dispatched when a mentor responds to a student query on the Doubt Resolution Desk.
-    """
+    """Dispatched when a mentor responds to a student query on the Doubt Resolution Desk."""
     display_name = student_name or student_email.split("@")[0]
     subject = f"💬 Doubt Resolved: [{module_name}] | InternVision Tech Helpdesk"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       A senior engineering mentor has provided a solution to your technical query under <strong>{escape(module_name)}</strong>.
     </p>
 
     <!-- Query Summary -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin: 18px 0; font-size: 13px; color: #475569;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 8px; margin: 16px 0; font-size: 13px; color: #475569; box-sizing: border-box; width: 100%;">
       <strong style="color: #0f172a;">Your Question:</strong>
-      <p style="margin: 6px 0 0 0; color: #334155; font-style: italic;">"{escape(question)}"</p>
+      <p style="margin: 4px 0 0 0; color: #334155; font-style: italic;">"{escape(question)}"</p>
     </div>
 
     <!-- Mentor Resolution Box -->
-    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <div style="font-size: 12px; font-weight: bold; color: #059669; text-transform: uppercase; margin-bottom: 8px;">
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <div style="font-size: 12px; font-weight: bold; color: #059669; text-transform: uppercase; margin-bottom: 6px;">
         ✓ Mentor Solution (Answered by {escape(answered_by)})
       </div>
-      <p style="margin: 0; font-size: 14px; color: #0f172a; line-height: 1.7; white-space: pre-wrap;">
+      <p style="margin: 0; font-size: 13px; color: #0f172a; line-height: 1.7; white-space: pre-wrap;">
         {escape(mentor_reply)}
       </p>
     </div>
@@ -669,32 +652,32 @@ def send_course_enrollment_request_received_email(
     subject = f"Enrollment Request Received: {course_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Hello <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       We have received your free enrollment request for <strong style="color: #2563eb;">{escape(course_title)}</strong> at InternVision Tech.
     </p>
 
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
         Bootcamp Application Status
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #475569; line-height: 1.8;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #475569; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Selected Bootcamp:</td>
-          <td style="color: #2563eb; font-weight: bold;">{escape(course_title)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Selected Bootcamp:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #2563eb; font-weight: bold;">{escape(course_title)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Scholarship Tuition:</td>
-          <td style="color: #059669; font-weight: bold;">100% Free (Full Scholarship)</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Scholarship Tuition:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #059669; font-weight: bold;">100% Free (Full Scholarship)</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Status:</td>
-          <td style="color: #f59e0b; font-weight: bold;">Under Admissions Review</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Status:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #f59e0b; font-weight: bold;">Under Admissions Review</td>
         </tr>
       </table>
     </div>
 
-    <p style="margin: 0 0 16px;">
+    <p style="margin: 0 0 14px;">
       Our academic coordinators review submissions to maintain optimal mentor-to-student ratios. Once approved, you will receive your Discord/GitHub invite credentials.
     </p>
     """
@@ -723,36 +706,36 @@ def send_course_enrollment_acceptance_email(
     subject = f"🎉 Enrollment Confirmed: {course_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       🎉 <strong>Congratulations!</strong> Your enrollment in <strong style="color: #2563eb;">{escape(course_title)}</strong> has been <span style="color: #059669; font-weight: bold;">OFFICIALLY APPROVED</span>!
     </p>
 
-    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #065f46; text-transform: uppercase;">
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #065f46; text-transform: uppercase;">
         Bootcamp Confirmation Details
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #1e293b; line-height: 1.8;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #1e293b; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Program:</td>
-          <td style="color: #2563eb; font-weight: bold;">{escape(course_title)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Program:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #2563eb; font-weight: bold;">{escape(course_title)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Duration:</td>
-          <td>{escape(course_duration)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Duration:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">{escape(course_duration)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Tuition:</td>
-          <td style="color: #059669; font-weight: bold;">100% Free Sponsored Scholarship</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Tuition:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #059669; font-weight: bold;">100% Free Sponsored Scholarship</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Mode:</td>
-          <td>100% Virtual with Live Mentor Code Reviews</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Mode:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">100% Virtual with Live Mentor Code Reviews</td>
         </tr>
       </table>
     </div>
 
-    <p style="margin: 0 0 16px;">
+    <p style="margin: 0 0 14px;">
       Your lead mentor will reach out shortly with access to the private repository and Discord cohort channel.
     </p>
     """
@@ -783,14 +766,14 @@ def send_internship_rejection_email(
     subject = f"Application Status Update: Virtual Internship ({role_preference}) | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Thank you for taking the time to apply for the <strong>{escape(role_preference)} ({escape(duration)})</strong> program at InternVision Tech.
     </p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 16px;">
       Due to high cohort volume and strict mentor capacity limits, we are unfortunately unable to offer you an admission seat for this upcoming batch.
     </p>
-    <p style="margin: 0 0 16px;">
+    <p style="margin: 0 0 14px;">
       We strongly encourage you to continue building projects and apply for our next upcoming cohort opening next month.
     </p>
     """
@@ -819,11 +802,11 @@ def send_course_enrollment_rejection_email(
     subject = f"Enrollment Update: {course_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Thank you for applying for <strong>{escape(course_title)}</strong> at InternVision Tech.
     </p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 16px;">
       All scholarship seats for this {escape(course_duration)} cohort have currently been filled. We invite you to apply for our next batch.
     </p>
     """
@@ -848,21 +831,18 @@ def send_contact_received_admin_alert(
     sender_name: str,
     sender_email: str,
     subject_text: str,
-    message_text: str
+    message_text: str,
+    admin_recipient: str = "internvisiontechhr@gmail.com"
 ) -> bool:
-    """Dispatched when a student/partner submits an inquiry on the Contact page."""
-    admin_recipient = "internvisiontechhr@gmail.com"
-    subject = f"📬 New Contact Inquiry: {subject_text} (from {sender_name})"
+    """Dispatched to admin when a user submits a contact form message."""
+    subject = f"🔔 [Contact Query] {subject_text} — from {sender_name}"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Hello Admin Team,</p>
-    <p style="margin: 0 0 18px;">
-      A new inquiry has been submitted on the InternVision Tech Contact desk:
-    </p>
-
-    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #4f46e5; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
-      <p style="margin: 0 0 8px; font-size: 13px;"><strong>Sender:</strong> {escape(sender_name)} (&lt;{escape(sender_email)}&gt;)</p>
-      <p style="margin: 0 0 8px; font-size: 13px;"><strong>Subject:</strong> {escape(subject_text)}</p>
+    <p style="margin: 0 0 14px;">A new contact message has been submitted on the InternVision Tech portal:</p>
+    
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #4f46e5; padding: 16px 18px; border-radius: 8px; margin: 18px 0; box-sizing: border-box; width: 100%;">
+      <p style="margin: 0 0 6px; font-size: 13px;"><strong>Sender:</strong> {escape(sender_name)} (&lt;{escape(sender_email)}&gt;)</p>
+      <p style="margin: 0 0 6px; font-size: 13px;"><strong>Subject:</strong> {escape(subject_text)}</p>
       <p style="margin: 0; font-size: 13px; white-space: pre-wrap;"><strong>Message:</strong><br/>{escape(message_text)}</p>
     </div>
     """
@@ -893,14 +873,14 @@ def send_contact_reply_email(
     subject = f"Re: {original_subject} | InternVision Tech Support"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Thank you for reaching out to InternVision Tech. Our support team has reviewed your query:
     </p>
 
-    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; margin-bottom: 20px;">
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; padding: 16px 18px; border-radius: 6px; margin-bottom: 18px; box-sizing: border-box; width: 100%;">
       <p style="margin: 0 0 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #64748b;">Response from {escape(admin_name)}:</p>
-      <p style="margin: 0; font-size: 14px; color: #1e293b; line-height: 1.6; white-space: pre-wrap;">{escape(reply_message)}</p>
+      <p style="margin: 0; font-size: 13px; color: #1e293b; line-height: 1.6; white-space: pre-wrap;">{escape(reply_message)}</p>
     </div>
 
     <p style="margin: 0 0 14px; font-size: 13px; color: #64748b;">
@@ -922,7 +902,7 @@ def send_contact_reply_email(
     return _send_smtp_email(recipient_email, subject, html, text)
 
 
-# ─── 13. TASK SUBMISSION CONFIRMATION EMAIL ──────────────────────────────────
+# ─── 10. TASK SUBMISSION CONFIRMATION EMAIL ──────────────────────────────────
 
 def send_submission_confirmation_email(
     student_email: str,
@@ -938,26 +918,26 @@ def send_submission_confirmation_email(
     subject = f"✅ {action_label}: {task_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Your project deliverable for <strong>{escape(task_title)}</strong> has been successfully submitted and queued for engineering mentor evaluation.
     </p>
 
-    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; padding: 18px; border-radius: 8px; margin-bottom: 22px;">
-      <h3 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #15803d; text-transform: uppercase; letter-spacing: 0.5px;">
+    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; padding: 16px 18px; border-radius: 8px; margin-bottom: 18px; box-sizing: border-box; width: 100%;">
+      <h3 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #15803d; text-transform: uppercase; letter-spacing: 0.5px;">
         Submission Summary
       </h3>
-      <table role="presentation" width="100%" style="font-size: 13px; color: #1e293b; line-height: 1.8;">
+      <table role="presentation" width="100%" style="width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #1e293b; line-height: 1.8;">
         <tr>
-          <td width="35%" style="font-weight: 600;">Task Name:</td>
-          <td style="color: #0f172a; font-weight: bold;">{escape(task_title)}</td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Task Name:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top; color: #0f172a; font-weight: bold;">{escape(task_title)}</td>
         </tr>
         <tr>
-          <td style="font-weight: 600;">Status:</td>
-          <td><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">SUBMITTED (UNDER REVIEW)</span></td>
+          <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Status:</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">SUBMITTED (UNDER REVIEW)</span></td>
         </tr>
-        {f'<tr><td style="font-weight: 600;">GitHub Repo:</td><td style="font-family: monospace; color: #2563eb;">{escape(github_url)}</td></tr>' if github_url else ''}
-        {f'<tr><td style="font-weight: 600;">Live URL:</td><td style="font-family: monospace; color: #2563eb;">{escape(live_url)}</td></tr>' if live_url else ''}
+        {f'<tr><td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">GitHub Repo:</td><td style="width: 62%; padding: 3px 0; vertical-align: top; font-family: monospace; color: #2563eb; word-break: break-word;">{escape(github_url)}</td></tr>' if github_url else ''}
+        {f'<tr><td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Live URL:</td><td style="width: 62%; padding: 3px 0; vertical-align: top; font-family: monospace; color: #2563eb; word-break: break-word;">{escape(live_url)}</td></tr>' if live_url else ''}
       </table>
     </div>
 
@@ -980,7 +960,7 @@ def send_submission_confirmation_email(
     return _send_smtp_email(student_email, subject, html, text)
 
 
-# ─── 14. TASK UNLOCK REQUEST RECEIVED EMAIL ──────────────────────────────────
+# ─── 11. TASK UNLOCK REQUEST RECEIVED EMAIL ──────────────────────────────────
 
 def send_unlock_request_received_email(
     student_email: str,
@@ -993,13 +973,13 @@ def send_unlock_request_received_email(
     subject = f"🔓 Unlock Request Logged: {task_title} | InternVision Tech"
 
     body_html = f"""
-    <p style="margin: 0 0 16px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
-    <p style="margin: 0 0 18px;">
+    <p style="margin: 0 0 14px;">Dear <strong style="color: #0f172a;">{escape(display_name)}</strong>,</p>
+    <p style="margin: 0 0 16px;">
       Your request to unlock module <strong>{escape(task_title)}</strong> has been received and forwarded to administrative reviewers.
     </p>
 
-    <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; padding: 18px; border-radius: 8px; margin-bottom: 22px;">
-      <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #92400e;">Provided Reason:</p>
+    <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; padding: 16px 18px; border-radius: 8px; margin-bottom: 18px; box-sizing: border-box; width: 100%;">
+      <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 600; color: #92400e;">Provided Reason:</p>
       <p style="margin: 0; font-size: 13px; color: #451a03; line-height: 1.6; white-space: pre-wrap;">{escape(reason)}</p>
     </div>
 
@@ -1020,5 +1000,3 @@ def send_unlock_request_received_email(
 
     text = f"""Dear {display_name},\n\nYour unlock request for '{task_title}' has been logged.\nReason: {reason}\n\nBest regards,\nInternVision Tech Mentorship Team"""
     return _send_smtp_email(student_email, subject, html, text)
-
-
