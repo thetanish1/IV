@@ -53,298 +53,795 @@ def _configure_cloudinary():
 DOMAIN_TASKS = {
     "full-stack": {
         "title": "Full Stack Web Development",
+        "description": "Modern full-stack web application engineering with Next.js 15, React 19, TypeScript, FastAPI / Node.js, and PostgreSQL.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Modern UI Architecture & Responsive Component Trees",
-                "objective": "Design and build a responsive, interactive component system using React / Next.js and Tailwind CSS with clean state management.",
-                "deliverables": ["Component hierarchy", "Mobile-responsive layouts", "Clean state hooks", "GitHub repo setup with README"],
+                "title": "Week 1: Modern Component Architecture & Responsive UI Design",
+                "objective": "Build a responsive, accessible component library and application layout using Next.js 15 App Router, React 19, and Tailwind CSS with clean state hooks.",
+                "deliverables": [
+                    "Structured Next.js project with modular component tree",
+                    "Fully responsive mobile, tablet, and desktop layouts",
+                    "Interactive navigation, dark-mode toggle, and accessible modals",
+                    "GitHub repository with clean Git commit history and comprehensive README.md"
+                ],
+                "tech_stack": ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS", "Lucide Icons"],
+                "evaluation_focus": "Component reusability, responsiveness across breakpoints, and clean code formatting"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "RESTful Backend Architecture & Database Relational Modeling",
-                "objective": "Develop production REST APIs using FastAPI or Node.js, connect to PostgreSQL, and implement validation schemas & CRUD operations.",
-                "deliverables": ["Relational DB Schema (PostgreSQL)", "Documented API endpoints (/docs)", "Pydantic/Zod data validation"],
+                "title": "Week 2: RESTful Backend APIs, Relational Database & Validation",
+                "objective": "Design scalable REST API endpoints using FastAPI or Express, configure PostgreSQL with relational schema migrations, and implement Pydantic/Zod request validation.",
+                "deliverables": [
+                    "Normalized PostgreSQL relational database schema with foreign keys and indexes",
+                    "CRUD REST API endpoints with status codes and error handling",
+                    "Pydantic / Zod request validation schemas and OpenAPI documentation (/docs)",
+                    "Database seed script with realistic sample datasets"
+                ],
+                "tech_stack": ["FastAPI", "Python", "PostgreSQL", "SQLAlchemy", "Pydantic"],
+                "evaluation_focus": "API contract design, database normalization, and input validation security"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "JWT Authentication, State Store & Secure Protected Routing",
-                "objective": "Implement secure authentication with JWT tokens / OAuth, route guards, session persistence, and cloud storage upload integration.",
-                "deliverables": ["Token-based Auth flow", "Protected routes & middleware", "File/resume upload integration"],
+                "title": "Week 3: JWT Authentication, Protected Routes & Cloud Storage",
+                "objective": "Implement secure authentication with JSON Web Tokens (JWT) / OAuth, route protection middleware, password hashing, and multipart file uploads to cloud storage.",
+                "deliverables": [
+                    "Complete user signup, login, and token refresh authentication flow",
+                    "Password hashing with bcrypt / Argon2 and HTTP-only cookie or bearer token authorization",
+                    "Protected API routes and frontend authentication guards",
+                    "Image and resume file upload integration (Cloudinary / S3 / Local storage)"
+                ],
+                "tech_stack": ["JWT Auth", "Bcrypt", "FastAPI / Next.js", "Cloudinary / AWS S3"],
+                "evaluation_focus": "Authentication security, token expiry handling, and secure route protection"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Production Deployment, CI/CD Pipelines & Performance Optimization",
-                "objective": "Deploy the full-stack system live to cloud providers (Vercel + Render / Docker), optimize Lighthouse performance, and record demo video.",
-                "deliverables": ["Live public deployment URL", "Automated CI/CD workflow", "Lighthouse score > 90 report", "Comprehensive documentation"],
+                "title": "Week 4: Production Deployment, CI/CD Pipelines & Mini-Capstone",
+                "objective": "Deploy the complete full-stack application live to production (Vercel frontend + Render / Docker backend), configure GitHub Actions CI/CD, and record a walkthrough demo.",
+                "deliverables": [
+                    "Live public URL for frontend (Vercel) and backend API (Render/Railway)",
+                    "Automated GitHub Actions CI/CD workflow testing builds on push",
+                    "Lighthouse performance and accessibility score audit (> 90)",
+                    "Video walkthrough recording (Loom/YouTube link) demonstrating all features"
+                ],
+                "tech_stack": ["Vercel", "Render", "Docker", "GitHub Actions", "Lighthouse"],
+                "evaluation_focus": "Live deployment stability, CI/CD automation, and documentation completeness"
+            },
+            {
+                "week": 5,
+                "key": "month2_week5",
+                "title": "Week 5: State Stores, Caching & Real-Time WebSockets (6M Track)",
+                "objective": "Integrate global state management (Zustand / Redux Toolkit), Redis caching for frequent API queries, and real-time bidirectional WebSocket event streams.",
+                "deliverables": [
+                    "Global state store implementation with persistent middleware",
+                    "Redis caching layer reducing database latency on heavy queries",
+                    "Live WebSocket event stream for real-time notifications or chat",
+                    "Benchmark performance comparison with and without caching"
+                ],
+                "tech_stack": ["Zustand", "Redis", "WebSockets", "FastAPI / Socket.IO"],
+                "evaluation_focus": "State predictability, cache invalidation strategy, and WebSocket resilience"
+            },
+            {
+                "week": 6,
+                "key": "month2_week6",
+                "title": "Week 6: Automated Testing Suites (Unit, Integration & E2E) (6M Track)",
+                "objective": "Write comprehensive automated test suites using Pytest for backend APIs and Jest / React Testing Library / Playwright for frontend UI interactions.",
+                "deliverables": [
+                    "Pytest suite covering all API endpoints and edge cases (> 80% code coverage)",
+                    "Frontend unit tests verifying component states and user events",
+                    "End-to-End (E2E) Playwright test validating login and core user workflows",
+                    "Automated coverage report badge in GitHub README"
+                ],
+                "tech_stack": ["Pytest", "Jest", "Playwright", "Coverage.py"],
+                "evaluation_focus": "Test coverage depth, mock data isolation, and CI test pipeline execution"
+            },
+            {
+                "week": 7,
+                "key": "month2_week7",
+                "title": "Week 7: Microservices Architecture & Asynchronous Task Queues (6M Track)",
+                "objective": "Refactor monolithic components into decoupled microservices, implementing background job processing with Celery / BullMQ and message brokers (RabbitMQ/Redis).",
+                "deliverables": [
+                    "Decoupled microservice communicating over REST or gRPC",
+                    "Asynchronous background worker processing tasks (e.g. email / PDF generation)",
+                    "Message broker configuration with failure retries and dead-letter queues",
+                    "Architecture diagram explaining data flow between services"
+                ],
+                "tech_stack": ["Celery", "RabbitMQ / Redis", "FastAPI Microservices", "Docker Compose"],
+                "evaluation_focus": "Service decoupling, task idempotency, and asynchronous error handling"
+            },
+            {
+                "week": 8,
+                "key": "month2_week8",
+                "title": "Week 8: Performance Profiling, Security Hardening & Monitoring (6M Track)",
+                "objective": "Conduct load testing with Locust, audit security against OWASP vulnerabilities, configure structured logging and Prometheus / Grafana observability.",
+                "deliverables": [
+                    "Locust load test report handling 100+ concurrent users without error",
+                    "Security audit checklist (CORS, Rate limiting, SQL injection defense)",
+                    "Structured JSON logging with request tracing correlation IDs",
+                    "System health check and monitoring dashboard integration"
+                ],
+                "tech_stack": ["Locust", "Prometheus", "Grafana", "Rate Limiting", "OWASP"],
+                "evaluation_focus": "System throughput under load, defensive security posture, and observability"
             },
         ],
     },
     "ai-ml": {
         "title": "AI & Machine Learning Engineering",
+        "description": "Production machine learning pipelines, deep learning with PyTorch, LLMs, Vector Databases (RAG), and model deployment.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Exploratory Data Analysis (EDA) & Feature Engineering Pipelines",
-                "objective": "Perform deep data wrangling, missing data imputation, statistical profiling, and visual insight generation with Pandas and NumPy.",
-                "deliverables": ["Jupyter notebook with EDA charts", "Feature correlation heatmap", "Cleaned datasets repository"],
+                "title": "Week 1: Exploratory Data Analysis (EDA) & Feature Engineering Pipelines",
+                "objective": "Perform comprehensive data wrangling, missing data imputation, outlier detection, statistical profiling, and feature encoding with Pandas and NumPy.",
+                "deliverables": [
+                    "Cleaned and validated domain datasets with automated preprocessing scripts",
+                    "Jupyter Notebook with statistical visualizations and feature correlation heatmaps",
+                    "Automated feature scaling and categorical encoding transformation pipelines",
+                    "GitHub repository with dataset documentation and EDA findings summary"
+                ],
+                "tech_stack": ["Python 3.12", "Pandas", "NumPy", "Matplotlib", "Seaborn"],
+                "evaluation_focus": "Data cleaning rigor, statistical insights quality, and reproducible notebook code"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "Supervised & Unsupervised Machine Learning Pipelines",
-                "objective": "Build, tune hyperparameters, and evaluate classification and regression models using Scikit-Learn with cross-validation.",
-                "deliverables": ["ML training pipeline scripts", "ROC-AUC & F1-score evaluation matrix", "Model serialization (.pkl / .onnx)"],
+                "title": "Week 2: Supervised & Unsupervised Machine Learning Pipelines",
+                "objective": "Train, cross-validate, and optimize classification and regression models using Scikit-Learn, XGBoost, and hyperparameter tuning with Optuna.",
+                "deliverables": [
+                    "Trained ML models evaluated with precision, recall, F1-score, and ROC-AUC curves",
+                    "Hyperparameter optimization script utilizing cross-validation",
+                    "Feature importance analysis and model interpretability charts (SHAP / Lime)",
+                    "Model serialization artifacts (.joblib / .pkl) and inference testing script"
+                ],
+                "tech_stack": ["Scikit-Learn", "XGBoost", "Optuna", "SHAP", "Joblib"],
+                "evaluation_focus": "Model evaluation metrics accuracy, prevention of data leakage, and tuning methodology"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "Deep Neural Architectures with PyTorch & Computer Vision / NLP",
-                "objective": "Train and fine-tune convolutional neural networks or transformer models on custom domain datasets with transfer learning.",
-                "deliverables": ["PyTorch training loop code", "Loss / Accuracy convergence graphs", "Inference benchmark tests"],
+                "title": "Week 3: Deep Neural Architectures with PyTorch (Computer Vision / NLP)",
+                "objective": "Build and train deep learning models with PyTorch, implementing custom Dataset/DataLoader classes, transfer learning (ResNet/BERT), and GPU acceleration.",
+                "deliverables": [
+                    "PyTorch neural network training loop with loss tracking and early stopping",
+                    "Transfer learning implementation on an image or text classification dataset",
+                    "Validation loss and accuracy convergence graphs",
+                    "Saved PyTorch model weights (.pth) and standalone prediction script"
+                ],
+                "tech_stack": ["PyTorch", "Torchvision", "Hugging Face Transformers", "CUDA"],
+                "evaluation_focus": "Training loop structure, gradient handling, and transfer learning fine-tuning"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "LLM Integration, Vector Search (RAG) & FastAPI Model Serving",
-                "objective": "Implement a Retrieval-Augmented Generation (RAG) pipeline using Vector Embeddings and deploy an inference API with FastAPI.",
-                "deliverables": ["Vector DB integration (Chroma / Pinecone)", "FastAPI model serving endpoints", "Live demo interface"],
+                "title": "Week 4: LLM Integration, Vector Search (RAG) & FastAPI Model Serving",
+                "objective": "Build a Retrieval-Augmented Generation (RAG) agent with Vector Embeddings (Chroma/Pinecone), LangChain/LlamaIndex, and serve real-time predictions via FastAPI.",
+                "deliverables": [
+                    "Vector database pipeline chunking documents and generating semantic embeddings",
+                    "RAG query engine retrieving relevant context and generating grounded responses",
+                    "FastAPI model serving REST endpoints with Swagger documentation",
+                    "Interactive web demo interface and live deployed link with demo video"
+                ],
+                "tech_stack": ["FastAPI", "LangChain", "ChromaDB", "OpenAI / HuggingFace", "Streamlit"],
+                "evaluation_focus": "Retrieval accuracy, response grounding, and low-latency API serving"
+            },
+            {
+                "week": 5,
+                "key": "month2_week5",
+                "title": "Week 5: MLOps Pipelines, Experiment Tracking & Model Registry (6M Track)",
+                "objective": "Implement automated MLOps pipelines using MLflow / Weights & Biases for experiment tracking, model versioning, artifact logging, and automated model registration.",
+                "deliverables": [
+                    "MLflow / W&B experiment tracking dashboard logging hyperparameter runs and metrics",
+                    "Model registry pipeline promoting models from Staging to Production",
+                    "Automated dataset versioning with DVC (Data Version Control)",
+                    "CI workflow triggering model validation on new dataset commits"
+                ],
+                "tech_stack": ["MLflow", "Weights & Biases", "DVC", "GitHub Actions"],
+                "evaluation_focus": "Experiment reproducibility, model governance, and artifact versioning"
+            },
+            {
+                "week": 6,
+                "key": "month2_week6",
+                "title": "Week 6: Model Optimization, Quantization & TensorRT / ONNX Serving (6M Track)",
+                "objective": "Optimize neural networks for low-latency edge and cloud deployment using model quantization (INT8/FP16), pruning, and ONNX Runtime / TensorRT acceleration.",
+                "deliverables": [
+                    "ONNX model export and inference benchmark script",
+                    "Quantized model pipeline demonstrating reduced memory footprint (> 50% reduction)",
+                    "Latency benchmark comparing native PyTorch vs ONNX Runtime throughput",
+                    "Docker container optimized for high-performance model serving"
+                ],
+                "tech_stack": ["ONNX Runtime", "TorchScript", "Model Quantization", "Docker"],
+                "evaluation_focus": "Inference speedup, accuracy retention after quantization, and memory efficiency"
+            },
+            {
+                "week": 7,
+                "key": "month2_week7",
+                "title": "Week 7: Advanced Multi-Agent Orchestration & Tool Calling (6M Track)",
+                "objective": "Architect autonomous multi-agent systems with LangGraph / CrewAI, integrating tool calling, web search capabilities, SQL querying, and memory state graphs.",
+                "deliverables": [
+                    "Multi-agent workflow with specialized role agents (Researcher, Writer, Reviewer)",
+                    "Custom Python tool integrations (SQL query executor, Web search, Calculator)",
+                    "Persistent conversation memory with SQLite / Redis checkpointer",
+                    "Traceability logging with LangSmith / Phoenix evaluation telemetry"
+                ],
+                "tech_stack": ["LangGraph", "CrewAI", "LangSmith", "Python"],
+                "evaluation_focus": "Agent coordination logic, tool error handling, and cyclic graph stability"
+            },
+            {
+                "week": 8,
+                "key": "month2_week8",
+                "title": "Week 8: Model Drift Monitoring & Production Continuous Retraining (6M Track)",
+                "objective": "Build continuous monitoring pipelines detecting data drift, concept drift, and model degradation using Evidently AI, with automated alerts and retraining triggers.",
+                "deliverables": [
+                    "Evidently AI dashboard detecting statistical distribution drift on live data",
+                    "Automated webhook alerts on accuracy drop / distribution drift",
+                    "Continuous retraining pipeline triggered automatically on drift detection",
+                    "Production architecture documentation and end-to-end demo video"
+                ],
+                "tech_stack": ["Evidently AI", "FastAPI", "Prometheus", "Docker"],
+                "evaluation_focus": "Drift detection accuracy, automated alert triggers, and retraining safety"
             },
         ],
     },
     "python": {
         "title": "Python Developer",
+        "description": "Enterprise Python programming: advanced OOP, AsyncIO concurrency, web scraping, FastAPI microservices, and automated testing.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Advanced Python OOP, Design Patterns & AsyncIO Concurrency",
-                "objective": "Master object-oriented design patterns, custom decorators, context managers, and async event loops.",
-                "deliverables": ["Modular OOP architecture codebase", "Asynchronous task benchmark script", "Unit tests with pytest"],
+                "title": "Week 1: Advanced Python OOP, Type Hinting & AsyncIO Concurrency",
+                "objective": "Master modern Python 3.12 features: dataclasses, custom decorators, context managers, structural pattern matching, and AsyncIO event loops.",
+                "deliverables": [
+                    "Modular OOP codebase demonstrating inheritance, encapsulation, and design patterns",
+                    "Asynchronous task executor utilizing AsyncIO and aiohttp for concurrent operations",
+                    "Full type-hinted code with static analysis validation (Mypy / Ruff)",
+                    "Pytest test suite with 90%+ branch coverage"
+                ],
+                "tech_stack": ["Python 3.12", "AsyncIO", "Mypy", "Ruff", "Pytest"],
+                "evaluation_focus": "Code idiomaticity, async performance, and type safety"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "Web Scraping, Automated Data Extractors & Headless Pipelines",
-                "objective": "Build robust web scrapers and automation scripts with Playwright / BeautifulSoup / Scrapy with error resilience.",
-                "deliverables": ["Automated crawler script", "Structured JSON/CSV export engine", "Rate limiting & proxy handling"],
+                "title": "Week 2: Web Scraping, Headless Automation & ETL Data Pipelines",
+                "objective": "Build resilient web scraping pipelines with Playwright / BeautifulSoup / Scrapy, handling dynamic JS rendering, rate limiting, and database exports.",
+                "deliverables": [
+                    "Automated scraper extracting structured data from multi-page web applications",
+                    "Error recovery, proxy rotation, and rate-limiting retry mechanism",
+                    "ETL pipeline cleaning, transforming, and inserting data into PostgreSQL / SQLite",
+                    "Automated cron / task scheduler running data extraction routines"
+                ],
+                "tech_stack": ["Playwright", "BeautifulSoup4", "Scrapy", "PostgreSQL", "Pandas"],
+                "evaluation_focus": "Scraper resilience against errors, rate-limit compliance, and data schema cleanliness"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "Backend Microservices & Database Integration with FastAPI",
-                "objective": "Build high-performance REST APIs with SQLAlchemy ORM, PostgreSQL connection pooling, and background task queues.",
-                "deliverables": ["FastAPI microservice endpoints", "Database migrations with Alembic", "Postman / Swagger collection"],
+                "title": "Week 3: High-Performance Backend APIs with FastAPI & SQLAlchemy ORM",
+                "objective": "Develop production REST APIs with FastAPI, implementing SQLAlchemy 2.0 async sessions, Alembic database migrations, and JWT authentication.",
+                "deliverables": [
+                    "FastAPI application with asynchronous database CRUD endpoints",
+                    "Alembic migration scripts versioning relational schema changes",
+                    "Secure JWT authentication and password hashing middleware",
+                    "Interactive OpenAPI Swagger UI documentation (/docs)"
+                ],
+                "tech_stack": ["FastAPI", "SQLAlchemy 2.0", "Alembic", "PostgreSQL", "Pydantic"],
+                "evaluation_focus": "Async session efficiency, migration cleanliness, and API response standards"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Docker Packaging, Cloud Deployment & Comprehensive Testing",
-                "objective": "Containerize the Python application with Docker multi-stage builds, write CI test suites, and deploy to Render / AWS.",
-                "deliverables": ["Optimized Dockerfile", "GitHub Actions test workflow", "Live deployed API link"],
+                "title": "Week 4: Docker Packaging, Cloud Deployment & Mini-Capstone",
+                "objective": "Containerize the Python application with multi-stage Docker builds, configure GitHub Actions CI/CD, and deploy live to cloud platforms.",
+                "deliverables": [
+                    "Multi-stage optimized Dockerfile and docker-compose.yml stack",
+                    "GitHub Actions CI pipeline running linters and tests on pull requests",
+                    "Live deployed public API URL with database connectivity (Render / Railway)",
+                    "Walkthrough video and comprehensive technical documentation"
+                ],
+                "tech_stack": ["Docker", "Docker Compose", "GitHub Actions", "Render", "Cloud"],
+                "evaluation_focus": "Container footprint optimization, CI/CD pipeline, and deployment uptime"
             },
         ],
     },
     "java": {
         "title": "Java Developer",
+        "description": "Enterprise Java 21 development: Core Java OOP, Streams & Concurrency, Spring Boot 3, Spring Data JPA, Spring Security, and microservices.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Core Java 21, Collections Framework & Functional Streams",
-                "objective": "Build robust OOP architectures utilizing modern Java features, generics, records, and functional Streams pipelines.",
-                "deliverables": ["Clean architecture Java repository", "Streams & Collections benchmarks", "JUnit 5 test suite"],
+                "title": "Week 1: Core Java 21, Collections Framework & Functional Streams",
+                "objective": "Master modern Java 21 features: records, sealed classes, pattern matching, Collections framework, and functional Streams pipelines.",
+                "deliverables": [
+                    "Clean architecture Java repository with Maven / Gradle build setup",
+                    "Data processing pipelines utilizing Java Streams, Lambdas, and Optionals",
+                    "Custom thread-safe generic collections implementation",
+                    "JUnit 5 and AssertJ unit test suite with high coverage"
+                ],
+                "tech_stack": ["Java 21", "Maven / Gradle", "JUnit 5", "AssertJ"],
+                "evaluation_focus": "OOP principles, idiomatic Java 21 syntax, and unit test thoroughness"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "Data Structures, Multithreading & Memory Management",
-                "objective": "Implement custom thread-safe data structures, ExecutorService concurrency pools, and profiling memory performance.",
-                "deliverables": ["Concurrent producer-consumer engine", "Thread synchronization documentation", "DSA algorithms implementation"],
+                "title": "Week 2: Multithreading, Concurrency Pools & Memory Management",
+                "objective": "Implement concurrent applications with Virtual Threads (Project Loom), ExecutorService thread pools, synchronized blocks, and atomic variables.",
+                "deliverables": [
+                    "High-throughput concurrent task processor utilizing Virtual Threads",
+                    "Producer-consumer pattern implementation with BlockingQueue",
+                    "Deadlock prevention and memory leak profiling documentation",
+                    "Performance benchmark comparing classic threads vs virtual threads"
+                ],
+                "tech_stack": ["Java Concurrency", "Virtual Threads", "JConsole / VisualVM"],
+                "evaluation_focus": "Thread safety, synchronization correctness, and resource management"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "Spring Boot 3 REST Microservices & JPA Hibernate Persistence",
-                "objective": "Develop enterprise Spring Boot microservices with Spring Data JPA, relational entities, DTOs, and global exception handlers.",
-                "deliverables": ["Spring Boot service application", "Database repository mapping", "Swagger OpenAPI documentation"],
+                "title": "Week 3: Spring Boot 3 REST Microservices & JPA Hibernate Persistence",
+                "objective": "Develop enterprise Spring Boot 3 microservices with Spring Data JPA, Hibernate relational mappings, DTO pattern, and global exception handlers.",
+                "deliverables": [
+                    "Spring Boot 3 REST application with layered Controller-Service-Repository architecture",
+                    "Entity mappings with relationships (@OneToMany, @ManyToMany) and custom repository queries",
+                    "Global @ControllerAdvice exception handler returning standardized error responses",
+                    "SpringDoc OpenAPI (Swagger UI) documentation (/swagger-ui.html)"
+                ],
+                "tech_stack": ["Spring Boot 3", "Spring Data JPA", "Hibernate", "PostgreSQL / H2", "Swagger"],
+                "evaluation_focus": "Layered architecture cleanliness, database query efficiency, and DTO validation"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Spring Security JWT, Docker Containerization & Cloud Deployment",
-                "objective": "Implement Spring Security filter chains for JWT authentication, package with Maven/Gradle into Docker, and deploy live.",
-                "deliverables": ["Security configuration & token filters", "Dockerized JAR image", "Live cloud deployment URL"],
+                "title": "Week 4: Spring Security JWT, Docker Containerization & Cloud Deployment",
+                "objective": "Secure the application with Spring Security filter chains and JWT tokens, package into lightweight Docker containers, and deploy to cloud environments.",
+                "deliverables": [
+                    "Spring Security JWT authentication with role-based access control (RBAC)",
+                    "Multi-stage Dockerfile packaging the JAR with Temurin JDK runtime",
+                    "Integration test suite with @SpringBootTest and Testcontainers",
+                    "Live deployed cloud service link and architectural demonstration video"
+                ],
+                "tech_stack": ["Spring Security", "JWT", "Docker", "Testcontainers", "Cloud Platform"],
+                "evaluation_focus": "Security filter chain configuration, container efficiency, and deployment stability"
             },
         ],
     },
-    "android": {
-        "title": "Android App Development",
+    "backend": {
+        "title": "Backend Engineering",
+        "description": "High-throughput backend architectures: API design, JWT/OAuth2, PostgreSQL database modeling, Redis caching, and microservices.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Kotlin Foundations & Declarative UI with Jetpack Compose",
-                "objective": "Build modern Android UI components with Jetpack Compose, Material 3 theming, and responsive screen adaptations.",
-                "deliverables": ["Declarative Compose screens", "Custom themed UI kit", "Android Studio project repo"],
+                "title": "Week 1: API Design, Relational Modeling & Schema Optimization",
+                "objective": "Design clean RESTful and RPC API contracts, build normalized PostgreSQL database schemas with indexing strategies, and implement connection pooling.",
+                "deliverables": [
+                    "Database schema ERD diagram with foreign keys, constraints, and B-Tree indexes",
+                    "API specification document with standardized status codes and pagination",
+                    "PostgreSQL query performance benchmark comparing indexed vs non-indexed queries",
+                    "Database migration scripts versioning all schema changes"
+                ],
+                "tech_stack": ["PostgreSQL", "FastAPI / Node.js", "SQLAlchemy / Prisma", "DBeaver"],
+                "evaluation_focus": "Database normalization, query execution plan analysis (EXPLAIN ANALYZE), and schema design"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "MVVM Architecture, Coroutines & StateFlow Reactive Streams",
-                "objective": "Implement MVVM design pattern with ViewModel, Kotlin Coroutines for asynchronous work, and StateFlow UI state binding.",
-                "deliverables": ["MVVM layered structure", "Coroutines background handlers", "StateFlow reactive bindings"],
+                "title": "Week 2: Secure Authentication, Session Management & RBAC",
+                "objective": "Implement production authentication using JWT, OAuth2, refresh token rotation, password hashing, and Role-Based Access Control (RBAC) middleware.",
+                "deliverables": [
+                    "Complete auth system with signup, login, password reset, and token rotation",
+                    "RBAC middleware enforcing granular user permissions across endpoints",
+                    "Rate-limiting middleware protecting sensitive endpoints against brute force",
+                    "Comprehensive unit tests verifying unauthorized access rejection"
+                ],
+                "tech_stack": ["JWT", "OAuth2", "Bcrypt", "Redis Rate Limiter"],
+                "evaluation_focus": "Token rotation security, permission boundary enforcement, and rate limiting"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "REST API Integration (Retrofit) & Local Database Caching (Room)",
-                "objective": "Integrate network calls with Retrofit + Moshi and create an offline-first caching layer with Room SQLite Database.",
-                "deliverables": ["Retrofit network service", "Room database DAO & entities", "Offline-first sync logic"],
+                "title": "Week 3: In-Memory Caching (Redis), Message Queues & Background Workers",
+                "objective": "Integrate Redis caching to reduce database read pressure, configure message queues (Celery/BullMQ), and process asynchronous tasks with failure retries.",
+                "deliverables": [
+                    "Redis cache-aside implementation with configurable TTL and cache invalidation",
+                    "Asynchronous worker queue processing background tasks (emails, notifications)",
+                    "Dead-letter queue handling failed background job retries",
+                    "Benchmark showing 5x+ latency reduction on cached endpoints"
+                ],
+                "tech_stack": ["Redis", "Celery / BullMQ", "PostgreSQL", "Python / Node.js"],
+                "evaluation_focus": "Cache invalidation reliability, worker idempotency, and error handling"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Firebase Services, Cloud Storage & Release APK Signing",
-                "objective": "Add Firebase Auth and notifications, configure ProGuard obfuscation, and generate a signed release APK with demo recording.",
-                "deliverables": ["Firebase integration", "Signed release APK file", "Demo walkthrough video"],
+                "title": "Week 4: Observability, Load Testing & Cloud Deployment (Mini-Capstone)",
+                "objective": "Deploy the backend service to cloud infrastructure with Docker, configure structured JSON logging, Prometheus metrics, and execute load testing with Locust.",
+                "deliverables": [
+                    "Live deployed backend API URL connected to managed cloud PostgreSQL",
+                    "Locust load testing report demonstrating sustained 200+ RPS with low latency",
+                    "Structured logging with correlation IDs and health check endpoint (/health)",
+                    "Walkthrough video and complete API documentation repository"
+                ],
+                "tech_stack": ["Docker", "Locust", "Prometheus", "Render / AWS", "GitHub Actions"],
+                "evaluation_focus": "System throughput under stress, deployment reliability, and observability"
             },
         ],
     },
-    "data-science": {
-        "title": "Data Science & Big Data Analytics",
+    "frontend": {
+        "title": "Frontend Engineering",
+        "description": "Modern frontend architectures: Next.js 15, React 19, TypeScript, Tailwind CSS, global state stores, component testing, and performance optimization.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Data Wrangling, Statistical Distributions & Advanced EDA",
-                "objective": "Perform deep exploratory data analysis, hypothesis testing, outlier detection, and statistical visualizations with Pandas and Seaborn.",
-                "deliverables": ["Jupyter EDA Notebook", "Statistical Distribution Matrix", "Cleaned Datasets"],
+                "title": "Week 1: Next.js 15 App Router, React 19 & Component Design Systems",
+                "objective": "Architect a modular frontend application using Next.js 15 App Router, React 19 Server & Client Components, TypeScript, and a unified Tailwind CSS design system.",
+                "deliverables": [
+                    "Component hierarchy with reusable UI primitives (Buttons, Inputs, Cards, Modals)",
+                    "Responsive layouts adapting smoothly across mobile, tablet, and widescreen views",
+                    "Design tokens configuration with dark/light mode theme support",
+                    "GitHub repository with clean structure, ESLint, and Prettier configuration"
+                ],
+                "tech_stack": ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS", "Lucide Icons"],
+                "evaluation_focus": "Component composition, responsive layout fluidness, and TypeScript rigor"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "SQL for Analytics, Window Functions & Relational Schemas",
-                "objective": "Write complex analytical SQL queries, CTEs, aggregation pipelines, and build data models in PostgreSQL.",
-                "deliverables": ["Analytical SQL queries file", "Schema ERD diagram", "Performance index report"],
+                "title": "Week 2: Advanced State Management, Form Validation & API Integration",
+                "objective": "Implement predictable global state stores (Zustand), complex multi-step forms with React Hook Form + Zod, and data fetching with optimistic updates.",
+                "deliverables": [
+                    "Global state store managing user session, cart/workspace state, and UI toggles",
+                    "Multi-step interactive form with real-time Zod schema validation and error feedback",
+                    "Custom data fetching hooks with loading skeletons, error boundaries, and retries",
+                    "Optimistic UI updates for immediate user feedback on mutations"
+                ],
+                "tech_stack": ["Zustand", "React Hook Form", "Zod", "TanStack Query", "Axios"],
+                "evaluation_focus": "State predictability, validation error clarity, and smooth data loading states"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "Predictive Modeling & Applied Machine Learning",
-                "objective": "Train predictive regression & classification models with Scikit-Learn, evaluate performance metrics, and build feature stores.",
-                "deliverables": ["Scikit-Learn ML script", "Model evaluation benchmark", "Feature importance charts"],
+                "title": "Week 3: Micro-Animations, Accessibility (a11y) & Interactive Charts",
+                "objective": "Enhance user experience with smooth Framer Motion micro-animations, interactive data visualizations with Recharts, and strict WCAG accessibility compliance.",
+                "deliverables": [
+                    "Page transitions and interactive micro-animations using Framer Motion",
+                    "Interactive dashboard charts with tooltips and responsive scaling (Recharts)",
+                    "Keyboard navigation support and ARIA attributes passing screen reader audits",
+                    "WCAG 2.1 AA accessibility compliance audit report"
+                ],
+                "tech_stack": ["Framer Motion", "Recharts", "Radix UI", "Accessibility (a11y)"],
+                "evaluation_focus": "Animation smoothness (60 FPS), chart interactivity, and accessibility score"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Executive Business Intelligence Dashboards & Deployment",
-                "objective": "Design interactive BI dashboards using Streamlit / Power BI and deploy live with automated data refresh pipelines.",
-                "deliverables": ["Interactive Streamlit dashboard URL", "GitHub repo", "Executive insights slide deck"],
+                "title": "Week 4: Automated Testing, Performance Optimization & Live Deployment",
+                "objective": "Write automated component and E2E tests with Jest / Playwright, optimize bundle size and Core Web Vitals, and deploy live to Vercel.",
+                "deliverables": [
+                    "Jest / React Testing Library unit tests and Playwright E2E user flow tests",
+                    "Lighthouse performance score 95+ with code-splitting and image optimization",
+                    "Live public deployment URL on Vercel with automatic preview deployments",
+                    "Demonstration video walkthrough and comprehensive technical README"
+                ],
+                "tech_stack": ["Jest", "Playwright", "Lighthouse", "Vercel", "GitHub Actions"],
+                "evaluation_focus": "Core Web Vitals metrics, test automation pass rate, and deployment quality"
             },
         ],
     },
     "devops": {
-        "title": "Cloud DevOps & CI/CD Engineering",
+        "title": "Cloud DevOps & Kubernetes",
+        "description": "Cloud infrastructure automation: Linux server administration, Docker containerization, GitHub Actions CI/CD, Kubernetes orchestration, and AWS.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Linux Systems Administration, Bash Scripting & Git Flow",
-                "objective": "Master Linux server administration, SSH tunneling, systemd services, and automated bash scripting.",
-                "deliverables": ["Bash automation scripts", "System monitoring tool", "Git branching workflow docs"],
+                "title": "Week 1: Linux Server Administration, Bash Automation & Git Flow",
+                "objective": "Master Linux server administration: user permissions, systemd services, SSH key authentication, networking tools, and automated Bash scripting.",
+                "deliverables": [
+                    "Automated Bash scripts for server provisioning, backup, and health monitoring",
+                    "Configured systemd service with automated restart and journalctl log rotation",
+                    "Hardened SSH configuration with firewall rules (UFW / iptables)",
+                    "GitHub repository documenting standard Git branching workflows"
+                ],
+                "tech_stack": ["Linux (Ubuntu/Debian)", "Bash", "Systemd", "SSH", "UFW"],
+                "evaluation_focus": "Script robustness, error handling, and server security hardening"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "Docker Containerization & Multi-Container Docker Compose",
-                "objective": "Containerize full-stack services with multi-stage Docker builds, compose stacks, and volume persistence.",
-                "deliverables": ["Multi-stage Dockerfile", "Docker Compose architecture file", "Container security scan"],
+                "title": "Week 2: Docker Containerization & Multi-Container Docker Compose",
+                "objective": "Containerize full-stack services using multi-stage Dockerfiles, minimize image sizes, and orchestrate multi-container environments with Docker Compose.",
+                "deliverables": [
+                    "Multi-stage Dockerfiles for frontend, backend, and background worker services",
+                    "Docker Compose stack linking App, PostgreSQL database, and Redis cache",
+                    "Non-root container user configuration and vulnerability security scanning (Trivy)",
+                    "Volume persistence and environment variable management documentation"
+                ],
+                "tech_stack": ["Docker", "Docker Compose", "Trivy", "Container Security"],
+                "evaluation_focus": "Image size optimization (< 100MB), build caching efficiency, and security scans"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "CI/CD Pipelines with GitHub Actions & Automated Testing",
-                "objective": "Build automated continuous integration pipelines with linting, unit testing, Docker Hub push, and zero-downtime deploy.",
-                "deliverables": [".github/workflows/deploy.yml", "Automated test integration", "Build badge status"],
+                "title": "Week 3: Continuous Integration & Delivery (CI/CD) with GitHub Actions",
+                "objective": "Design end-to-end CI/CD pipelines in GitHub Actions with automated linting, unit testing, Docker Hub image build & push, and zero-downtime deployment.",
+                "deliverables": [
+                    ".github/workflows CI pipeline running tests and static analysis on PRs",
+                    "Automated Docker image publishing to GitHub Container Registry / Docker Hub",
+                    "Zero-downtime deployment trigger deploying to staging/production servers",
+                    "Pipeline status badges and build failure alerting integration"
+                ],
+                "tech_stack": ["GitHub Actions", "Docker Hub", "CI/CD", "Automated Testing"],
+                "evaluation_focus": "Pipeline speed, secret management security, and deployment reliability"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Kubernetes Orchestration & Cloud Infrastructure Deployment",
-                "objective": "Deploy scalable applications to Kubernetes / Cloud (AWS/Render) with ingress, ConfigMaps, and health probes.",
-                "deliverables": ["K8s deployment manifests", "Live cloud application URL", "Architecture walkthrough"],
+                "title": "Week 4: Kubernetes Cluster Orchestration & Cloud Deployment",
+                "objective": "Deploy scalable applications onto Kubernetes clusters with Deployments, Services, Ingress controllers, ConfigMaps, Secrets, and automated Horizontal Pod Autoscaling (HPA).",
+                "deliverables": [
+                    "Kubernetes manifest files (Deployment, Service, Ingress, ConfigMap, Secret)",
+                    "Horizontal Pod Autoscaler (HPA) configured with CPU/Memory utilization thresholds",
+                    "Live deployed cloud application running on managed Kubernetes (EKS/GKE/Kind)",
+                    "Architecture diagram and video walkthrough explaining cluster topology"
+                ],
+                "tech_stack": ["Kubernetes", "Helm", "kubectl", "AWS / Cloud", "Ingress NGINX"],
+                "evaluation_focus": "Manifest correctness, rolling update zero-downtime capability, and autoscaling"
             },
         ],
     },
     "cyber-security": {
         "title": "Cyber Security & Ethical Hacking",
+        "description": "Offensive and defensive security: network reconnaissance, OWASP Top 10 web vulnerabilities, cryptography, system hardening, and pen-testing.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "Networking Protocols, Packet Analysis & Reconnaissance",
-                "objective": "Perform passive/active reconnaissance, network packet capture with Wireshark, and port scanning with Nmap.",
-                "deliverables": ["Wireshark PCAP analysis report", "Nmap network topology scan", "Recon methodology docs"],
+                "title": "Week 1: Network Protocols, Packet Analysis & Active Reconnaissance",
+                "objective": "Perform network packet analysis with Wireshark, active and passive reconnaissance with Nmap, and identify exposed services and open ports.",
+                "deliverables": [
+                    "Wireshark PCAP network capture analysis report detailing TCP handshakes and protocols",
+                    "Nmap network topology and service version scanning audit report",
+                    "OSINT reconnaissance documentation on a lab target domain",
+                    "GitHub repository documenting ethical hacking methodology and legal boundaries"
+                ],
+                "tech_stack": ["Wireshark", "Nmap", "Linux", "OSINT Tools", "TCP/IP"],
+                "evaluation_focus": "Reconnaissance depth, packet inspection accuracy, and methodology documentation"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "OWASP Top 10 Web Application Vulnerability Assessment",
-                "objective": "Audit web applications against SQL injection, XSS, CSRF, and broken authentication using Burp Suite.",
-                "deliverables": ["Vulnerability assessment report", "Proof of Concept (PoC) exploits", "Remediation recommendations"],
+                "title": "Week 2: OWASP Top 10 Web Application Vulnerability Assessment",
+                "objective": "Audit web applications against OWASP Top 10 vulnerabilities (SQL Injection, XSS, CSRF, IDOR, SSRF) using Burp Suite and manual exploitation techniques.",
+                "deliverables": [
+                    "Vulnerability assessment report detailing findings on a designated lab application",
+                    "Proof of Concept (PoC) exploit scripts and request payloads for detected flaws",
+                    "Step-by-step developer remediation and secure coding recommendations",
+                    "Burp Suite audit project file and testing logs"
+                ],
+                "tech_stack": ["Burp Suite", "OWASP ZAP", "SQLMap", "Web Security"],
+                "evaluation_focus": "Vulnerability identification accuracy, PoC reproducibility, and remediation advice"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "Cryptography, SSL/TLS & Identity Access Management",
-                "objective": "Implement symmetric/asymmetric encryption, PKI certificate authorities, and secure password hashing protocols.",
-                "deliverables": ["Python crypto utility script", "SSL/TLS hardening checklist", "Security audit report"],
+                "title": "Week 3: Applied Cryptography, SSL/TLS Hardening & IAM Security",
+                "objective": "Implement symmetric (AES) and asymmetric (RSA/ECC) encryption in Python, configure TLS certificate security, and audit Identity & Access Management (IAM).",
+                "deliverables": [
+                    "Python cryptographic utility script performing secure encryption and digital signatures",
+                    "SSL/TLS server configuration audit using testssl.sh / Qualys SSL Labs",
+                    "IAM privilege escalation analysis and least-privilege security policy implementation",
+                    "Secure password storage and hashing audit report (Argon2 / PBKDF2)"
+                ],
+                "tech_stack": ["Python Cryptography", "OpenSSL", "testssl.sh", "IAM Policies"],
+                "evaluation_focus": "Crypto implementation correctness, cipher suite selection, and IAM auditing"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "System Hardening, Incident Response & Penetration Testing Report",
-                "objective": "Perform defensive system hardening, configure iptables/firewalls, and author a professional penetration testing report.",
-                "deliverables": ["Professional Pen-Test Audit PDF", "Defensive hardening script", "Walkthrough video"],
+                "title": "Week 4: Defensive System Hardening, SIEM & Penetration Testing Audit",
+                "objective": "Perform defensive Linux/Windows server hardening, configure host firewalls and intrusion detection (Fail2ban/Wazuh), and author a professional Penetration Testing Report.",
+                "deliverables": [
+                    "Professional Executive Penetration Testing & Vulnerability Assessment PDF Report",
+                    "Automated Linux server hardening script (Fail2ban, iptables, disable root SSH)",
+                    "SIEM log analysis walkthrough detecting brute-force attacks in real time",
+                    "Video presentation summarizing high-risk findings and executive takeaways"
+                ],
+                "tech_stack": ["Fail2ban", "iptables", "Wazuh / Splunk", "Linux Hardening"],
+                "evaluation_focus": "Report professional quality, severity classification (CVSS v3.1), and remediation"
             },
         ],
     },
     "ui-ux": {
-        "title": "UI/UX Design & Product Frontend",
+        "title": "UI/UX Design & Modern Frontend",
+        "description": "User experience design and frontend craftsmanship: Figma user research, wireframing, design systems, interactive prototypes, and React handoff.",
         "weeks": [
             {
                 "week": 1,
                 "key": "month1_week1",
-                "title": "User Research, Wireframing & Low-Fidelity Prototyping",
-                "objective": "Conduct user persona discovery, information architecture mapping, and low-fidelity wireframes in Figma.",
-                "deliverables": ["Figma wireframe board link", "User persona cards", "User journey map"],
+                "title": "Week 1: User Research, Information Architecture & Low-Fi Wireframes",
+                "objective": "Conduct target user discovery, user personas creation, user journey mapping, information architecture diagrams, and low-fidelity wireframing in Figma.",
+                "deliverables": [
+                    "Figma project link containing low-fidelity wireframes for all core user screens",
+                    "User Persona cards and Empathy Maps detailing pain points and goals",
+                    "Information Architecture (IA) sitemap and user flow diagram",
+                    "Summary documentation of user research findings and design rationale"
+                ],
+                "tech_stack": ["Figma", "FigJam", "Miro", "Information Architecture"],
+                "evaluation_focus": "User journey clarity, wireframe structure, and problem-solving focus"
             },
             {
                 "week": 2,
                 "key": "month1_week2",
-                "title": "Comprehensive Design Systems, Color Tokens & Typography",
-                "objective": "Build high-end design systems in Figma with auto-layout, variants, typography scale, and dark-mode tokens.",
-                "deliverables": ["Figma Design System kit", "Component variant library", "Accessibility contrast matrix"],
+                "title": "Week 2: Comprehensive Design Systems, Color Tokens & Typography",
+                "objective": "Build a scalable, accessible design system in Figma utilizing auto-layout, component variants, typography hierarchy, and dark/light color tokens.",
+                "deliverables": [
+                    "Complete Figma Design System component library (Buttons, Inputs, Badges, Modals)",
+                    "Design token definitions with semantic color palettes and typography scale",
+                    "WCAG contrast compliance validation matrix (AAA / AA standard)",
+                    "Component usage guideline documentation for developer handoff"
+                ],
+                "tech_stack": ["Figma Auto-Layout", "Design Tokens", "Accessibility Contrast"],
+                "evaluation_focus": "Component modularity, auto-layout responsiveness, and token consistency"
             },
             {
                 "week": 3,
                 "key": "month1_week3",
-                "title": "High-Fidelity Interactive Prototypes & Micro-Animations",
-                "objective": "Create pixel-perfect interactive prototype flows with animated transitions, modal states, and interactive feedback.",
-                "deliverables": ["Figma clickable interactive prototype", "Micro-interaction specs", "Usability test recordings"],
+                "title": "Week 3: High-Fidelity Interactive Prototypes & Micro-Interactions",
+                "objective": "Create high-fidelity UI screens in Figma with realistic interactive prototypes, smart animations, modal overlays, and conduct usability testing.",
+                "deliverables": [
+                    "Clickable, interactive Figma prototype demonstrating complete user workflows",
+                    "Micro-interaction specifications and transition choreography notes",
+                    "Usability testing video recording with 3 test users and synthesized feedback report",
+                    "Design iteration changelog based on usability findings"
+                ],
+                "tech_stack": ["Figma Smart Animate", "Interactive Components", "Usability Testing"],
+                "evaluation_focus": "Prototype interactivity realism, visual aesthetics quality, and user feedback synthesis"
             },
             {
                 "week": 4,
                 "key": "month1_week4",
-                "title": "Production Frontend Implementation with React & Tailwind CSS",
-                "objective": "Translate the Figma design system into production React + Tailwind CSS code with responsive layouts and deploy live.",
-                "deliverables": ["Live deployment URL (Vercel)", "GitHub component repository", "Lighthouse accessibility 100 score"],
+                "title": "Week 4: Production Frontend Implementation with React & Tailwind CSS",
+                "objective": "Translate the Figma design system into pixel-perfect React + Tailwind CSS code with responsive adaptations, Framer Motion animations, and deploy live to Vercel.",
+                "deliverables": [
+                    "Live deployed frontend application matching the Figma design pixel-for-pixel (Vercel)",
+                    "GitHub component repository with clean, maintainable JSX/TSX structure",
+                    "Lighthouse performance and accessibility score 95+ audit",
+                    "Case study presentation walkthrough video explaining design-to-code decisions"
+                ],
+                "tech_stack": ["React", "Tailwind CSS", "Next.js", "Framer Motion", "Vercel"],
+                "evaluation_focus": "Visual fidelity to design, responsive behavior, and clean code handoff"
+            },
+        ],
+    },
+    "data-science": {
+        "title": "Data Science & Big Data Analytics",
+        "description": "Data exploration, statistical modeling, analytical SQL, predictive machine learning, and interactive business intelligence dashboards.",
+        "weeks": [
+            {
+                "week": 1,
+                "key": "month1_week1",
+                "title": "Week 1: Data Wrangling, Statistical Distributions & Advanced EDA",
+                "objective": "Perform deep exploratory data analysis, hypothesis testing, outlier detection, and statistical visualizations with Pandas and Seaborn.",
+                "deliverables": [
+                    "Jupyter EDA Notebook with statistical insights and hypothesis testing",
+                    "Cleaned datasets repository with automated validation scripts",
+                    "Feature distribution and outlier detection report",
+                    "GitHub repository with clear documentation and summary insights"
+                ],
+                "tech_stack": ["Python 3.12", "Pandas", "NumPy", "Seaborn", "Scipy"],
+                "evaluation_focus": "Statistical analysis depth, data cleaning rigor, and visual clarity"
+            },
+            {
+                "week": 2,
+                "key": "month1_week2",
+                "title": "Week 2: Analytical SQL, Window Functions & Relational Data Modeling",
+                "objective": "Write complex analytical SQL queries, window functions, CTEs, aggregation pipelines, and build data models in PostgreSQL.",
+                "deliverables": [
+                    "Analytical SQL queries file solving complex business aggregations",
+                    "Relational schema ERD diagram with optimized indexes",
+                    "Query execution performance report comparing optimization iterations",
+                    "Automated SQL test script verifying query results"
+                ],
+                "tech_stack": ["PostgreSQL", "SQL Window Functions", "CTEs", "DBeaver"],
+                "evaluation_focus": "Query efficiency, correct use of window functions, and schema design"
+            },
+            {
+                "week": 3,
+                "key": "month1_week3",
+                "title": "Week 3: Predictive Modeling & Applied Machine Learning",
+                "objective": "Train predictive regression & classification models with Scikit-Learn, evaluate performance metrics, and build feature importance pipelines.",
+                "deliverables": [
+                    "Scikit-Learn ML script with cross-validation and hyperparameter tuning",
+                    "Model evaluation benchmark with precision, recall, and ROC-AUC curves",
+                    "Feature importance analysis and model interpretation charts (SHAP)",
+                    "Serialized model artifact (.pkl) with sample prediction runner"
+                ],
+                "tech_stack": ["Scikit-Learn", "XGBoost", "SHAP", "Joblib"],
+                "evaluation_focus": "Model validation rigor, feature selection, and evaluation accuracy"
+            },
+            {
+                "week": 4,
+                "key": "month1_week4",
+                "title": "Week 4: Business Intelligence Dashboards & Live Deployment",
+                "objective": "Design interactive BI dashboards using Streamlit / Power BI, connect to live datasets, and deploy live with automated data refresh pipelines.",
+                "deliverables": [
+                    "Interactive Streamlit dashboard URL with filters and drill-down charts",
+                    "GitHub repository containing the dashboard code and deployment configs",
+                    "Executive insights summary slide deck with key actionable takeaways",
+                    "Demonstration video explaining dashboard metrics to stakeholders"
+                ],
+                "tech_stack": ["Streamlit", "Plotly", "Python", "Render / Cloud"],
+                "evaluation_focus": "Dashboard usability, insight clarity, and deployment stability"
+            },
+        ],
+    },
+    "android": {
+        "title": "Android App Development",
+        "description": "Modern Android application engineering: Kotlin, Jetpack Compose, MVVM architecture, Coroutines, Retrofit APIs, Room database, and Firebase.",
+        "weeks": [
+            {
+                "week": 1,
+                "key": "month1_week1",
+                "title": "Week 1: Kotlin Foundations & Declarative UI with Jetpack Compose",
+                "objective": "Build modern Android UI components with Jetpack Compose, Material 3 theming, state hoisting, and responsive screen adaptations.",
+                "deliverables": [
+                    "Android Studio project with clean package structure and Kotlin setup",
+                    "Declarative Compose screens with Material 3 typography and dark mode",
+                    "Custom reusable UI component kit (Buttons, TextFields, Cards)",
+                    "GitHub repository with project README and UI screenshots"
+                ],
+                "tech_stack": ["Kotlin", "Jetpack Compose", "Material 3", "Android Studio"],
+                "evaluation_focus": "Compose state management, UI fluidness, and Material 3 adherence"
+            },
+            {
+                "week": 2,
+                "key": "month1_week2",
+                "title": "Week 2: MVVM Architecture, Coroutines & Reactive StateFlow",
+                "objective": "Implement MVVM design pattern with ViewModel, Kotlin Coroutines for asynchronous work, and StateFlow for UI state binding.",
+                "deliverables": [
+                    "Layered MVVM architecture with Repository and ViewModel separation",
+                    "Asynchronous network / background handling using Kotlin Coroutines",
+                    "Reactive UI state management with StateFlow and Compose collectAsState",
+                    "Unit tests verifying ViewModel logic with mock dependencies"
+                ],
+                "tech_stack": ["Kotlin Coroutines", "StateFlow", "ViewModel", "JUnit"],
+                "evaluation_focus": "Architecture separation, coroutine lifecycle safety, and state reactivity"
+            },
+            {
+                "week": 3,
+                "key": "month1_week3",
+                "title": "Week 3: REST API Integration (Retrofit) & Local DB Caching (Room)",
+                "objective": "Integrate REST API calls with Retrofit + Moshi and create an offline-first caching layer with Room SQLite Database.",
+                "deliverables": [
+                    "Retrofit network service communicating with REST endpoints",
+                    "Room SQLite database with entities, DAOs, and database migrations",
+                    "Offline-first synchronization repository displaying cached data when offline",
+                    "Network error handling and user retry feedback states"
+                ],
+                "tech_stack": ["Retrofit", "Moshi", "Room Database", "SQLite"],
+                "evaluation_focus": "Offline-first capability, caching efficiency, and network error handling"
+            },
+            {
+                "week": 4,
+                "key": "month1_week4",
+                "title": "Week 4: Firebase Integration, Signed Release APK & Mini-Capstone",
+                "objective": "Add Firebase Authentication and notifications, configure ProGuard / R8 obfuscation, and generate a signed release APK with demo recording.",
+                "deliverables": [
+                    "Firebase Authentication integration with Google / Email sign-in",
+                    "Signed release APK file uploaded to GitHub Releases",
+                    "ProGuard / R8 code shrinking and obfuscation configuration",
+                    "Video walkthrough demonstrating the Android app running on a device / emulator"
+                ],
+                "tech_stack": ["Firebase Auth", "ProGuard / R8", "Android Gradle", "APK Signing"],
+                "evaluation_focus": "APK stability, release build configuration, and demo completeness"
             },
         ],
     },
@@ -355,55 +852,87 @@ DEFAULT_DOMAIN_TASKS = DOMAIN_TASKS["full-stack"]
 CURATED_PROJECT_LIST = [
     {
         "id": "saas-platform",
-        "title": "Enterprise Cloud SaaS Platform",
-        "description": "Multi-tenant business management dashboard with Role-Based Access Control (RBAC), analytics charts, audit logs, and automated email reports.",
-        "tech_stack": ["React/Next.js", "FastAPI / Node.js", "PostgreSQL", "Tailwind CSS"],
+        "title": "Enterprise Cloud SaaS Management Platform",
+        "description": "Multi-tenant business management portal with Role-Based Access Control (RBAC), analytical telemetry charts, audit logs, and automated notification triggers.",
+        "tech_stack": ["Next.js 15", "FastAPI / Node.js", "PostgreSQL", "Tailwind CSS", "Redis"],
     },
     {
         "id": "ai-rag-agent",
         "title": "AI Document Intelligence & Knowledge RAG Agent",
-        "description": "Enterprise AI assistant that ingests company PDF/Doc manuals, computes vector embeddings, and performs semantic Q&A with source citations.",
-        "tech_stack": ["Python / PyTorch", "LangChain / OpenAI", "Chroma / Pinecone", "FastAPI", "React"],
+        "description": "Enterprise AI assistant that ingests company PDF manuals, computes vector embeddings, and performs semantic search & Q&A with source citations.",
+        "tech_stack": ["Python", "PyTorch", "LangChain / LlamaIndex", "Chroma / Pinecone", "FastAPI", "React"],
     },
     {
         "id": "ecommerce-marketplace",
-        "title": "High-Throughput E-Commerce Marketplace",
-        "description": "Full-scale commerce platform with catalog search, filtering, shopping cart state, order management, and secure payment checkout integration.",
-        "tech_stack": ["Next.js 15", "PostgreSQL", "Razorpay / Stripe", "Redis Caching"],
+        "title": "High-Throughput E-Commerce Marketplace & Checkout",
+        "description": "Full-scale commerce platform with catalog search, multi-faceted filtering, shopping cart state, order tracking, and secure payment checkout integration.",
+        "tech_stack": ["Next.js 15", "PostgreSQL", "Razorpay / Stripe", "Redis Caching", "Tailwind CSS"],
+    },
+    {
+        "id": "devops-gitops-k8s",
+        "title": "Cloud-Native GitOps CI/CD & Kubernetes Observability",
+        "description": "Production Kubernetes deployment automated with ArgoCD / GitHub Actions, ingress routing, SSL termination, and Prometheus / Grafana monitoring dashboards.",
+        "tech_stack": ["Kubernetes", "Helm", "GitHub Actions", "Prometheus", "Grafana", "Docker"],
+    },
+    {
+        "id": "cyber-pentest-audit",
+        "title": "Enterprise Security Hardening & Penetration Testing Suite",
+        "description": "Comprehensive vulnerability assessment, automated penetration testing scripts, defensive firewall hardening, and executive remediation audit report.",
+        "tech_stack": ["Burp Suite", "Nmap", "Wireshark", "Python Security", "Linux Hardening"],
     },
     {
         "id": "collab-workspace",
-        "title": "Real-Time Collaborative Workspace Board",
-        "description": "Interactive team board with drag-and-drop task workflows, real-time WebSocket notifications, user mentions, and file attachments.",
-        "tech_stack": ["React", "WebSockets", "Node / FastAPI", "PostgreSQL"],
+        "title": "Real-Time Collaborative Workspace & Kanban System",
+        "description": "Interactive team board with drag-and-drop task workflows, real-time WebSocket notifications, user mentions, and cloud file attachments.",
+        "tech_stack": ["React", "WebSockets", "Node / FastAPI", "PostgreSQL", "Tailwind CSS"],
     },
 ]
 
 # ─── Helper Functions ─────────────────────────────────────────────────────────
 
-def get_tasks_for_domain(role_preference: Optional[str]):
-    if not role_preference:
-        return DOMAIN_TASKS["full-stack"]
+def get_tasks_for_domain(role_preference: Optional[str], duration: Optional[str] = "1 Month"):
+    """
+    Returns domain tasks tailored for the specific domain and duration.
+    For 6-month tracks, returns all 8 foundation weeks; for 1-month and 3-month tracks, returns weeks 1-4.
+    """
+    selected_domain = DOMAIN_TASKS["full-stack"]
     
-    r = role_preference.lower()
-    if "ai" in r or "machine" in r:
-        return DOMAIN_TASKS["ai-ml"]
-    elif "data science" in r or "analytics" in r:
-        return DOMAIN_TASKS["data-science"]
-    elif "python" in r or "backend" in r:
-        return DOMAIN_TASKS["python"]
-    elif "java" in r or "spring" in r:
-        return DOMAIN_TASKS["java"]
-    elif "android" in r or "app" in r or "kotlin" in r:
-        return DOMAIN_TASKS["android"]
-    elif "devops" in r or "cloud" in r or "docker" in r:
-        return DOMAIN_TASKS["devops"]
-    elif "cyber" in r or "security" in r or "ethical" in r:
-        return DOMAIN_TASKS["cyber-security"]
-    elif "design" in r or "ui" in r or "ux" in r or "frontend" in r:
-        return DOMAIN_TASKS["ui-ux"]
+    if role_preference:
+        r = role_preference.lower()
+        if "ai" in r or "machine" in r:
+            selected_domain = DOMAIN_TASKS["ai-ml"]
+        elif "data science" in r or "analytics" in r:
+            selected_domain = DOMAIN_TASKS["data-science"]
+        elif "python" in r:
+            selected_domain = DOMAIN_TASKS["python"]
+        elif "java" in r or "spring" in r:
+            selected_domain = DOMAIN_TASKS["java"]
+        elif "backend" in r:
+            selected_domain = DOMAIN_TASKS["backend"]
+        elif "frontend" in r:
+            selected_domain = DOMAIN_TASKS["frontend"]
+        elif "android" in r or "app" in r or "kotlin" in r:
+            selected_domain = DOMAIN_TASKS["android"]
+        elif "devops" in r or "cloud" in r or "docker" in r or "kubernetes" in r:
+            selected_domain = DOMAIN_TASKS["devops"]
+        elif "cyber" in r or "security" in r or "ethical" in r:
+            selected_domain = DOMAIN_TASKS["cyber-security"]
+        elif "design" in r or "ui" in r or "ux" in r:
+            selected_domain = DOMAIN_TASKS["ui-ux"]
+        else:
+            selected_domain = DOMAIN_TASKS["full-stack"]
+
+    # Filter weeks based on duration: 6 Months gets all weeks (up to 8), 1M & 3M get weeks 1-4
+    if duration == "6 Months":
+        weeks_list = selected_domain["weeks"]
     else:
-        return DOMAIN_TASKS["full-stack"]
+        weeks_list = [w for w in selected_domain["weeks"] if w["week"] <= 4]
+
+    return {
+        "title": selected_domain["title"],
+        "description": selected_domain.get("description", ""),
+        "weeks": weeks_list
+    }
 
 
 # ─── Pydantic Schemas ────────────────────────────────────────────────────────
@@ -496,8 +1025,8 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
     unlock_map = {u.task_key: u for u in unlock_requests}
 
     # Domain tasks
-    domain_pack = get_tasks_for_domain(app.role_preference)
     duration_str = app.duration or "1 Month"
+    domain_pack = get_tasks_for_domain(app.role_preference, duration_str)
 
     # Build weekly task items with time-lock calculation
     # Week 1: Unlocked on Day 0..7

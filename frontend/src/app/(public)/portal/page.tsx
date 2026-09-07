@@ -582,9 +582,9 @@ export default function StudentPortalPage() {
               {weeklyTasks.map((task) => (
                 <div
                   key={task.key}
-                  className="glass-card p-6 border border-ink-800 rounded-xl space-y-4 relative overflow-hidden flex flex-col justify-between"
+                  className="glass-card p-6 border border-ink-800 rounded-xl space-y-4 relative overflow-hidden flex flex-col justify-between hover:border-ink-700 transition"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
                         WEEK {task.week}
@@ -599,8 +599,19 @@ export default function StudentPortalPage() {
                         </span>
                       )}
                     </div>
-                    <h4 className="text-base font-bold text-white">{task.title}</h4>
+
+                    <h4 className="text-base font-bold text-white leading-snug">{task.title}</h4>
                     <p className="text-xs text-ink-300 leading-relaxed">{task.objective}</p>
+
+                    {task.tech_stack && task.tech_stack.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {task.tech_stack.map((t, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-mono bg-ink-900/90 border border-ink-800 text-brand-300">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-3 pt-3 border-t border-ink-800/80">
@@ -614,9 +625,15 @@ export default function StudentPortalPage() {
                       ))}
                     </ul>
 
+                    {task.evaluation_focus && (
+                      <div className="p-2.5 rounded-lg bg-ink-950 border border-ink-800/70 text-[11px] text-ink-400">
+                        <strong className="text-ink-200">Mentor Evaluation Focus:</strong> {task.evaluation_focus}
+                      </div>
+                    )}
+
                     {task.submission ? (
-                      <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs text-emerald-400 font-semibold flex items-center justify-between mt-2">
-                        <span>Submitted ({task.submission.status})</span>
+                      <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold flex items-center justify-between mt-2">
+                        <span>Submitted ({(task.submission.status || "submitted").toUpperCase()})</span>
                         <button
                           onClick={() => {
                             setActiveTab("submission");
@@ -624,7 +641,7 @@ export default function StudentPortalPage() {
                           }}
                           className="underline hover:text-emerald-300"
                         >
-                          View / Edit
+                          View / Update
                         </button>
                       </div>
                     ) : (
@@ -635,9 +652,9 @@ export default function StudentPortalPage() {
                             handleOpenSubmitModal(task);
                           }
                         }}
-                        className={`w-full py-2 text-xs font-bold rounded transition flex items-center justify-center gap-1.5 mt-2 ${
+                        className={`w-full py-2.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 mt-2 ${
                           task.is_unlocked
-                            ? "bg-ink-800 hover:bg-brand-600 text-white"
+                            ? "bg-brand-600 hover:bg-brand-500 text-white shadow-sm"
                             : "bg-ink-950 text-ink-500 cursor-not-allowed border border-ink-800"
                         }`}
                       >

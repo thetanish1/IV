@@ -163,6 +163,8 @@ export interface WeeklyTaskItem {
   title: string;
   objective: string;
   deliverables: string[];
+  tech_stack?: string[];
+  evaluation_focus?: string;
   required_days: number;
   is_unlocked: boolean;
   submission?: TaskSubmissionDetails | null;
