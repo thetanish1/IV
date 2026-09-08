@@ -37,9 +37,15 @@ def create_payment_order(req: CreateOrderRequest, db: Session = Depends(get_db))
     payment = Payment(
         registration_id=registration.id,
         order_id=order_id,
+        razorpay_order_id=order_id,
+        currency="INR",
         amount_inr=course.price_inr,
+        amount=float(course.price_inr or 0),
         status="created",
         student_email=req.student_email,
+        student_name=req.student_name,
+        student_phone=req.student_phone,
+        course_id=str(course.id),
         raw_response=order_data
     )
     db.add(payment)
