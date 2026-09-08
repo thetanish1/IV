@@ -419,19 +419,38 @@ async def send_branded_email(request: Request, db: Session = Depends(get_db)):
             except Exception as e:
                 logger.error(f"Failed to attach {att['filename']}: {e}")
 
-        # Send via SMTP
-        try:
-            if smtp_port == 465:
-                server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15)
-            else:
-                server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
-                server.starttls()
+        # Send via SMTP with multi-port failover
+        ports_to_try = [
+            (int(settings.SMTP_PORT or 587), False),
+            (465, True),
+            (2525, False),
+        ]
+        
+        sent_ok = False
+        last_error = "Connection failed"
+        msg_id = f"brevo-{uuid.uuid4()}"
 
-            server.login(smtp_user, smtp_password)
-            server.sendmail(from_email, [to_email], msg.as_string())
-            server.quit()
+        for p, is_ssl in ports_to_try:
+            try:
+                if is_ssl:
+                    server = smtplib.SMTP_SSL(smtp_host, p, timeout=30)
+                else:
+                    server = smtplib.SMTP(smtp_host, p, timeout=30)
+                    server.starttls()
 
-            msg_id = f"brevo-{uuid.uuid4()}"
+                server.login(smtp_user, smtp_password)
+                server.sendmail(from_email, [to_email], msg.as_string())
+                try:
+                    server.quit()
+                except Exception:
+                    pass
+                sent_ok = True
+                break
+            except Exception as err:
+                last_error = str(err)
+                logger.warning(f"Failed sending to {to_email} on port {p}: {err}")
+
+        if sent_ok:
             sent_record = SentEmail(
                 batch_id=batch_id,
                 to_email=to_email,
@@ -445,10 +464,9 @@ async def send_branded_email(request: Request, db: Session = Depends(get_db)):
             )
             db.add(sent_record)
             db.commit()
-
             results.append({"to": to_email, "success": True, "messageId": msg_id})
-        except Exception as err:
-            logger.error(f"Failed to send email to {to_email}: {err}")
+        else:
+            logger.error(f"Failed all ports sending to {to_email}: {last_error}")
             sent_record = SentEmail(
                 batch_id=batch_id,
                 to_email=to_email,
@@ -458,12 +476,11 @@ async def send_branded_email(request: Request, db: Session = Depends(get_db)):
                 brand_name=brand_name,
                 attachment_names=all_attachment_names,
                 status="failed",
-                error_message=str(err),
+                error_message=last_error,
             )
             db.add(sent_record)
             db.commit()
-
-            results.append({"to": to_email, "success": False, "error": str(err)})
+            results.append({"to": to_email, "success": False, "error": last_error})
 
     success_count = len([r for r in results if r["success"]])
     failure_count = len(results) - success_count

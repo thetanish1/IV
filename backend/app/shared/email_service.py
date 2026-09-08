@@ -45,31 +45,45 @@ def _send_smtp_email(to_email: str, subject: str, html_content: str, text_conten
         )
         return True
 
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"{from_name} <{from_email}>"
-        msg["To"] = to_email
+    ports_to_try = [
+        (int(settings.SMTP_PORT or 587), False),
+        (465, True),
+        (2525, False),
+    ]
 
-        if text_content:
-            msg.attach(MIMEText(text_content, "plain", "utf-8"))
-        msg.attach(MIMEText(html_content, "html", "utf-8"))
+    last_error = None
+    for port, is_ssl in ports_to_try:
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"{from_name} <{from_email}>"
+            msg["To"] = to_email
 
-        if smtp_port == 465:
-            server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15)
-        else:
-            server = smtplib.SMTP(smtp_host, smtp_port, timeout=15)
-            if settings.SMTP_TLS:
-                server.starttls()
+            if text_content:
+                msg.attach(MIMEText(text_content, "plain", "utf-8"))
+            msg.attach(MIMEText(html_content, "html", "utf-8"))
 
-        server.login(smtp_user, smtp_password)
-        server.sendmail(from_email, [to_email], msg.as_string())
-        server.quit()
-        logger.info(f"Successfully sent email to {to_email}: '{subject}' via Brevo SMTP")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send email to {to_email} via SMTP: {str(e)}")
-        return False
+            if is_ssl:
+                server = smtplib.SMTP_SSL(smtp_host, port, timeout=30)
+            else:
+                server = smtplib.SMTP(smtp_host, port, timeout=30)
+                if settings.SMTP_TLS:
+                    server.starttls()
+
+            server.login(smtp_user, smtp_password)
+            server.sendmail(from_email, [to_email], msg.as_string())
+            try:
+                server.quit()
+            except Exception:
+                pass
+            logger.info(f"Successfully sent email to {to_email}: '{subject}' via Brevo SMTP (port {port})")
+            return True
+        except Exception as e:
+            last_error = e
+            logger.warning(f"Failed to send email to {to_email} via port {port}: {e}")
+
+    logger.error(f"Failed to send email to {to_email} on all ports: {last_error}")
+    return False
 
 
 def _build_base_email_template(

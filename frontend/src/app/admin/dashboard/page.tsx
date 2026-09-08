@@ -327,7 +327,7 @@ export default function AdminDashboardPage() {
     router.push("/admin/login");
   };
 
-  // Navigation Groups modeled after Cloudflare Dashboard Hierarchy
+  // Navigation Groups modeled after Enterprise Dashboard Hierarchy
   const navGroups: NavGroup[] = useMemo(() => [
     {
       groupTitle: "Core & Platform",
@@ -530,7 +530,7 @@ export default function AdminDashboardPage() {
 
           {/* Topbar Right: Search trigger, Ask AI, Theme Toggle, Support, Profile */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Ask AI Button (Cloudflare Blue Style) */}
+            {/* Ask AI Button (Enterprise Blue Style) */}
             <button
               onClick={() => setActiveTab("doubts")}
               className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${
@@ -762,7 +762,7 @@ export default function AdminDashboardPage() {
           {/* ─── MAIN CONTENT CANVAS ──────────────────────────────────── */}
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto space-y-6">
-              {/* Cloudflare Header Card Banner */}
+              {/* Enterprise Header Card Banner */}
               <div className={`p-6 rounded-xl border transition-colors ${
                 theme === "dark"
                   ? "bg-[#18181B] border-[#27272A]"
@@ -812,13 +812,65 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Tab Content Display */}
+              {/* Tab Content Display / Component Simulation Loading Skeleton */}
               {loading ? (
-                <div className={`p-16 rounded-xl border text-center space-y-3 ${
-                  theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-[#E5E7EB] shadow-sm"
-                }`}>
-                  <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-600 rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-gray-400">Loading Cloudflare telemetry & security state...</p>
+                <div className="space-y-6 animate-pulse">
+                  {/* Top KPI Telemetry Skeleton Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div
+                        key={i}
+                        className={`p-5 rounded-xl border ${
+                          theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-gray-200 shadow-sm"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className={`h-3 w-16 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                          <div className={`h-4 w-4 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                        </div>
+                        <div className={`h-7 w-24 rounded mt-2 ${theme === "dark" ? "bg-white/15" : "bg-gray-300"}`} />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Filter Bar Skeleton */}
+                  <div
+                    className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 ${
+                      theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <div className={`h-9 w-full sm:w-80 rounded-lg ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <div className={`h-9 w-28 rounded-lg ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                      <div className={`h-9 w-28 rounded-lg ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                    </div>
+                  </div>
+
+                  {/* Table Skeleton */}
+                  <div
+                    className={`rounded-2xl border overflow-hidden ${
+                      theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <div className={`p-4 border-b ${theme === "dark" ? "border-[#27272A] bg-[#141417]" : "border-gray-200 bg-gray-50"}`}>
+                      <div className="grid grid-cols-5 gap-4">
+                        {[1, 2, 3, 4, 5].map((c) => (
+                          <div key={c} className={`h-3 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="divide-y divide-gray-100 dark:divide-[#27272A]">
+                      {[1, 2, 3, 4, 5, 6].map((row) => (
+                        <div key={row} className="p-4 grid grid-cols-5 gap-4 items-center">
+                          <div className={`h-4 w-32 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                          <div className={`h-4 w-24 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                          <div className={`h-4 w-28 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                          <div className={`h-6 w-20 rounded-full ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                          <div className={`h-4 w-16 rounded ml-auto ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <>
