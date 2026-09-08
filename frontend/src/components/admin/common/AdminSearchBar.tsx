@@ -14,34 +14,23 @@ export default function AdminSearchBar({
   onChange,
   placeholder = "Search...",
   className = "",
-  accentColor = "brand",
+  accentColor = "blue",
 }: AdminSearchBarProps) {
-  const borderFocus =
-    accentColor === "blue"
-      ? "focus:border-blue-500"
-      : accentColor === "pink"
-      ? "focus:border-pink-500"
-      : accentColor === "cyan"
-      ? "focus:border-cyan-500"
-      : accentColor === "emerald"
-      ? "focus:border-emerald-500"
-      : "focus:border-brand-500";
-
   return (
     <div className={`relative w-full sm:w-64 ${className}`}>
-      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-ink-400" />
+      <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-gray-400 dark:text-gray-500" />
       <input
         type="text"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full bg-ink-950 border border-ink-800 rounded-lg pl-9 pr-8 py-1.5 text-sm text-white placeholder-ink-500 focus:outline-none ${borderFocus} transition-colors`}
+        className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg pl-9 pr-8 py-1.5 text-xs text-gray-900 dark:text-[#EDEDED] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-colors"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange("")}
-          className="absolute right-2.5 top-2 text-ink-400 hover:text-white transition"
+          className="absolute right-2.5 top-2 text-gray-400 hover:text-gray-700 dark:hover:text-white transition"
           title="Clear search"
         >
           <X className="w-3.5 h-3.5" />

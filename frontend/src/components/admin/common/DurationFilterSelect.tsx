@@ -13,20 +13,11 @@ export default function DurationFilterSelect({
   accentColor = "default",
   className = "",
 }: DurationFilterSelectProps) {
-  const borderFocus =
-    accentColor === "blue"
-      ? "focus:border-blue-500"
-      : accentColor === "amber"
-      ? "focus:border-amber-500"
-      : accentColor === "pink"
-      ? "focus:border-pink-500"
-      : "focus:border-brand-500";
-
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none ${borderFocus} transition-colors cursor-pointer ${className}`}
+      className={`bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] text-gray-800 dark:text-[#EDEDED] rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors cursor-pointer shadow-sm ${className}`}
       title="Filter records by internship duration"
     >
       <option value="all">All Durations</option>

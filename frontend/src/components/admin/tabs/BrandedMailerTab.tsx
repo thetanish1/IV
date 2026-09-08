@@ -14,19 +14,13 @@ import {
   AlertCircle,
   RefreshCw,
   Eye,
-  FileText,
-  Award,
-  Filter,
   Search,
   CheckSquare,
   Square,
-  ChevronDown,
   Clock,
-  ShieldAlert,
 } from "lucide-react";
 import { ApplicantRecipientItem, SentEmailItem } from "@/types";
 import { apiRequest } from "@/lib/api-client";
-import { FadeIn } from "@/components/animations/FadeIn";
 
 const MAX_ATTACHMENTS = 9;
 const MAX_FILE_MB = 25;
@@ -467,15 +461,15 @@ export default function BrandedMailerTab() {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* ─── Top Header & Preset Templates ────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-ink-800 pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-gray-200 dark:border-[#27272A] pb-6">
         <div>
-          <div className="flex items-center gap-2 text-brand-400 text-xs font-bold uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-1">
             <Mail className="w-4 h-4" /> Official Communications Suite
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight">Branded Email Broadcasts & Mailer</h2>
-          <p className="text-xs text-ink-400 mt-1 max-w-2xl">
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Branded Email Broadcasts & Mailer</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-2xl">
             Compose and dispatch verified branded emails with selectable HTML text, underlined markdown links, dynamic
             CTA buttons, and optional individual Offer Letters / Certificates via Brevo SMTP.
           </p>
@@ -483,15 +477,15 @@ export default function BrandedMailerTab() {
 
         {/* Quick Presets */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-ink-400 mr-1 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Presets:
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 mr-1 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Presets:
           </span>
           {TEMPLATE_PRESETS.map((p) => (
             <button
               key={p.name}
               type="button"
               onClick={() => applyPreset(p)}
-              className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 border border-ink-800 hover:border-brand-500/50 text-ink-200 text-xs font-medium rounded-lg transition flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-gray-100 dark:bg-[#1F1F23] hover:bg-gray-200 dark:hover:bg-[#27272A] border border-gray-200 dark:border-[#2E2E33] hover:border-blue-500/50 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5"
             >
               {p.name}
             </button>
@@ -503,17 +497,17 @@ export default function BrandedMailerTab() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
         {/* LEFT COLUMN: COMPOSITION FORM (7 Cols) */}
         <div className="xl:col-span-7 space-y-6">
-          <form onSubmit={handleSend} className="space-y-6 bg-ink-950/70 border border-ink-800 p-6 sm:p-8 rounded-2xl">
+          <form onSubmit={handleSend} className="space-y-6 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-[#27272A] p-6 sm:p-8 rounded-2xl shadow-sm">
             {/* Recipients Header & Picker Trigger */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-ink-300 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-brand-400" /> Recipients
+                <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Recipients
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowApplicantPicker(true)}
-                  className="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1.5 py-1 px-2.5 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/30 rounded-lg transition"
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1.5 py-1 px-2.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 rounded-lg transition-colors"
                 >
                   <Users className="w-3.5 h-3.5" /> Pick From Applied Users ({applicants.length})
                 </button>
@@ -525,7 +519,7 @@ export default function BrandedMailerTab() {
                 value={recipientsRaw}
                 onChange={(e) => setRecipientsRaw(e.target.value)}
                 placeholder="student1@example.com, student2@gmail.com (comma or newline separated for bulk sends)"
-                className="w-full bg-ink-900 border border-ink-800 focus:border-brand-500 rounded-xl px-4 py-3 text-xs sm:text-sm text-ink-100 placeholder-ink-600 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono transition"
+                className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-3 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono transition"
               />
 
               {recipientList.length > 0 && (
@@ -533,10 +527,10 @@ export default function BrandedMailerTab() {
                   <span
                     className={`px-2.5 py-1 rounded-full font-bold flex items-center gap-1.5 ${
                       isBulk
-                        ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                        ? "bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/40"
                         : validRecipients.length === 1
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                        : "bg-ink-800 text-ink-400"
+                        ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40"
+                        : "bg-gray-100 dark:bg-white/5 text-gray-500"
                     }`}
                   >
                     {isBulk
@@ -546,7 +540,7 @@ export default function BrandedMailerTab() {
                       : "No valid recipients"}
                   </span>
                   {invalidRecipients.length > 0 && (
-                    <span className="px-2.5 py-1 bg-red-500/20 text-red-300 border border-red-500/40 rounded-full font-bold flex items-center gap-1">
+                    <span className="px-2.5 py-1 bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/40 rounded-full font-bold flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {invalidRecipients.length} invalid email(s)
                     </span>
@@ -557,45 +551,45 @@ export default function BrandedMailerTab() {
 
             {/* Personalized Offer Letter / Certificate Mode */}
             {validRecipients.length > 1 && (
-              <div className="bg-ink-900/60 border border-ink-800 rounded-xl p-4 space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer text-xs sm:text-sm font-semibold text-ink-200">
+              <div className="bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-xl p-4 space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200">
                   <input
                     type="checkbox"
                     checked={personalizeMode}
                     onChange={(e) => setPersonalizeMode(e.target.checked)}
-                    className="w-4 h-4 rounded border-ink-700 text-brand-500 focus:ring-brand-500 bg-ink-950"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500"
                   />
                   <span>Send each recipient their own Offer Letter / Completion Certificate</span>
                 </label>
 
                 {personalizeMode && (
                   <div className="space-y-3 pt-2">
-                    <p className="text-xs text-ink-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Upload each candidate's unique Offer Letter and/or Certificate. They will automatically be renamed to
                       include the candidate's name.
                     </p>
                     {personalFileError && (
-                      <p className="text-xs text-red-400 bg-red-500/10 p-2 rounded border border-red-500/30">
+                      <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 p-2 rounded border border-red-200 dark:border-red-500/30">
                         {personalFileError}
                       </p>
                     )}
-                    <div className="max-h-64 overflow-y-auto border border-ink-800 rounded-lg divide-y divide-ink-800 text-xs">
+                    <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-[#27272A] rounded-lg divide-y divide-gray-200 dark:divide-[#27272A] text-xs">
                       {validRecipients.map((email) => {
                         const row = personalFiles[email] || { name: "", offerLetter: null, certificate: null };
                         return (
-                          <div key={email} className="p-3 bg-ink-950/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div key={email} className="p-3 bg-white dark:bg-[#18181B] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div className="min-w-[140px] truncate">
-                              <div className="font-mono text-ink-200 truncate">{email}</div>
+                              <div className="font-mono text-gray-900 dark:text-gray-200 truncate">{email}</div>
                               <input
                                 type="text"
                                 placeholder="Student Full Name"
                                 value={row.name || ""}
                                 onChange={(e) => updatePersonalRow(email, "name", e.target.value)}
-                                className="mt-1 w-full bg-ink-900 border border-ink-800 rounded px-2 py-1 text-xs text-white"
+                                className="mt-1 w-full bg-gray-50 dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded px-2 py-1 text-xs text-gray-900 dark:text-white"
                               />
                             </div>
                             <div className="flex items-center gap-2 w-full sm:w-auto">
-                              <label className="flex-1 sm:flex-initial px-2.5 py-1.5 bg-ink-900 hover:bg-ink-800 border border-ink-800 hover:border-brand-500/50 rounded cursor-pointer text-center text-ink-300 truncate max-w-[130px]">
+                              <label className="flex-1 sm:flex-initial px-2.5 py-1.5 bg-gray-100 dark:bg-[#1F1F23] hover:bg-gray-200 dark:hover:bg-[#27272A] border border-gray-200 dark:border-[#2E2E33] rounded cursor-pointer text-center text-gray-700 dark:text-gray-300 truncate max-w-[130px]">
                                 <span className="truncate">{row.offerLetter ? row.offerLetter.name : "📎 Offer Letter"}</span>
                                 <input
                                   type="file"
@@ -604,7 +598,7 @@ export default function BrandedMailerTab() {
                                   onChange={(e) => updatePersonalRow(email, "offerLetter", e.target.files?.[0] || null)}
                                 />
                               </label>
-                              <label className="flex-1 sm:flex-initial px-2.5 py-1.5 bg-ink-900 hover:bg-ink-800 border border-ink-800 hover:border-brand-500/50 rounded cursor-pointer text-center text-ink-300 truncate max-w-[130px]">
+                              <label className="flex-1 sm:flex-initial px-2.5 py-1.5 bg-gray-100 dark:bg-[#1F1F23] hover:bg-gray-200 dark:hover:bg-[#27272A] border border-gray-200 dark:border-[#2E2E33] rounded cursor-pointer text-center text-gray-700 dark:text-gray-300 truncate max-w-[130px]">
                                 <span className="truncate">{row.certificate ? row.certificate.name : "🏆 Certificate"}</span>
                                 <input
                                   type="file"
@@ -625,49 +619,49 @@ export default function BrandedMailerTab() {
 
             {/* Subject */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-ink-300">Subject Line</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Subject Line</label>
               <input
                 type="text"
                 required
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g. Action Required: Internship Milestone Deliverables"
-                className="w-full bg-ink-900 border border-ink-800 focus:border-brand-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink-100 placeholder-ink-600 focus:outline-none focus:ring-1 focus:ring-brand-500 transition"
+                className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
               />
             </div>
 
             {/* Brand Name & Accent Color */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-ink-300">Brand Name</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Brand Name</label>
                 <input
                   type="text"
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
-                  className="w-full bg-ink-900 border border-ink-800 focus:border-brand-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink-100 placeholder-ink-600 focus:outline-none focus:ring-1 focus:ring-brand-500 transition"
+                  className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-ink-300 flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center justify-between">
                   <span>Accent Color</span>
-                  <span className="font-mono text-[10px] text-ink-400">{accentColor}</span>
+                  <span className="font-mono text-[10px] text-gray-400">{accentColor}</span>
                 </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
                     value={accentColor}
                     onChange={(e) => setAccentColor(e.target.value)}
-                    className="w-10 h-10 rounded-lg cursor-pointer bg-ink-900 border border-ink-800 p-1"
+                    className="w-10 h-10 rounded-lg cursor-pointer bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] p-1"
                   />
                   <div className="flex items-center gap-1.5">
-                    {["#2563eb", "#10b981", "#8b5cf6", "#f59e0b", "#e11d48"].map((c) => (
+                    {["#0051C3", "#2563eb", "#10b981", "#8b5cf6", "#f59e0b", "#e11d48"].map((c) => (
                       <button
                         key={c}
                         type="button"
                         onClick={() => setAccentColor(c)}
                         style={{ backgroundColor: c }}
-                        className={`w-6 h-6 rounded-full border ${accentColor === c ? "border-white ring-2 ring-white/30" : "border-transparent"}`}
+                        className={`w-6 h-6 rounded-full border ${accentColor === c ? "border-blue-600 ring-2 ring-blue-500/30" : "border-transparent"}`}
                       />
                     ))}
                   </div>
@@ -678,33 +672,33 @@ export default function BrandedMailerTab() {
             {/* Heading & Greet Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-ink-300">Heading (Optional)</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Heading (Optional)</label>
                 <input
                   type="text"
                   value={heading}
                   onChange={(e) => setHeading(e.target.value)}
                   placeholder="e.g. Program Onboarding & Task Desk"
-                  className="w-full bg-ink-900 border border-ink-800 focus:border-brand-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink-100 placeholder-ink-600 focus:outline-none focus:ring-1 focus:ring-brand-500 transition"
+                  className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-ink-300">Greeting Name Fallback</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">Greeting Name Fallback</label>
                 <input
                   type="text"
                   value={greetingName}
                   onChange={(e) => setGreetingName(e.target.value)}
                   placeholder="e.g. Tanish Dewase (Dear {name},)"
-                  className="w-full bg-ink-900 border border-ink-800 focus:border-brand-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink-100 placeholder-ink-600 focus:outline-none focus:ring-1 focus:ring-brand-500 transition"
+                  className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
                 />
               </div>
             </div>
 
             {/* Message Editor */}
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-ink-300 flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center justify-between">
                 <span>Message Body (Markdown Links Supported)</span>
-                <span className="text-[10px] text-brand-400 font-mono">[Link Text](https://url)</span>
+                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-mono">[Link Text](https://url)</span>
               </label>
               <textarea
                 ref={messageRef}
@@ -713,13 +707,13 @@ export default function BrandedMailerTab() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Write your email body. Use the Insert Link tool below to create clickable anchor links..."
-                className="w-full bg-ink-900 border border-ink-800 focus:border-brand-500 rounded-xl px-4 py-3 text-xs sm:text-sm text-ink-100 placeholder-ink-600 focus:outline-none focus:ring-1 focus:ring-brand-500 leading-relaxed font-sans transition"
+                className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-3 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed font-sans transition"
               />
 
               {/* Link Inserter Tool */}
-              <div className="bg-ink-900/80 border border-ink-800 rounded-xl p-3 space-y-2">
-                <div className="text-[11px] font-bold text-ink-300 flex items-center gap-1.5">
-                  <LinkIcon className="w-3.5 h-3.5 text-brand-400" /> Insert Underlined Hyperlink Tool
+              <div className="bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-xl p-3 space-y-2">
+                <div className="text-[11px] font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <LinkIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Insert Underlined Hyperlink Tool
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
                   <input
@@ -727,20 +721,20 @@ export default function BrandedMailerTab() {
                     placeholder="Link text (e.g. Submission Form)"
                     value={linkLabel}
                     onChange={(e) => setLinkLabel(e.target.value)}
-                    className="sm:col-span-5 bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-xs text-ink-100"
+                    className="sm:col-span-5 bg-white dark:bg-[#18181B] border border-gray-300 dark:border-[#27272A] rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white"
                   />
                   <input
                     type="url"
                     placeholder="https://iv-theta.vercel.app/portal"
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
-                    className="sm:col-span-5 bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-xs text-ink-100 font-mono"
+                    className="sm:col-span-5 bg-white dark:bg-[#18181B] border border-gray-300 dark:border-[#27272A] rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white font-mono"
                   />
                   <button
                     type="button"
                     disabled={!linkLabel.trim() || !isValidUrl(linkUrl.trim())}
                     onClick={insertLink}
-                    className="sm:col-span-2 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition"
+                    className="sm:col-span-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs rounded-lg transition-colors"
                   >
                     Insert Link
                   </button>
@@ -749,9 +743,9 @@ export default function BrandedMailerTab() {
             </div>
 
             {/* CTA Button Box */}
-            <div className="bg-ink-900/60 border border-ink-800 rounded-xl p-4 space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-ink-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-brand-400" /> Call-To-Action Button (Optional)
+            <div className="bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-xl p-4 space-y-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Call-To-Action Button (Optional)
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
@@ -759,27 +753,27 @@ export default function BrandedMailerTab() {
                   placeholder="Button Label (e.g. Open Portal)"
                   value={ctaText}
                   onChange={(e) => setCtaText(e.target.value)}
-                  className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-2 text-xs text-ink-100"
+                  className="bg-white dark:bg-[#18181B] border border-gray-300 dark:border-[#27272A] rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white"
                 />
                 <input
                   type="url"
                   placeholder="https://iv-theta.vercel.app/portal"
                   value={ctaUrl}
                   onChange={(e) => setCtaUrl(e.target.value)}
-                  className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-2 text-xs text-ink-100 font-mono"
+                  className="bg-white dark:bg-[#18181B] border border-gray-300 dark:border-[#27272A] rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white font-mono"
                 />
               </div>
             </div>
 
             {/* Shared Attachments */}
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-ink-300 flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center justify-between">
                 <span>Shared Attachments (Sent to all recipients)</span>
-                <span className="text-[10px] text-ink-400">Up to 9 files, 25MB each</span>
+                <span className="text-[10px] text-gray-400">Up to 9 files, 25MB each</span>
               </label>
               <div className="flex items-center gap-3">
-                <label className="px-4 py-2.5 bg-ink-900 hover:bg-ink-800 border border-ink-800 hover:border-brand-500/50 rounded-xl cursor-pointer text-xs font-bold text-ink-200 flex items-center gap-2 transition">
-                  <Paperclip className="w-4 h-4 text-brand-400" /> Attach Files
+                <label className="px-4 py-2.5 bg-gray-100 dark:bg-[#1F1F23] hover:bg-gray-200 dark:hover:bg-[#27272A] border border-gray-200 dark:border-[#2E2E33] rounded-xl cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2 transition-colors">
+                  <Paperclip className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Attach Files
                   <input
                     type="file"
                     multiple
@@ -789,26 +783,26 @@ export default function BrandedMailerTab() {
                   />
                 </label>
                 {attachments.length > 0 && (
-                  <span className="text-xs text-ink-400">{attachments.length} file(s) attached</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{attachments.length} file(s) attached</span>
                 )}
               </div>
 
-              {attachError && <p className="text-xs text-red-400">{attachError}</p>}
+              {attachError && <p className="text-xs text-red-600 dark:text-red-400">{attachError}</p>}
 
               {attachments.length > 0 && (
                 <ul className="space-y-1.5 pt-1">
                   {attachments.map((file, idx) => (
                     <li
                       key={`${file.name}-${idx}`}
-                      className="flex items-center justify-between gap-2 p-2 bg-ink-900 border border-ink-800 rounded-lg text-xs"
+                      className="flex items-center justify-between gap-2 p-2 bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-lg text-xs"
                     >
-                      <span className="truncate font-medium text-ink-200">📎 {file.name}</span>
+                      <span className="truncate font-medium text-gray-700 dark:text-gray-200">📎 {file.name}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] text-ink-500 font-mono">{formatBytes(file.size)}</span>
+                        <span className="text-[10px] text-gray-400 font-mono">{formatBytes(file.size)}</span>
                         <button
                           type="button"
                           onClick={() => removeAttachment(idx)}
-                          className="text-red-400 hover:text-red-300 p-1"
+                          className="text-red-600 dark:text-red-400 hover:opacity-80 p-1"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -824,7 +818,7 @@ export default function BrandedMailerTab() {
               <button
                 type="submit"
                 disabled={sending || validRecipients.length === 0}
-                className="w-full py-4 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition shadow-[0_0_25px_rgba(37,99,235,0.4)]"
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-colors shadow-md"
               >
                 {sending ? (
                   <>
@@ -850,14 +844,14 @@ export default function BrandedMailerTab() {
               <div
                 className={`p-4 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-3 border ${
                   statusMsg.type === "success"
-                    ? "bg-emerald-950/60 border-emerald-500/40 text-emerald-300"
-                    : "bg-red-950/60 border-red-500/40 text-red-300"
+                    ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                    : "bg-red-50 dark:bg-red-950/60 border-red-200 dark:border-red-500/40 text-red-700 dark:text-red-300"
                 }`}
               >
                 {statusMsg.type === "success" ? (
-                  <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+                  <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                 ) : (
-                  <XCircle className="w-5 h-5 shrink-0 text-red-400" />
+                  <XCircle className="w-5 h-5 shrink-0 text-red-600 dark:text-red-400" />
                 )}
                 <span>{statusMsg.text}</span>
               </div>
@@ -865,14 +859,14 @@ export default function BrandedMailerTab() {
 
             {/* Detailed per-recipient results */}
             {sendResults && sendResults.length > 1 && (
-              <div className="p-4 bg-ink-900/80 border border-ink-800 rounded-xl space-y-2">
-                <div className="text-xs font-bold text-ink-300">Dispatch Report:</div>
+              <div className="p-4 bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-xl space-y-2">
+                <div className="text-xs font-bold text-gray-700 dark:text-gray-300">Dispatch Report:</div>
                 <div className="max-h-40 overflow-y-auto space-y-1 text-xs">
                   {sendResults.map((r, i) => (
                     <div
                       key={`${r.to}-${i}`}
                       className={`flex items-center justify-between p-1.5 rounded ${
-                        r.success ? "text-emerald-300 bg-emerald-500/10" : "text-red-300 bg-red-500/10"
+                        r.success ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10" : "text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10"
                       }`}
                     >
                       <span className="font-mono truncate">{r.to}</span>
@@ -887,15 +881,15 @@ export default function BrandedMailerTab() {
 
         {/* RIGHT COLUMN: LIVE REALISTIC EMAIL PREVIEW (5 Cols) */}
         <div className="xl:col-span-5 space-y-4 sticky top-24">
-          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-ink-400">
-            <span className="flex items-center gap-1.5 text-white">
-              <Eye className="w-4 h-4 text-brand-400" /> Live Rendered Email Preview
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <span className="flex items-center gap-1.5 text-gray-900 dark:text-white">
+              <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Live Rendered Email Preview
             </span>
-            <span className="text-[10px] text-ink-500 font-mono">HTML Real-Time</span>
+            <span className="text-[10px] text-gray-400 font-mono">HTML Real-Time</span>
           </div>
 
           {/* Email Preview Frame */}
-          <div className="bg-white text-slate-800 rounded-2xl overflow-hidden border border-ink-800 shadow-2xl">
+          <div className="bg-white text-slate-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-[#27272A] shadow-xl">
             {/* Header Bar */}
             <div className="bg-[#111827] px-6 py-5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -943,8 +937,8 @@ export default function BrandedMailerTab() {
           </div>
 
           {attachments.length > 0 && (
-            <div className="p-3 bg-ink-900 border border-ink-800 rounded-xl text-xs text-ink-300">
-              <strong className="text-white">Attachments ({attachments.length}):</strong>{" "}
+            <div className="p-3 bg-white dark:bg-[#18181B] border border-gray-200 dark:border-[#27272A] rounded-xl text-xs text-gray-700 dark:text-gray-300">
+              <strong className="text-gray-900 dark:text-white">Attachments ({attachments.length}):</strong>{" "}
               {attachments.map((f) => f.name).join(", ")}
             </div>
           )}
@@ -953,37 +947,37 @@ export default function BrandedMailerTab() {
 
       {/* ─── Applicant Directory Picker Modal / Drawer ────────────────── */}
       {showApplicantPicker && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-ink-950 border border-ink-800 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#18181B] border border-gray-200 dark:border-[#27272A] rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
             {/* Modal Header */}
-            <div className="p-6 border-b border-ink-800 flex items-center justify-between">
+            <div className="p-6 border-b border-gray-200 dark:border-[#27272A] flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-brand-400" /> Applied Candidates Directory
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Applied Candidates Directory
                 </h3>
-                <p className="text-xs text-ink-400 mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Select applicants from your database to immediately populate the Mailer recipient list.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowApplicantPicker(false)}
-                className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 hover:bg-ink-800 text-ink-300 flex items-center justify-center"
+                className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-300 flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
             </div>
 
             {/* Filter & Search Bar */}
-            <div className="p-4 bg-ink-900/60 border-b border-ink-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="p-4 bg-gray-50 dark:bg-[#141417] border-b border-gray-200 dark:border-[#27272A] flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="relative w-full sm:w-64">
-                <Search className="w-4 h-4 text-ink-500 absolute left-3 top-2.5" />
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
                 <input
                   type="text"
                   placeholder="Search name, email, track..."
                   value={applicantSearch}
                   onChange={(e) => setApplicantSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-ink-950 border border-ink-800 rounded-lg text-xs text-white"
+                  className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg text-xs text-gray-900 dark:text-white"
                 />
               </div>
 
@@ -993,10 +987,10 @@ export default function BrandedMailerTab() {
                     key={f}
                     type="button"
                     onClick={() => setApplicantFilter(f)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
                       applicantFilter === f
-                        ? "bg-brand-600 text-white shadow-sm"
-                        : "bg-ink-950 border border-ink-800 text-ink-300 hover:bg-ink-800"
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "bg-white dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#27272A]"
                     }`}
                   >
                     {f}
@@ -1006,11 +1000,11 @@ export default function BrandedMailerTab() {
             </div>
 
             {/* Candidates Table List */}
-            <div className="flex-1 overflow-y-auto p-4 divide-y divide-ink-800">
+            <div className="flex-1 overflow-y-auto p-4 divide-y divide-gray-100 dark:divide-[#27272A]">
               {loadingApplicants ? (
-                <div className="p-8 text-center text-xs text-ink-400">Loading applicants from database...</div>
+                <div className="p-8 text-center text-xs text-gray-400">Loading applicants from database...</div>
               ) : filteredApplicants.length === 0 ? (
-                <div className="p-8 text-center text-xs text-ink-500">No applicants found matching your filter.</div>
+                <div className="p-8 text-center text-xs text-gray-400">No applicants found matching your filter.</div>
               ) : (
                 filteredApplicants.map((a) => {
                   const isChecked = selectedApplicants.has(a.email);
@@ -1018,29 +1012,29 @@ export default function BrandedMailerTab() {
                     <div
                       key={a.email}
                       onClick={() => toggleSelectApplicant(a.email)}
-                      className={`py-3 px-3 flex items-center justify-between gap-3 rounded-lg cursor-pointer transition ${
-                        isChecked ? "bg-brand-500/15 border border-brand-500/30" : "hover:bg-ink-900/60"
+                      className={`py-3 px-3 flex items-center justify-between gap-3 rounded-lg cursor-pointer transition-colors ${
+                        isChecked ? "bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30" : "hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="text-brand-400">
-                          {isChecked ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-ink-600" />}
+                        <div className="text-blue-600 dark:text-blue-400">
+                          {isChecked ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-gray-400" />}
                         </div>
                         <div className="min-w-0">
-                          <div className="text-xs font-bold text-white truncate">{a.name}</div>
-                          <div className="text-[11px] font-mono text-ink-400 truncate">{a.email}</div>
+                          <div className="text-xs font-bold text-gray-900 dark:text-white truncate">{a.name}</div>
+                          <div className="text-[11px] font-mono text-gray-500 dark:text-gray-400 truncate">{a.email}</div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0 text-xs">
-                        <span className="px-2 py-0.5 bg-ink-900 text-ink-300 border border-ink-800 rounded font-medium text-[10px]">
+                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-[#1F1F23] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#2E2E33] rounded font-medium text-[10px]">
                           {a.role_preference}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                             (a.status || "").toLowerCase() === "accepted"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                              : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                              ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40"
+                              : "bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/40"
                           }`}
                         >
                           {a.status}
@@ -1053,24 +1047,24 @@ export default function BrandedMailerTab() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-ink-800 bg-ink-900/60 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xs text-ink-400">
-                <button type="button" onClick={handleSelectAllFiltered} className="hover:text-white underline">
+            <div className="p-4 border-t border-gray-200 dark:border-[#27272A] bg-gray-50 dark:bg-[#141417] flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <button type="button" onClick={handleSelectAllFiltered} className="hover:text-gray-900 dark:hover:text-white underline">
                   Select All ({filteredApplicants.length})
                 </button>
                 •
-                <button type="button" onClick={handleDeselectAll} className="hover:text-white underline">
+                <button type="button" onClick={handleDeselectAll} className="hover:text-gray-900 dark:hover:text-white underline">
                   Clear
                 </button>
                 •
-                <span className="font-bold text-brand-400">{selectedApplicants.size} selected</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{selectedApplicants.size} selected</span>
               </div>
 
               <button
                 type="button"
                 onClick={handleAddSelectedToRecipients}
                 disabled={selectedApplicants.size === 0}
-                className="px-5 py-2 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition flex items-center gap-2"
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-colors flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" /> Add Selected to Recipients ({selectedApplicants.size})
               </button>
@@ -1080,29 +1074,29 @@ export default function BrandedMailerTab() {
       )}
 
       {/* ─── Send History Audit Log Table ─────────────────────────────── */}
-      <div className="space-y-4 pt-6 border-t border-ink-800">
+      <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-[#27272A]">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-brand-400" /> Send History & Audit Trail
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Send History & Audit Trail
             </h3>
-            <p className="text-xs text-ink-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Persistent record of all single and bulk broadcasts delivered via Brevo SMTP.
             </p>
           </div>
           <button
             type="button"
             onClick={fetchHistory}
-            className="p-2 bg-ink-900 hover:bg-ink-800 border border-ink-800 text-ink-300 rounded-lg text-xs font-medium flex items-center gap-1.5 transition"
+            className="p-2 bg-gray-100 dark:bg-[#1F1F23] hover:bg-gray-200 dark:hover:bg-[#27272A] border border-gray-200 dark:border-[#2E2E33] text-gray-700 dark:text-gray-300 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingHistory ? "animate-spin" : ""}`} /> Refresh Log
           </button>
         </div>
 
-        <div className="bg-ink-950/70 border border-ink-800 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-white dark:bg-[#18181B] border border-gray-200 dark:border-[#27272A] rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-ink-900/80 text-ink-400 font-bold uppercase tracking-wider border-b border-ink-800">
+              <thead className="bg-gray-50 dark:bg-[#1F1F23] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider border-b border-gray-200 dark:border-[#27272A]">
                 <tr>
                   <th className="px-5 py-3.5">Recipient</th>
                   <th className="px-5 py-3.5">Subject</th>
@@ -1112,38 +1106,38 @@ export default function BrandedMailerTab() {
                   <th className="px-5 py-3.5">Dispatched At</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-800/60 font-sans">
+              <tbody className="divide-y divide-gray-100 dark:divide-[#27272A] font-sans">
                 {history.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-8 text-center text-ink-500">
+                    <td colSpan={6} className="px-5 py-8 text-center text-gray-400">
                       No broadcast emails sent yet.
                     </td>
                   </tr>
                 ) : (
                   history.map((h) => (
-                    <tr key={h.id} className="hover:bg-ink-900/40 transition">
-                      <td className="px-5 py-3 font-mono text-ink-200">
+                    <tr key={h.id} className="hover:bg-gray-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-3 font-mono text-gray-900 dark:text-gray-200">
                         {h.to}
-                        {h.recipient_name && <div className="text-[10px] text-ink-500 font-sans">{h.recipient_name}</div>}
+                        {h.recipient_name && <div className="text-[10px] text-gray-500 font-sans">{h.recipient_name}</div>}
                       </td>
-                      <td className="px-5 py-3 text-white font-medium max-w-xs truncate">{h.subject}</td>
+                      <td className="px-5 py-3 text-gray-900 dark:text-white font-medium max-w-xs truncate">{h.subject}</td>
                       <td className="px-5 py-3">
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
                             h.status === "success"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                              : "bg-red-500/20 text-red-300 border border-red-500/40"
+                              ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40"
+                              : "bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/40"
                           }`}
                         >
                           {h.status === "success" ? "✓ Sent" : "✗ Failed"}
                         </span>
                       </td>
                       <td className="px-5 py-3">
-                        <span className="px-2 py-0.5 bg-ink-900 text-ink-400 border border-ink-800 rounded text-[10px] font-mono">
+                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-[#1F1F23] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2E2E33] rounded text-[10px] font-mono">
                           {h.batch_id ? "Bulk Batch" : "Single"}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-ink-400 text-[11px]">
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400 text-[11px]">
                         {(h.attachment_names || []).length > 0 ? (
                           <span className="truncate max-w-[160px] inline-block font-mono">
                             📎 {(h.attachment_names || []).join(", ")}
@@ -1152,7 +1146,7 @@ export default function BrandedMailerTab() {
                           "—"
                         )}
                       </td>
-                      <td className="px-5 py-3 text-ink-500 text-[11px] font-mono">
+                      <td className="px-5 py-3 text-gray-500 dark:text-gray-400 text-[11px] font-mono">
                         {h.created_at ? new Date(h.created_at).toLocaleString() : "—"}
                       </td>
                     </tr>

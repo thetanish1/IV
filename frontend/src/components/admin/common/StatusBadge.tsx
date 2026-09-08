@@ -14,14 +14,14 @@ export default function StatusBadge({ status, type = "generic", className = "" }
   if (type === "iam" || normalized === "active" || normalized === "revoked") {
     if (normalized === "active" || status === "true" || normalized === "granted") {
       return (
-        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ${className}`}>
-          <CheckCircle className="w-3 h-3 text-emerald-400" /> Active / Granted
+        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 ${className}`}>
+          <CheckCircle className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Active / Granted
         </span>
       );
     }
     return (
-      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 ${className}`}>
-        <XCircle className="w-3 h-3 text-red-400" /> Access Revoked
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 ${className}`}>
+        <XCircle className="w-3 h-3 text-red-600 dark:text-red-400" /> Access Revoked
       </span>
     );
   }
@@ -30,21 +30,21 @@ export default function StatusBadge({ status, type = "generic", className = "" }
   if (type === "unlock") {
     if (normalized === "approved") {
       return (
-        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ${className}`}>
-          <Unlock className="w-3 h-3 text-emerald-400" /> Form Active (ON)
+        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 ${className}`}>
+          <Unlock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Form Active (ON)
         </span>
       );
     }
     if (normalized === "rejected") {
       return (
-        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/30 ${className}`}>
-          <Lock className="w-3 h-3 text-red-400" /> Form Locked (OFF)
+        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30 ${className}`}>
+          <Lock className="w-3 h-3 text-red-600 dark:text-red-400" /> Form Locked (OFF)
         </span>
       );
     }
     return (
-      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 animate-pulse ${className}`}>
-        <Clock className="w-3 h-3 text-amber-400" /> Pending Review
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30 animate-pulse ${className}`}>
+        <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" /> Pending Review
       </span>
     );
   }
@@ -53,13 +53,13 @@ export default function StatusBadge({ status, type = "generic", className = "" }
   if (type === "doubt") {
     if (normalized === "answered" || normalized === "resolved") {
       return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ${className}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 ${className}`}>
           ✓ Resolved
         </span>
       );
     }
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-pink-500/20 text-pink-300 border border-pink-500/40 animate-pulse ${className}`}>
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-pink-50 text-pink-700 border border-pink-200 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40 animate-pulse ${className}`}>
         ● Open Query
       </span>
     );
@@ -69,20 +69,20 @@ export default function StatusBadge({ status, type = "generic", className = "" }
   if (type === "contact") {
     if (normalized === "replied") {
       return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 ${className}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 ${className}`}>
           ✓ Replied
         </span>
       );
     }
     if (normalized === "new") {
       return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse ${className}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40 animate-pulse ${className}`}>
           ● New Inquiry
         </span>
       );
     }
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 ${className}`}>
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-200 dark:bg-zinc-800 dark:text-gray-300 dark:border-zinc-700 ${className}`}>
         Read
       </span>
     );
@@ -91,8 +91,8 @@ export default function StatusBadge({ status, type = "generic", className = "" }
   // Standard Application & Submission statuses
   if (normalized === "accepted" || normalized === "approved" || normalized === "captured" || normalized === "success") {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 ${className}`}>
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-xs font-bold ${className}`}>
+        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
         {normalized === "accepted" ? "Enrolled & Accepted" : normalized === "approved" ? "Approved" : "Successful"}
       </span>
     );
@@ -100,8 +100,8 @@ export default function StatusBadge({ status, type = "generic", className = "" }
 
   if (normalized === "rejected" || normalized === "failed") {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/20 ${className}`}>
-        <X className="w-3.5 h-3.5 text-red-400" />
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20 text-xs font-bold ${className}`}>
+        <X className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
         {normalized === "rejected" ? "Rejected" : "Failed"}
       </span>
     );
@@ -109,15 +109,15 @@ export default function StatusBadge({ status, type = "generic", className = "" }
 
   if (normalized === "needs_revision" || normalized === "changes_requested") {
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold border border-amber-500/30 ${className}`}>
-        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Needs Revision
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30 text-xs font-bold ${className}`}>
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Needs Revision
       </span>
     );
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20 ${className}`}>
-      <Clock className="w-3.5 h-3.5 text-yellow-400 animate-pulse" />
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20 text-xs font-bold ${className}`}>
+      <Clock className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400 animate-pulse" />
       {normalized === "submitted" ? "Under Review" : "Pending"}
     </span>
   );

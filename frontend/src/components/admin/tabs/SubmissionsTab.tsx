@@ -78,13 +78,13 @@ export default function SubmissionsTab() {
 
   return (
     <FadeIn delay={0.2} direction="up">
-      <div className="space-y-4 pt-2">
+      <div className="space-y-4 pt-1">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <FolderGit2 className="w-5 h-5 text-blue-400" /> Student Task & Project Submissions
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FolderGit2 className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Student Task & Project Submissions
             </h2>
-            <p className="text-xs text-ink-400 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               Review weekly deliverables, GitHub repositories, live deployments, and assign mentor feedback.
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function SubmissionsTab() {
             <select
               value={subStatusFilter}
               onChange={(e) => setSubStatusFilter(e.target.value)}
-              className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+              className="bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg px-3 py-1.5 text-xs text-gray-800 dark:text-[#EDEDED] focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-colors cursor-pointer font-medium"
             >
               <option value="all">All Statuses</option>
               <option value="submitted">Pending Review</option>
@@ -114,7 +114,7 @@ export default function SubmissionsTab() {
             <button
               type="button"
               onClick={fetchSubmissions}
-              className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+              className="p-2 bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A30] transition shadow-sm"
               title="Refresh Submissions"
             >
               <RefreshCw className="w-4 h-4" />
@@ -122,53 +122,53 @@ export default function SubmissionsTab() {
           </div>
         </div>
 
-        <div className="border border-ink-800 rounded-xl overflow-hidden bg-ink-950/30">
+        <div className="border border-gray-200 dark:border-[#27272A] rounded-xl overflow-hidden bg-white dark:bg-[#18181B] shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-ink-900/50 text-ink-400 font-medium border-b border-ink-800 text-xs uppercase tracking-wider">
+              <thead className="bg-gray-50 dark:bg-[#151518] text-gray-700 dark:text-gray-300 font-semibold border-b border-gray-200 dark:border-[#27272A] text-xs uppercase tracking-wider">
                 <tr>
-                  <th className="px-5 py-3.5 font-medium">Student</th>
-                  <th className="px-5 py-3.5 font-medium">Domain & Track</th>
-                  <th className="px-5 py-3.5 font-medium">Task / Project</th>
-                  <th className="px-5 py-3.5 font-medium">Work Artifacts</th>
-                  <th className="px-5 py-3.5 font-medium">Status</th>
-                  <th className="px-5 py-3.5 font-medium">Submitted</th>
-                  <th className="px-5 py-3.5 font-medium text-right">Actions</th>
+                  <th className="px-5 py-3.5 font-semibold">Student</th>
+                  <th className="px-5 py-3.5 font-semibold">Domain & Track</th>
+                  <th className="px-5 py-3.5 font-semibold">Task / Project</th>
+                  <th className="px-5 py-3.5 font-semibold">Work Artifacts</th>
+                  <th className="px-5 py-3.5 font-semibold">Status</th>
+                  <th className="px-5 py-3.5 font-semibold">Submitted</th>
+                  <th className="px-5 py-3.5 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-800/50">
+              <tbody className="divide-y divide-gray-100 dark:divide-[#27272A]">
                 {loadingSubmissions ? (
                   <tr>
                     <td colSpan={7} className="text-center py-12">
-                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-blue-400" />
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-blue-600 dark:text-blue-400" />
                     </td>
                   </tr>
                 ) : submissionsList.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-ink-500 text-sm">
+                    <td colSpan={7} className="text-center py-12 text-gray-500 dark:text-gray-400 text-sm">
                       No submissions found matching criteria.
                     </td>
                   </tr>
                 ) : (
                   submissionsList.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-ink-900/30 transition-colors">
+                    <tr key={sub.id} className="hover:bg-gray-50/80 dark:hover:bg-[#1F1F23]/60 transition-colors">
                       <td className="px-5 py-4">
-                        <div className="font-semibold text-white">{sub.student_name}</div>
-                        <div className="text-xs text-ink-400 font-mono">{sub.student_email}</div>
+                        <div className="font-bold text-gray-900 dark:text-white">{sub.student_name}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">{sub.student_email}</div>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="text-xs text-ink-200">{sub.role_preference}</div>
-                        <div className="text-[10px] text-ink-500">{sub.duration} Track</div>
+                        <div className="text-xs text-gray-800 dark:text-gray-200 font-medium">{sub.role_preference}</div>
+                        <div className="text-[10px] text-gray-400 dark:text-gray-500">{sub.duration} Track</div>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-mono bg-ink-800 text-brand-400">
+                        <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-mono bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
                             {sub.task_key}
                           </span>
                           {sub.title}
                         </div>
                         {sub.project_topic && (
-                          <div className="text-[11px] text-purple-400 mt-0.5 font-medium">
+                          <div className="text-[11px] text-purple-600 dark:text-purple-400 mt-0.5 font-medium">
                             Topic: {sub.project_topic}
                           </div>
                         )}
@@ -180,10 +180,10 @@ export default function SubmissionsTab() {
                               href={sub.github_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-2 py-1 bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 rounded text-xs flex items-center gap-1 transition"
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-[#222226] dark:hover:bg-[#2A2A30] dark:text-gray-200 border border-gray-300 dark:border-[#2E2E33] rounded text-xs flex items-center gap-1 transition shadow-sm"
                               title="Open GitHub Repository"
                             >
-                              <Code2 className="w-3 h-3 text-blue-400" /> Code
+                              <Code2 className="w-3 h-3 text-blue-600 dark:text-blue-400" /> Code
                             </a>
                           )}
                           {sub.live_url && (
@@ -191,10 +191,10 @@ export default function SubmissionsTab() {
                               href={sub.live_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-2 py-1 bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 rounded text-xs flex items-center gap-1 transition"
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-[#222226] dark:hover:bg-[#2A2A30] dark:text-gray-200 border border-gray-300 dark:border-[#2E2E33] rounded text-xs flex items-center gap-1 transition shadow-sm"
                               title="Open Live Deployment"
                             >
-                              <Globe className="w-3 h-3 text-emerald-400" /> Demo
+                              <Globe className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Demo
                             </a>
                           )}
                           {sub.documentation_url && (
@@ -202,28 +202,28 @@ export default function SubmissionsTab() {
                               href={sub.documentation_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-2 py-1 bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 rounded text-xs flex items-center gap-1 transition"
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-[#222226] dark:hover:bg-[#2A2A30] dark:text-gray-200 border border-gray-300 dark:border-[#2E2E33] rounded text-xs flex items-center gap-1 transition shadow-sm"
                               title="Open Documentation"
                             >
-                              <FileText className="w-3 h-3 text-purple-400" /> Docs
+                              <FileText className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Docs
                             </a>
                           )}
                           {!sub.github_url && !sub.live_url && !sub.documentation_url && (
-                            <span className="text-xs text-ink-500 italic">No links</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500 italic">No links</span>
                           )}
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         <StatusBadge status={sub.status || "submitted"} />
                       </td>
-                      <td className="px-5 py-4 text-xs text-ink-400">
+                      <td className="px-5 py-4 text-xs text-gray-500 dark:text-gray-400">
                         {sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString() : "—"}
                       </td>
                       <td className="px-5 py-4 text-right">
                         <button
                           type="button"
                           onClick={() => handleOpenReviewModal(sub)}
-                          className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-semibold transition"
+                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 dark:border-blue-500/40 dark:text-blue-300 rounded-lg text-xs font-semibold transition shadow-sm"
                         >
                           Review / Grade
                         </button>

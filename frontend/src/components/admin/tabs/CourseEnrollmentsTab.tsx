@@ -54,9 +54,9 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pt-1">
       {/* Filters Bar */}
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 p-5 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-[#18181B] border border-gray-200 dark:border-[#27272A] p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
         <div className="w-full md:w-80">
           <AdminSearchBar
             value={searchTerm}
@@ -65,6 +65,7 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
               setCurrentPage(1);
             }}
             placeholder="Search learner, course, or transaction ID..."
+            accentColor="blue"
           />
         </div>
 
@@ -75,7 +76,7 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
               setStatusFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="bg-slate-800/80 border border-white/10 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500/50"
+            className="bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] text-xs text-gray-800 dark:text-[#EDEDED] font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-colors cursor-pointer"
           >
             <option value="ALL">All Statuses ({registrations.length})</option>
             <option value="pending">Pending Approval</option>
@@ -86,23 +87,23 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
       </div>
 
       {/* Enrollments Table */}
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-white dark:bg-[#18181B] border border-gray-200 dark:border-[#27272A] rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-white/5 border-b border-white/10 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-gray-50 dark:bg-[#151518] border-b border-gray-200 dark:border-[#27272A] text-xs uppercase tracking-wider text-gray-700 dark:text-gray-300 font-semibold">
               <tr>
-                <th className="py-4 px-6">Learner</th>
-                <th className="py-4 px-6">Enrolled Course</th>
-                <th className="py-4 px-6">Amount / TxID</th>
-                <th className="py-4 px-6">Status</th>
-                <th className="py-4 px-6">Date</th>
-                <th className="py-4 px-6 text-right">Actions</th>
+                <th className="py-3.5 px-6 font-semibold">Learner</th>
+                <th className="py-3.5 px-6 font-semibold">Enrolled Course</th>
+                <th className="py-3.5 px-6 font-semibold">Amount / TxID</th>
+                <th className="py-3.5 px-6 font-semibold">Status</th>
+                <th className="py-3.5 px-6 font-semibold">Date</th>
+                <th className="py-3.5 px-6 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 font-normal">
+            <tbody className="divide-y divide-gray-100 dark:divide-[#27272A]">
               {paginatedRegistrations.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-gray-500 dark:text-gray-400 text-sm">
                     No course registrations match your current filter.
                   </td>
                 </tr>
@@ -114,15 +115,15 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
                   return (
                     <tr
                       key={r.id}
-                      className="hover:bg-white/[0.02] transition-colors duration-150"
+                      className="hover:bg-gray-50/80 dark:hover:bg-[#1F1F23]/60 transition-colors"
                     >
                       {/* Learner */}
                       <td className="py-4 px-6">
-                        <div className="font-semibold text-white">
+                        <div className="font-bold text-gray-900 dark:text-white">
                           {r.user_name || "Anonymous Learner"}
                         </div>
-                        <div className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                          <Mail className="w-3 h-3 text-slate-500" />
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5 font-mono">
+                          <Mail className="w-3 h-3 text-gray-400" />
                           {r.user_email}
                         </div>
                       </td>
@@ -130,8 +131,8 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
                       {/* Course */}
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
-                          <BookOpen className="w-4 h-4 text-cyan-400 shrink-0" />
-                          <span className="font-medium text-slate-200">
+                          <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                          <span className="font-medium text-gray-800 dark:text-gray-200">
                             {r.course_name || "Certification Program"}
                           </span>
                         </div>
@@ -139,11 +140,11 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
 
                       {/* Amount / TxID */}
                       <td className="py-4 px-6">
-                        <div className="font-medium text-emerald-400">
+                        <div className="font-bold text-emerald-700 dark:text-emerald-400">
                           {r.amount ? `₹${r.amount}` : "Free / Trial"}
                         </div>
                         {r.transaction_id && (
-                          <div className="text-xs text-slate-500 font-mono mt-0.5">
+                          <div className="text-xs text-gray-400 dark:text-gray-500 font-mono mt-0.5">
                             Tx: {r.transaction_id.slice(0, 14)}...
                           </div>
                         )}
@@ -155,7 +156,7 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
                       </td>
 
                       {/* Date */}
-                      <td className="py-4 px-6 text-xs text-slate-400">
+                      <td className="py-4 px-6 text-xs text-gray-500 dark:text-gray-400">
                         {r.created_at
                           ? new Date(r.created_at).toLocaleDateString(undefined, {
                               year: "numeric",
@@ -173,20 +174,20 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
                               <button
                                 onClick={() => handleAction(r.id, "approved")}
                                 disabled={isActionLoading}
-                                className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                                className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 dark:text-emerald-300 dark:border-emerald-800/60 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50 shadow-sm"
                               >
                                 <CheckCircle className="w-3.5 h-3.5" /> Approve
                               </button>
                               <button
                                 onClick={() => handleAction(r.id, "rejected")}
                                 disabled={isActionLoading}
-                                className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50"
+                                className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 dark:border-rose-800/60 text-xs font-semibold flex items-center gap-1 transition-colors disabled:opacity-50 shadow-sm"
                               >
                                 <XCircle className="w-3.5 h-3.5" /> Reject
                               </button>
                             </>
                           ) : (
-                            <span className="text-xs text-slate-500 italic">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 italic">
                               Decided ({r.status})
                             </span>
                           )}
@@ -198,7 +199,7 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
                                   onDeleteRegistration(r.id);
                                 }
                               }}
-                              className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors"
+                              className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-400 dark:bg-[#222226] dark:hover:bg-rose-500/20 dark:text-gray-400 dark:hover:text-rose-400 transition-colors shadow-sm"
                               title="Delete Record"
                             >
                               <XCircle className="w-4 h-4" />
@@ -215,15 +216,13 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t border-white/10">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredRegistrations.length}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredRegistrations.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

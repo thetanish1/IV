@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Shield,
@@ -392,62 +393,62 @@ export default function AdminDashboardPage() {
     overview: {
       title: "Overview",
       subtitle: "Platform KPI telemetry, analytics summaries, and live system status.",
-      icon: <LayoutDashboard className="w-5 h-5 text-cf-orange" />,
+      icon: <LayoutDashboard className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     applicants: {
       title: "Applications",
       subtitle: "Review candidate profiles, download resumes, and manage acceptance status.",
-      icon: <Users className="w-5 h-5 text-cf-orange" />,
+      icon: <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     submissions: {
       title: "Task Submissions",
       subtitle: "Audit student project milestones, GitHub repositories, and live demo URLs.",
-      icon: <FolderGit2 className="w-5 h-5 text-cf-orange" />,
+      icon: <FolderGit2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     unlocks: {
       title: "Unlock Requests",
       subtitle: "Authorize early access to time-gated curriculum modules and advance tasks.",
-      icon: <Unlock className="w-5 h-5 text-cf-orange" />,
+      icon: <Unlock className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     doubts: {
       title: "Doubts Helpdesk",
       subtitle: "Respond to technical inquiries, inspect code snippets, and assist students.",
-      icon: <HelpCircle className="w-5 h-5 text-cf-orange" />,
+      icon: <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     contacts: {
       title: "Contact Inquiries",
       subtitle: "Manage corporate partnerships, student queries, and reply via Brevo SMTP.",
-      icon: <MessageSquare className="w-5 h-5 text-cf-orange" />,
+      icon: <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     certificates: {
       title: "Digital Certificates",
       subtitle: "Generate tamper-proof credentials and manage the public verification registry.",
-      icon: <Award className="w-5 h-5 text-cf-orange" />,
+      icon: <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     users: {
       title: "User Accounts",
       subtitle: "Manage student accounts, credentials, authentication providers, and roles.",
-      icon: <Key className="w-5 h-5 text-cf-orange" />,
+      icon: <Key className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     enrollments: {
       title: "Course Enrollments",
       subtitle: "Review bootcamp registrations, grant access, and monitor student intake.",
-      icon: <BookOpen className="w-5 h-5 text-cf-orange" />,
+      icon: <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     payments: {
       title: "Payments Audit",
       subtitle: "Razorpay financial transaction ledger, payment verification, and order auditing.",
-      icon: <CreditCard className="w-5 h-5 text-cf-orange" />,
+      icon: <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     mailer: {
       title: "Branded Dispatcher",
       subtitle: "Send rich HTML broadcast newsletters and notifications to students.",
-      icon: <Mail className="w-5 h-5 text-cf-orange" />,
+      icon: <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
     settings: {
       title: "IAM & Platform Settings",
       subtitle: "Admin access controls, sub-admin role assignment, and platform feature flags.",
-      icon: <Shield className="w-5 h-5 text-cf-orange" />,
+      icon: <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
     },
   };
 
@@ -466,15 +467,24 @@ export default function AdminDashboardPage() {
         }`}>
           {/* Topbar Left: Brand / Account Selector */}
           <div className="flex items-center gap-3">
-            {/* Cloudflare Orange Cloud Logo */}
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab("overview")}>
-              <div className="w-8 h-8 rounded-lg bg-[#F38020] flex items-center justify-center text-white font-bold shadow-md shadow-orange-500/20">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
-                </svg>
+            {/* InternVision Tech Logo as on homepage */}
+            <div 
+              className="flex items-center gap-2.5 cursor-pointer select-none group" 
+              onClick={() => setActiveTab("overview")}
+              title="InternVision Tech Admin"
+            >
+              <div className="bg-white p-1 rounded-md flex items-center justify-center border border-gray-200 dark:border-zinc-700 shadow-sm">
+                <Image 
+                  src="/logo.jpg" 
+                  alt="InternVision Logo" 
+                  width={140} 
+                  height={36} 
+                  className="h-6 w-auto object-contain" 
+                  priority
+                />
               </div>
-              <span className="font-semibold text-sm tracking-tight hidden md:inline">
-                InternVision <span className="text-[#F38020]">Tech</span>
+              <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-white hidden md:inline">
+                InternVision <span className="text-[#0051C3] dark:text-[#3B82F6]">Tech</span>
               </span>
             </div>
 
@@ -488,7 +498,7 @@ export default function AdminDashboardPage() {
                     : "border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:bg-[#F3F4F6]"
                 }`}
               >
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                 <span className="max-w-[150px] truncate">{currentAdmin?.email || "Enterprise Admin"}</span>
                 <ChevronDown className="w-3.5 h-3.5 opacity-60" />
               </button>
@@ -506,7 +516,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="px-3 py-2 flex items-center justify-between">
                     <span className="font-semibold">{currentAdmin?.full_name || "Admin"}</span>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#F38020]/10 text-[#F38020]">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
                       {currentAdmin?.role || "super_admin"}
                     </span>
                   </div>
@@ -520,16 +530,16 @@ export default function AdminDashboardPage() {
 
           {/* Topbar Right: Search trigger, Ask AI, Theme Toggle, Support, Profile */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Ask AI Button (Cloudflare Style) */}
+            {/* Ask AI Button (Cloudflare Blue Style) */}
             <button
               onClick={() => setActiveTab("doubts")}
               className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${
                 theme === "dark"
-                  ? "border-[#2E2E33] bg-[#222226] text-[#EDEDED] hover:border-[#F38020]/50"
-                  : "border-[#E5E7EB] bg-white text-[#374151] hover:border-[#F38020]"
+                  ? "border-[#2E2E33] bg-[#222226] text-[#EDEDED] hover:border-blue-500/50"
+                  : "border-[#E5E7EB] bg-white text-[#374151] hover:border-blue-600"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#F38020]" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Ask AI</span>
             </button>
 
@@ -559,7 +569,7 @@ export default function AdminDashboardPage() {
               {theme === "dark" ? (
                 <Sun className="w-4 h-4" />
               ) : (
-                <Moon className="w-4 h-4 text-indigo-600" />
+                <Moon className="w-4 h-4 text-blue-600" />
               )}
             </button>
 
@@ -574,14 +584,14 @@ export default function AdminDashboardPage() {
               }`}
               title="Refresh telemetry"
             >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-[#F38020]" : ""}`} />
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-blue-600 dark:text-blue-400" : ""}`} />
             </button>
 
             {/* Profile Avatar & Menu */}
             <div className="relative">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#F38020] to-amber-500 text-white font-bold text-xs flex items-center justify-center shadow-sm"
+                className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-700 to-blue-500 text-white font-bold text-xs flex items-center justify-center shadow-sm"
               >
                 {(currentAdmin?.full_name || currentAdmin?.email || "A").slice(0, 1).toUpperCase()}
               </button>
@@ -645,8 +655,8 @@ export default function AdminDashboardPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className={`w-full pl-8 pr-12 py-1.5 rounded-md text-xs border outline-none transition-colors ${
                       theme === "dark"
-                        ? "bg-[#1F1F23] border-[#2E2E33] text-[#EDEDED] focus:border-[#F38020]"
-                        : "bg-[#F9FAFB] border-[#E5E7EB] text-[#111827] focus:border-[#F38020]"
+                        ? "bg-[#1F1F23] border-[#2E2E33] text-[#EDEDED] focus:border-blue-500"
+                        : "bg-[#F9FAFB] border-[#E5E7EB] text-[#111827] focus:border-blue-600"
                     }`}
                   />
                   <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1 py-0.2 rounded border ${
@@ -684,15 +694,15 @@ export default function AdminDashboardPage() {
                           className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
                             isActive
                               ? theme === "dark"
-                                ? "bg-[#25252A] text-white shadow-sm font-semibold border-l-2 border-[#F38020]"
-                                : "bg-[#F3F4F6] text-[#111827] font-semibold border-l-2 border-[#F38020]"
+                                ? "bg-[#25252A] text-white shadow-sm font-semibold border-l-2 border-blue-500"
+                                : "bg-blue-50 text-blue-700 font-semibold border-l-2 border-blue-600"
                               : theme === "dark"
                               ? "text-[#A1A1AA] hover:text-white hover:bg-[#1F1F23]"
                               : "text-[#4B5563] hover:text-[#111827] hover:bg-[#F9FAFB]"
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <span className={isActive ? "text-[#F38020]" : "opacity-70"}>
+                            <span className={isActive ? "text-blue-600 dark:text-blue-400" : "opacity-70"}>
                               {item.icon}
                             </span>
                             {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
@@ -712,8 +722,8 @@ export default function AdminDashboardPage() {
                               {item.count !== undefined && item.count > 0 && (
                                 <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
                                   isActive
-                                    ? "bg-[#F38020] text-white"
-                                    : "bg-[#F38020]/15 text-[#F38020]"
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-blue-500/15 text-blue-600 dark:text-blue-400"
                                 }`}>
                                   {item.count}
                                 </span>
@@ -763,12 +773,12 @@ export default function AdminDashboardPage() {
                     <div className={`p-2.5 rounded-lg border ${
                       theme === "dark"
                         ? "bg-[#222226] border-[#2E2E33]"
-                        : "bg-[#FFF5EB] border-[#FED7AA]"
+                        : "bg-blue-50 border-blue-200"
                     }`}>
                       {tabInfo[activeTab]?.icon}
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold tracking-tight">
+                      <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                         {tabInfo[activeTab]?.title}
                       </h1>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -793,7 +803,7 @@ export default function AdminDashboardPage() {
 
                     <button
                       onClick={fetchAllData}
-                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-[#F38020] hover:bg-[#FA8B28] text-white shadow-sm transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors flex items-center gap-1.5"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
                       <span>Sync Data</span>
@@ -805,9 +815,9 @@ export default function AdminDashboardPage() {
               {/* Tab Content Display */}
               {loading ? (
                 <div className={`p-16 rounded-xl border text-center space-y-3 ${
-                  theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-[#E5E7EB]"
+                  theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-[#E5E7EB] shadow-sm"
                 }`}>
-                  <div className="w-8 h-8 border-2 border-[#F38020]/20 border-t-[#F38020] rounded-full animate-spin mx-auto" />
+                  <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-600 rounded-full animate-spin mx-auto" />
                   <p className="text-xs text-gray-400">Loading Cloudflare telemetry & security state...</p>
                 </div>
               ) : (

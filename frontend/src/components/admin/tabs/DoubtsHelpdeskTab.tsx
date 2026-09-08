@@ -72,13 +72,13 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
 
   return (
     <FadeIn delay={0.2} direction="up">
-      <div className="space-y-4 pt-2">
+      <div className="space-y-4 pt-1">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-pink-400" /> Technical Doubts & Mentor Desk
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Technical Doubts & Mentor Desk
             </h2>
-            <p className="text-xs text-ink-400 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               Direct 2-way query resolution desk for student code snippets, bugs, and module doubts.
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
             <select
               value={doubtFilter}
               onChange={(e) => setDoubtFilter(e.target.value)}
-              className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-pink-500 transition-colors cursor-pointer"
+              className="bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg px-3 py-1.5 text-xs text-gray-800 dark:text-[#EDEDED] focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-colors cursor-pointer font-medium"
             >
               <option value="all">All Queries</option>
               <option value="open">Open / Unanswered</option>
@@ -96,12 +96,12 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
             <DurationFilterSelect
               value={doubtDurationFilter}
               onChange={(val) => setDoubtDurationFilter(val)}
-              accentColor="pink"
+              accentColor="blue"
             />
             <button
               type="button"
               onClick={fetchDoubts}
-              className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+              className="p-2 bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A30] transition shadow-sm"
               title="Refresh Doubts"
             >
               <RefreshCw className="w-4 h-4" />
@@ -111,11 +111,11 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
 
         <div className="grid grid-cols-1 gap-4">
           {loadingDoubts ? (
-            <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30">
-              <Loader2 className="w-5 h-5 animate-spin mx-auto text-pink-400" />
+            <div className="p-12 text-center border border-gray-200 dark:border-[#27272A] rounded-xl bg-white dark:bg-[#18181B] shadow-sm">
+              <Loader2 className="w-5 h-5 animate-spin mx-auto text-blue-600 dark:text-blue-400" />
             </div>
           ) : doubtsList.length === 0 ? (
-            <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30 text-ink-500 text-sm">
+            <div className="p-12 text-center border border-gray-200 dark:border-[#27272A] rounded-xl bg-white dark:bg-[#18181B] shadow-sm text-gray-500 dark:text-gray-400 text-sm">
               No student queries found.
             </div>
           ) : (
@@ -124,21 +124,21 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
                 key={d.id}
                 className={`p-5 rounded-xl border transition-all ${
                   d.status === "open"
-                    ? "bg-pink-950/10 border-pink-500/30"
-                    : "bg-ink-950/30 border-ink-800 hover:border-ink-700"
+                    ? "bg-blue-50/40 border-blue-200 dark:bg-blue-950/20 dark:border-blue-500/30"
+                    : "bg-white border-gray-200 shadow-sm dark:bg-[#18181B] dark:border-[#27272A] hover:border-gray-300 dark:hover:border-zinc-700"
                 }`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-ink-800/60">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-gray-100 dark:border-zinc-800">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={d.status} type="doubt" />
-                      <span className="text-xs font-semibold text-brand-400">{d.domain_track}</span>
-                      <span className="text-xs text-ink-500">•</span>
-                      <span className="text-xs text-ink-300 font-mono">{d.module_name}</span>
+                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">{d.domain_track}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-600">•</span>
+                      <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">{d.module_name}</span>
                     </div>
-                    <h3 className="text-base font-bold text-white mt-1.5">{d.subject}</h3>
-                    <div className="text-xs text-ink-400 mt-0.5">
-                      From: <strong className="text-ink-200">{d.student_name}</strong> ({d.student_email}) •{" "}
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white mt-1.5">{d.subject}</h3>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      From: <strong className="text-gray-800 dark:text-gray-200">{d.student_name}</strong> ({d.student_email}) •{" "}
                       {new Date(d.created_at).toLocaleString()}
                     </div>
                   </div>
@@ -149,7 +149,7 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
                       setReplyingDoubt(d);
                       setDoubtReplyText(d.admin_reply || "");
                     }}
-                    className="px-3.5 py-1.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition self-start whitespace-nowrap"
+                    className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition self-start shadow-sm whitespace-nowrap"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     {d.admin_reply ? "Edit Reply" : "Answer Query"}
@@ -157,32 +157,32 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
                 </div>
 
                 {/* Question body */}
-                <p className="text-sm text-ink-200 mt-3 whitespace-pre-wrap leading-relaxed">{d.question}</p>
+                <p className="text-sm text-gray-800 dark:text-gray-200 mt-3 whitespace-pre-wrap leading-relaxed">{d.question}</p>
 
                 {/* Code snippet if any */}
                 {d.code_snippet && (
-                  <div className="mt-3 p-3 bg-black/70 border border-ink-800 rounded-lg font-mono text-xs text-ink-200 overflow-x-auto">
+                  <div className="mt-3 p-3 bg-gray-900 text-gray-100 dark:bg-black/80 dark:border-zinc-800 border rounded-lg font-mono text-xs overflow-x-auto">
                     <pre>{d.code_snippet}</pre>
                   </div>
                 )}
 
                 {/* Attached Error Screenshot */}
                 {d.image_url && (
-                  <div className="mt-3 flex items-center gap-3 p-2.5 bg-black/50 border border-ink-800 rounded-lg max-w-md">
+                  <div className="mt-3 flex items-center gap-3 p-2.5 bg-gray-50 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800 rounded-lg max-w-md">
                     <img
                       src={getImageUrl(d.image_url)}
                       alt="Error Screenshot"
-                      className="w-14 h-14 object-cover rounded border border-ink-700 cursor-pointer hover:opacity-80 transition shrink-0"
+                      className="w-14 h-14 object-cover rounded border border-gray-300 dark:border-zinc-700 cursor-pointer hover:opacity-80 transition shrink-0"
                       onClick={() => onZoomImage(getImageUrl(d.image_url))}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-pink-400 flex items-center gap-1.5">
+                      <div className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
                         <ImageIcon className="w-3.5 h-3.5" /> Error Screenshot Attached
                       </div>
                       <button
                         type="button"
                         onClick={() => onZoomImage(getImageUrl(d.image_url))}
-                        className="text-[11px] text-ink-400 hover:text-white underline mt-1 flex items-center gap-1"
+                        className="text-[11px] text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white underline mt-1 flex items-center gap-1"
                       >
                         <ZoomIn className="w-3 h-3" /> Click to inspect visual error
                       </button>
@@ -192,16 +192,16 @@ export default function DoubtsHelpdeskTab({ onZoomImage }: DoubtsHelpdeskTabProp
 
                 {/* Reply box if answered */}
                 {d.admin_reply && (
-                  <div className="mt-4 p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                  <div className="mt-4 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-500/30 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-400 font-semibold">
                       <span>✓ Mentor Resolution ({d.answered_by || "HR Team"})</span>
                       {d.answered_at && (
-                        <span className="text-ink-500 font-normal">
+                        <span className="text-gray-500 dark:text-gray-400 font-normal">
                           {new Date(d.answered_at).toLocaleDateString()}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-ink-200 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-xs text-emerald-950 dark:text-emerald-200 whitespace-pre-wrap leading-relaxed">
                       {d.admin_reply}
                     </p>
                   </div>

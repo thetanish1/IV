@@ -140,13 +140,13 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
 
   return (
     <FadeIn delay={0.2} direction="up">
-      <div className="space-y-4 pt-2">
+      <div className="space-y-4 pt-1">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Mail className="w-5 h-5 text-cyan-400" /> Contact Inquiries & Candidate Queries
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Contact Inquiries & Candidate Queries
             </h2>
-            <p className="text-xs text-ink-400 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               Direct inquiries sent via the public contact page. Reply via email and resolve student queries.
             </p>
           </div>
@@ -159,7 +159,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                 setContactSearch(val);
                 setContactPage(1);
               }}
-              accentColor="cyan"
+              accentColor="blue"
             />
             <select
               value={contactFilter}
@@ -167,7 +167,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                 setContactFilter(e.target.value);
                 setContactPage(1);
               }}
-              className="bg-ink-950 border border-ink-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+              className="bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg px-3 py-1.5 text-xs text-gray-800 dark:text-[#EDEDED] focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-colors cursor-pointer font-medium"
             >
               <option value="all">All Inquiries</option>
               <option value="new">New / Unread</option>
@@ -177,7 +177,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
             <button
               type="button"
               onClick={fetchContacts}
-              className="p-2 bg-ink-900 border border-ink-800 rounded-lg text-ink-300 hover:text-white transition"
+              className="p-2 bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2A2A30] transition shadow-sm"
               title="Refresh Contact Queries"
             >
               <RefreshCw className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                 type="button"
                 disabled={deletingAllContacts}
                 onClick={handleDeleteAllContacts}
-                className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+                className="px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 dark:bg-red-950/60 dark:border-red-800/70 dark:text-red-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 shadow-sm"
                 title="Permanently delete all contact queries"
               >
                 <Trash2 className="w-3.5 h-3.5" /> Delete All
@@ -198,11 +198,11 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
 
         <div className="grid grid-cols-1 gap-4">
           {loadingContacts ? (
-            <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30">
-              <Loader2 className="w-5 h-5 animate-spin mx-auto text-cyan-400" />
+            <div className="p-12 text-center border border-gray-200 dark:border-[#27272A] rounded-xl bg-white dark:bg-[#18181B] shadow-sm">
+              <Loader2 className="w-5 h-5 animate-spin mx-auto text-blue-600 dark:text-blue-400" />
             </div>
           ) : contactsList.length === 0 ? (
-            <div className="p-12 text-center border border-ink-800 rounded-xl bg-ink-950/30 text-ink-500 text-sm">
+            <div className="p-12 text-center border border-gray-200 dark:border-[#27272A] rounded-xl bg-white dark:bg-[#18181B] shadow-sm text-gray-500 dark:text-gray-400 text-sm">
               No contact inquiries found.
             </div>
           ) : (
@@ -211,29 +211,29 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                 key={c.id}
                 className={`p-5 rounded-xl border transition-all ${
                   c.status === "new"
-                    ? "bg-cyan-950/10 border-cyan-500/40 shadow-sm shadow-cyan-500/10"
+                    ? "bg-blue-50/40 border-blue-200 dark:bg-blue-950/20 dark:border-blue-500/40 shadow-sm"
                     : c.status === "replied"
-                    ? "bg-emerald-950/10 border-emerald-500/30"
-                    : "bg-ink-950/30 border-ink-800 hover:border-ink-700"
+                    ? "bg-white dark:bg-[#18181B] border-emerald-200 dark:border-emerald-500/30"
+                    : "bg-white border-gray-200 shadow-sm dark:bg-[#18181B] dark:border-[#27272A] hover:border-gray-300 dark:hover:border-zinc-700"
                 }`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-ink-800/60">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-gray-100 dark:border-zinc-800">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <StatusBadge status={c.status} type="contact" />
-                      <h3 className="text-base font-bold text-white">{c.subject}</h3>
+                      <h3 className="text-base font-bold text-gray-900 dark:text-white">{c.subject}</h3>
                     </div>
-                    <div className="text-xs text-ink-400 mt-1 flex items-center gap-2 flex-wrap">
-                      <span>From: <strong className="text-white">{c.name}</strong></span>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
+                      <span>From: <strong className="text-gray-800 dark:text-gray-200">{c.name}</strong></span>
                       <span>•</span>
                       <a
                         href={`mailto:${c.email}`}
-                        className="text-cyan-400 hover:underline flex items-center gap-1 font-mono"
+                        className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-mono"
                       >
                         {c.email}
                       </a>
                       <span>•</span>
-                      <span className="text-ink-500">
+                      <span className="text-gray-400 dark:text-gray-500">
                         {c.created_at ? new Date(c.created_at).toLocaleString() : ""}
                       </span>
                     </div>
@@ -246,7 +246,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                         setReplyingContact(c);
                         setContactReplyText(c.admin_reply || "");
                       }}
-                      className="px-3.5 py-1.5 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap cursor-pointer"
+                      className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition whitespace-nowrap cursor-pointer shadow-sm"
                     >
                       <Send className="w-3.5 h-3.5" />
                       {c.admin_reply ? "Edit Reply / Re-send" : "Reply to User"}
@@ -256,7 +256,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                       <button
                         type="button"
                         onClick={() => handleUpdateContactStatus(c.id, "read")}
-                        className="px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-ink-300 border border-ink-700 rounded-lg text-xs font-medium transition whitespace-nowrap"
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-[#222226] dark:hover:bg-[#2A2A30] dark:text-gray-300 border border-gray-300 dark:border-[#2E2E33] rounded-lg text-xs font-medium transition whitespace-nowrap shadow-sm"
                         title="Mark inquiry as read"
                       >
                         Mark Read
@@ -267,7 +267,7 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                       type="button"
                       disabled={deletingContactId === c.id}
                       onClick={() => handleDeleteContact(c.id, c.name)}
-                      className="p-1.5 text-ink-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition"
+                      className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition"
                       title="Delete inquiry"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -276,22 +276,22 @@ export default function ContactsTab({ onRefreshStats }: ContactsTabProps) {
                 </div>
 
                 {/* Inquiry Message Body */}
-                <div className="mt-3 text-sm text-ink-200 whitespace-pre-wrap leading-relaxed bg-ink-900/40 p-4 rounded-xl border border-ink-800/80">
+                <div className="mt-3 text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed bg-gray-50 dark:bg-[#1F1F23] p-4 rounded-xl border border-gray-200 dark:border-zinc-800">
                   {c.message}
                 </div>
 
                 {/* Official Admin Reply Snippet if answered */}
                 {c.admin_reply && (
-                  <div className="mt-3 p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                  <div className="mt-3 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-500/30 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-400 font-semibold">
                       <span>✓ Official Reply Sent ({c.replied_by || "Admin Support"})</span>
                       {c.replied_at && (
-                        <span className="text-ink-500 font-normal">
+                        <span className="text-gray-500 dark:text-gray-400 font-normal">
                           {new Date(c.replied_at).toLocaleString()}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-ink-200 whitespace-pre-wrap leading-relaxed">
+                    <p className="text-xs text-emerald-950 dark:text-emerald-200 whitespace-pre-wrap leading-relaxed">
                       {c.admin_reply}
                     </p>
                   </div>
