@@ -3,7 +3,7 @@ const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
-  timeoutMs: number = 30000
+  timeoutMs: number = 90000
 ): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers = new Headers(options.headers || {});

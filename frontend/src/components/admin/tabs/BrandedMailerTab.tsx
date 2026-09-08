@@ -435,7 +435,7 @@ export default function BrandedMailerTab() {
       }>("/admin/mailer/send", {
         method: "POST",
         body: formData,
-      });
+      }, 120000);
 
       setSendResults(res.results || null);
       if (res.failureCount === 0) {
