@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   CheckCircle2,
@@ -170,24 +171,49 @@ export default function HomePage() {
         </div>
 
         {/* Hero Content Layer (Prominently Above Background) */}
-        <div className="max-w-4xl mx-auto space-y-8 z-10 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-semibold uppercase tracking-wider -rotate-1 shadow-lg backdrop-blur-md">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-4xl mx-auto space-y-8 z-10 flex flex-col items-center"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-semibold uppercase tracking-wider -rotate-1 shadow-lg backdrop-blur-md"
+          >
             <Rocket className="w-3.5 h-3.5" />
             Virtual Pre-Hire Internship Program 2026
-          </div>
+          </motion.div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.08] max-w-4xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.08] max-w-4xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]"
+          >
             Transform Your Passion Into A <br />
             <span className="text-brand-400 bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-blue-300 to-brand-300">
               Production Tech Career
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-base sm:text-lg md:text-xl text-ink-200 max-w-2xl leading-relaxed mx-auto drop-shadow-md font-medium">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-base sm:text-lg md:text-xl text-ink-200 max-w-2xl leading-relaxed mx-auto drop-shadow-md font-medium"
+          >
             Gain industry-grade engineering experience with hands-on weekly tasks, real client projects, and verified digital certificates across 9 high-demand technology tracks.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-3 w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-3 w-full"
+          >
             <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/apply"
@@ -213,12 +239,18 @@ export default function HomePage() {
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Instant Credential Authenticity
               </p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ─── STATS TRUST STRIP ───────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 pb-12 mt-16 max-w-5xl mx-auto border-t border-b border-ink-800">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 pb-12 mt-16 max-w-5xl mx-auto border-t border-b border-ink-800"
+      >
         <div className="space-y-2 group md:translate-y-4">
           <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">100+</div>
           <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Students Trained</div>
@@ -235,7 +267,7 @@ export default function HomePage() {
           <div className="text-4xl sm:text-5xl font-black text-white group-hover:text-brand-400 transition-colors tracking-tighter">9+</div>
           <div className="text-sm font-bold text-ink-400 uppercase tracking-wide">Internship Tracks</div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ─── INTERNSHIP DOMAINS SHOWCASE ─────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -260,12 +292,17 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {INTERNSHIP_DOMAINS.map((domain) => {
+          {INTERNSHIP_DOMAINS.map((domain, idx) => {
             const Icon = domain.icon;
             return (
-              <div
+              <motion.div
                 key={domain.id}
-                className="glass-card p-7 border border-ink-800 rounded-2xl flex flex-col justify-between space-y-6 hover:border-brand-500/60 transition-all duration-300 hover:shadow-[0_0_30px_rgba(37,99,235,0.15)] group relative overflow-hidden"
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: idx * 0.06 }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="glass-card p-7 border border-ink-800 rounded-2xl flex flex-col justify-between space-y-6 hover:border-brand-500/60 transition-colors duration-300 hover:shadow-[0_0_30px_rgba(37,99,235,0.15)] group relative overflow-hidden"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -308,14 +345,20 @@ export default function HomePage() {
                     Apply for this Track <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       </section>
 
       {/* ─── WHY CHOOSE US ───────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
         <div className="text-left space-y-4 mb-16 max-w-2xl border-l-4 border-white pl-6">
           <h2 className="text-4xl font-black text-white uppercase tracking-tight">Why Choose InternVision Tech?</h2>
           <p className="text-ink-400 text-lg">
@@ -360,11 +403,17 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ─── OPTIONAL COURSES SECTION (Shown ONLY if enabled by Admin) ── */}
       {showCourses && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8"
+        >
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-6 border-l-4 border-white pl-6">
             <div>
               <h2 className="text-3xl font-black text-white uppercase tracking-tight">Featured Bootcamps</h2>
@@ -392,11 +441,17 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* ─── PLATFORM PREVIEW VIDEO SHOWCASE (3D CAROUSEL) ────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <motion.section
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4"
+      >
         <div className="text-center space-y-3 mb-6 max-w-2xl mx-auto">
           <span className="text-xs font-bold text-brand-400 uppercase tracking-wider">
             ✦ Interactive Platform Overview
@@ -410,10 +465,16 @@ export default function HomePage() {
         </div>
 
         <PlatformVideoCarousel />
-      </section>
+      </motion.section>
 
       {/* ─── CTA SECTION ────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+      <motion.section
+        initial={{ opacity: 0, scale: 0.96 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12"
+      >
         <div className="bg-brand-600 p-10 md:p-16 text-left space-y-6 relative overflow-hidden shadow-[8px_8px_0px_#ffffff] rounded-2xl">
           <div className="max-w-3xl relative z-10 space-y-4">
             <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tight leading-none">
@@ -432,7 +493,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }
