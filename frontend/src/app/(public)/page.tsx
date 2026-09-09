@@ -149,26 +149,26 @@ export default function HomePage() {
   return (
     <div className="space-y-24 pb-20">
       {/* ─── HERO SECTION ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden min-h-[80vh] grid grid-cols-[minmax(1rem,1fr)_minmax(0,40rem)_minmax(0,1fr)] lg:grid-cols-[minmax(2rem,1fr)_minmax(0,38rem)_minmax(0,1fr)] items-center lg:items-end pb-16">
+      <section className="relative overflow-hidden pt-12 sm:pt-16 pb-12">
         <div className="absolute inset-0 bg-ink-950 -z-10" />
 
-        <div className="col-start-2 pt-32 lg:pt-16 lg:pb-16 space-y-10 text-left z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-semibold uppercase tracking-wider -rotate-1 origin-bottom-left shadow-lg">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-semibold uppercase tracking-wider -rotate-1 shadow-lg">
             <Rocket className="w-3.5 h-3.5" />
             Virtual Pre-Hire Internship Program 2026
           </div>
 
-          <h1 className="text-5xl sm:text-7xl font-extrabold text-white tracking-tight leading-[1.05] max-w-3xl">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.08] max-w-4xl">
             Transform Your Passion Into A <br />
             <span className="text-brand-400">Production Tech Career</span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-ink-300 max-w-2xl leading-relaxed border-l-2 border-brand-500 pl-6">
+          <p className="text-base sm:text-lg text-ink-300 max-w-2xl leading-relaxed mx-auto">
             Gain industry-grade engineering experience with hands-on weekly tasks, real client projects, and verified digital certificates across 9 high-demand technology tracks.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-start gap-6 pt-4">
-            <div className="flex flex-col items-start">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-2 w-full">
+            <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/apply"
                 className="w-full sm:w-auto px-8 py-4 font-bold bg-white text-black hover:bg-ink-100 flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 shadow-lg"
@@ -176,12 +176,12 @@ export default function HomePage() {
                 Apply For Virtual Internship
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <p className="text-xs text-ink-500 mt-3 font-medium flex items-center gap-1.5">
+              <p className="text-xs text-ink-500 mt-2 font-medium flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Virtual • Flexible Durations (1M / 3M / 6M)
               </p>
             </div>
 
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/verify-certificate"
                 className="w-full sm:w-auto px-8 py-4 font-bold bg-transparent hover:bg-ink-900 text-white border border-ink-700 hover:border-brand-500 flex items-center justify-center gap-2.5 transition-all shadow-sm group"
@@ -189,16 +189,14 @@ export default function HomePage() {
                 <ShieldCheck className="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform" />
                 Certificate Verification
               </Link>
-              <p className="text-xs text-ink-500 mt-3 font-medium flex items-center gap-1.5">
+              <p className="text-xs text-ink-500 mt-2 font-medium flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Instant Credential Authenticity
               </p>
             </div>
           </div>
-        </div>
 
-        {/* Hero Video Showcase */}
-        <div className="col-[2/-1] lg:col-[3/-1] self-stretch flex items-center justify-center pt-8 lg:pt-16 pb-8 lg:pb-16 px-0 lg:px-6 relative z-10">
-          <div className="w-full max-w-xl">
+          {/* ─── CONTINUOUS LIVE VIDEO SHOWCASE (GIF-LIKE) ─────────────── */}
+          <div className="w-full max-w-4xl pt-4">
             <HeroVideoPlayer src="/hero-video.mp4" />
           </div>
         </div>
