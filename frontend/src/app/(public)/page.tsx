@@ -23,6 +23,7 @@ import {
   Check,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
+import HeroVideoPlayer from "@/components/HeroVideoPlayer";
 import { apiRequest } from "@/lib/api-client";
 
 interface DomainTrack {
@@ -392,6 +393,25 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ─── PLATFORM PREVIEW VIDEO SHOWCASE ────────────────────────── */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="text-center space-y-3 mb-10 max-w-2xl mx-auto">
+          <span className="text-xs font-bold text-brand-400 uppercase tracking-wider">
+            ✦ Interactive Platform Overview
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
+            See InternVision In Action
+          </h2>
+          <p className="text-ink-400 text-sm sm:text-base leading-relaxed">
+            Watch our platform walkthrough to explore weekly assignments, mentor reviews, and verifiable digital certificates.
+          </p>
+        </div>
+
+        <div className="w-full max-w-4xl mx-auto">
+          <HeroVideoPlayer src="/hero-video.mp4" />
+        </div>
+      </section>
 
       {/* ─── CTA SECTION ────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
