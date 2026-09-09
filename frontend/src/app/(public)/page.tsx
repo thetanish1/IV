@@ -151,16 +151,17 @@ export default function HomePage() {
     <div className="space-y-24 pb-20">
       {/* ─── HERO SECTION WITH LIVE SCI-FI BACKGROUND ─────────────────── */}
       <section className="relative overflow-hidden min-h-[75vh] flex flex-col justify-center items-center text-center pt-20 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
-        {/* Animated Live Background Image */}
+        {/* Continuous Live Video Background */}
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none">
-          <Image
-            src="/hero-bg.png"
-            alt="InternVision Tech Live Ambient Background"
-            fill
-            priority
-            quality={95}
-            className="object-cover object-center opacity-70 scale-105 transition-transform duration-1000 motion-safe:animate-pulse"
-            style={{ animationDuration: "10s" }}
+          <video
+            src="/hero-bg-video.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            disablePictureInPicture
+            poster="/hero-bg.png"
+            className="w-full h-full object-cover object-center opacity-65 scale-105"
           />
           {/* Contrast & Gradient Overlay Masks */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#06080e]/60 via-[#07090e]/75 to-ink-950" />
