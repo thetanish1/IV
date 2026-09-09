@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 interface AppleSlide {
   id: string;
@@ -23,7 +23,7 @@ const APPLE_SLIDES: AppleSlide[] = [
     title: "Industry-Grade Bootcamps.",
     lead: "Master production technologies.",
     description: "Deep-dive into Full-Stack Web Development, AI/ML Engineering, and Cloud DevOps with real GitHub code reviews and live projects.",
-    image: "/preview-courses.jpg",
+    image: "/preview-courses.png",
     link: "/courses",
   },
   {
@@ -32,7 +32,7 @@ const APPLE_SLIDES: AppleSlide[] = [
     title: "Verifiable Digital Credentials.",
     lead: "Cryptographic validation.",
     description: "Instant QR & Certificate ID authenticity checking trusted by tech companies, hiring managers, and verified LinkedIn profiles.",
-    image: "/preview-verify.jpg",
+    image: "/preview-verify.png",
     link: "/verify-certificate",
   },
   {
@@ -41,7 +41,7 @@ const APPLE_SLIDES: AppleSlide[] = [
     title: "Virtual Internship Portal.",
     lead: "1-Click fast onboarding.",
     description: "Flexible 1, 3, or 6-month durations across 9 high-demand engineering tracks with weekly task milestones and mentor evaluations.",
-    image: "/preview-apply.jpg",
+    image: "/preview-apply.png",
     link: "/apply",
   },
   {
@@ -50,7 +50,7 @@ const APPLE_SLIDES: AppleSlide[] = [
     title: "24/7 Engineering Support.",
     lead: "Direct senior guidance.",
     description: "Dedicated Discord community, 1:1 technical doubt resolution, resume optimization, and mock technical interview sessions.",
-    image: "/preview-contact.jpg",
+    image: "/preview-contact.png",
     link: "/contact",
   },
 ];
@@ -59,12 +59,12 @@ export default function ApplePreviewCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Auto-advance every 4.5 seconds when not hovering
+  // Auto-advance every 4 seconds when not hovering
   useEffect(() => {
     if (isHovered) return;
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % APPLE_SLIDES.length);
-    }, 4500);
+    }, 4000);
     return () => clearInterval(timer);
   }, [isHovered]);
 
@@ -102,19 +102,11 @@ export default function ApplePreviewCarousel() {
                     alt={slide.title}
                     fill
                     priority={idx === 0}
-                    quality={90}
+                    quality={95}
                     className="object-cover object-center transition-transform duration-700 group-hover:scale-103"
                   />
                   {/* Subtle glassmorphism gloss */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/[0.03] pointer-events-none" />
-
-                  {/* Badge */}
-                  <div className="absolute top-4 left-4 sm:top-5 sm:left-5 z-10">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-semibold shadow-lg">
-                      <Sparkles className="w-3 h-3 text-brand-400" />
-                      {slide.badge}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Apple-Style Text Block Underneath Screenshot */}
