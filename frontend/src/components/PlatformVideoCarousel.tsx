@@ -20,7 +20,7 @@ const VIDEO_SLIDES: VideoSlide[] = [
     badge: "1. Courses Overview",
     icon: BookOpen,
     description: "Explore comprehensive learning tracks in Web Dev, AI/ML, Cloud DevOps, and Python.",
-    src: "/courses-video.mp4",
+    src: "https://res.cloudinary.com/zmeqoh4x/video/upload/f_auto,q_auto/v1788968736/courses-video.mp4",
   },
   {
     id: "verify",
@@ -28,7 +28,7 @@ const VIDEO_SLIDES: VideoSlide[] = [
     badge: "2. Verify Certificate",
     icon: ShieldCheck,
     description: "Live cryptographic credential validation trusted by top companies and recruiters.",
-    src: "/verify-certificate.mp4",
+    src: "https://res.cloudinary.com/zmeqoh4x/video/upload/f_auto,q_auto/v1788968734/verify-certificate.mp4",
   },
   {
     id: "apply",
@@ -36,7 +36,7 @@ const VIDEO_SLIDES: VideoSlide[] = [
     badge: "3. Apply for Internship",
     icon: Rocket,
     description: "Streamlined 1-click application portal with immediate track allocation and onboarding.",
-    src: "/apply-internship.mp4",
+    src: "https://res.cloudinary.com/zmeqoh4x/video/upload/f_auto,q_auto/v1788968721/apply-internship.mp4",
   },
   {
     id: "contact",
@@ -44,7 +44,7 @@ const VIDEO_SLIDES: VideoSlide[] = [
     badge: "4. Student Support",
     icon: Phone,
     description: "24/7 Discord community support, 1:1 engineering reviews, and quick assistance.",
-    src: "/contact.mp4",
+    src: "https://res.cloudinary.com/zmeqoh4x/video/upload/f_auto,q_auto/v1788968845/contact.mp4",
   },
 ];
 

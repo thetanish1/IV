@@ -155,7 +155,7 @@ export default function HomePage() {
         {/* Continuous Live Video Background */}
         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none">
           <video
-            src="/hero-bg-video.mp4"
+            src="https://res.cloudinary.com/zmeqoh4x/video/upload/f_auto,q_auto/v1788968713/hero-bg-video.mp4"
             autoPlay
             loop
             muted
