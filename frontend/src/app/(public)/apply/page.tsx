@@ -89,6 +89,7 @@ export default function InternshipApplyPage() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [resumeUploadError, setResumeUploadError] = useState("");
   const [refreshingStatus, setRefreshingStatus] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const apiBase = (
     process.env.NEXT_PUBLIC_API_URL ||
@@ -410,6 +411,12 @@ export default function InternshipApplyPage() {
 
     if (!formData.resume_filename) {
       setResumeUploadError("Please upload your resume (PDF or DOC) before submitting.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setErrorMsg("Please read and accept the Internship Agreement, Rules, and Terms & Conditions before submitting.");
       setSubmitting(false);
       return;
     }
@@ -1300,6 +1307,34 @@ export default function InternshipApplyPage() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* SECTION 7: TERMS & AGREEMENT CONSENT */}
+          <div className="space-y-4 pt-6 border-t border-ink-800/80">
+            <label className="flex items-start gap-3.5 cursor-pointer p-4 rounded-xl bg-ink-900/80 border border-ink-800 hover:border-brand-500/50 transition group">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                required
+                className="mt-0.5 w-4 h-4 rounded border-ink-700 text-brand-600 focus:ring-brand-500 bg-ink-950 cursor-pointer shrink-0"
+              />
+              <span className="text-xs text-ink-300 leading-relaxed">
+                I hereby declare that all submitted academic and personal information is accurate. I have read, understood, and agree to abide by the{" "}
+                <Link href="/terms" target="_blank" className="text-brand-400 font-bold hover:underline">
+                  Terms & Conditions
+                </Link>
+                ,{" "}
+                <Link href="/rules" target="_blank" className="text-emerald-400 font-bold hover:underline">
+                  Internship Rules & Guidelines
+                </Link>
+                , and the{" "}
+                <Link href="/agreement" target="_blank" className="text-blue-400 font-bold hover:underline">
+                  Student Internship Agreement
+                </Link>
+                .
+              </span>
+            </label>
           </div>
 
           <div className="space-y-3">
