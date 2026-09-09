@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   CheckCircle2,
@@ -196,43 +195,18 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ─── HERO 3D LOGO SHOWCASE ─────────────────────────────────── */}
-        <div className="col-[2/-1] lg:col-[3/-1] self-stretch hidden lg:flex items-center justify-center pb-16 relative">
-          <div className="w-full h-full relative overflow-hidden mt-16 ml-8 flex items-center justify-center">
-            {/* Ambient Background Glows */}
-            <div className="absolute w-80 h-80 rounded-full bg-brand-500/15 blur-3xl pointer-events-none" />
-            <div className="absolute w-64 h-64 rounded-full bg-blue-600/10 blur-2xl pointer-events-none animate-pulse" />
-            
-            <Float delay={0} yOffset={12}>
-              <div className="relative z-10 flex flex-col items-center">
-                {/* 3D Sphere Card Presentation */}
-                <div className="relative p-7 rounded-3xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/10 backdrop-blur-xl shadow-2xl shadow-brand-500/10 group hover:border-brand-500/40 transition-all duration-300">
-                  <div className="relative w-52 h-52 sm:w-60 sm:h-60 flex items-center justify-center">
-                    <Image
-                      src="/logo.png"
-                      alt="InternVision Tech 3D Sphere Logo"
-                      width={240}
-                      height={240}
-                      priority
-                      className="w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(37,99,235,0.4)] transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  
-                  {/* Floating Status Pill */}
-                  <div className="mt-4 px-4 py-2 rounded-full bg-ink-900/90 border border-brand-500/30 text-center flex items-center justify-center gap-2 shadow-inner">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-xs font-semibold text-white tracking-wide">
-                      InternVision <span className="text-brand-400">Tech</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Floating 2026 Batch Badge */}
-                <div className="absolute -bottom-3 -right-3 px-3.5 py-1.5 rounded-lg bg-brand-600 text-white text-[11px] font-bold uppercase tracking-wider shadow-lg flex items-center gap-1.5 border border-brand-400/40">
-                  <Sparkles className="w-3.5 h-3.5" /> 2026 Batch
-                </div>
-              </div>
-            </Float>
+        {/* Asymmetric art element */}
+        <div className="col-[2/-1] lg:col-[3/-1] self-stretch hidden lg:flex items-end justify-end pb-16 relative">
+          <div className="w-full h-full border-l border-t border-ink-800/50 bg-ink-950 relative overflow-hidden mt-32 ml-16">
+            <div className="absolute inset-0 bg-grid-ink-800/30 bg-[length:32px_32px]" />
+            <div className="absolute top-1/2 -translate-y-1/2 -left-12 space-y-4">
+              <Float delay={0} yOffset={10}>
+                <div className="w-48 h-32 bg-ink-800 border border-ink-700" />
+              </Float>
+              <Float delay={0.5} yOffset={15}>
+                <div className="w-64 h-32 bg-brand-600/10 border border-brand-500/30 ml-8" />
+              </Float>
+            </div>
           </div>
         </div>
       </section>
