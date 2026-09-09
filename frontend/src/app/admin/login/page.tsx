@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Lock, Mail, ArrowRight, Loader2, Globe2 } from "lucide-react";
+import { Shield, Lock, Mail, ArrowRight, Loader2, Globe2, Sparkles, CheckCircle2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { FadeIn } from "@/components/animations/FadeIn";
+import { AdminButton } from "@/components/admin/common";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -15,7 +16,6 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// ─── Google Identity Services Types ─────────────────────────────────────────
 declare global {
   interface Window {
     google?: {
@@ -38,7 +38,6 @@ export default function AdminLoginPage() {
   const [googleReady, setGoogleReady] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
 
-  // ── Resolve the correct API base URL (fixes the /api/v1 bug) ──────────────
   const apiBase = (
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -50,7 +49,6 @@ export default function AdminLoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -60,7 +58,6 @@ export default function AdminLoginPage() {
     },
   });
 
-  // ── Load Google Identity Services script ──────────────────────────────────
   useEffect(() => {
     if (!googleClientId || googleClientId.includes("<your")) return;
 
@@ -92,7 +89,6 @@ export default function AdminLoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [googleClientId]);
 
-  // ── Handle Google credential response ────────────────────────────────────
   const handleGoogleCredential = async (response: { credential: string }) => {
     setGoogleLoading(true);
     setError("");
@@ -110,7 +106,7 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       localStorage.setItem("token", data.access_token);
-      // Decode or retrieve email
+      localStorage.setItem("admin_token", data.access_token);
       try {
         const payload = JSON.parse(atob(data.access_token.split(".")[1]));
         if (payload.sub) localStorage.setItem("admin_email", payload.sub);
@@ -127,7 +123,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  // ── Handle standard email/password login ─────────────────────────────────
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     setError("");
@@ -137,7 +132,6 @@ export default function AdminLoginPage() {
       formData.append("username", data.email);
       formData.append("password", data.password);
 
-      // ✅ Fixed URL: uses NEXT_PUBLIC_API_URL → http://localhost:8000/api/auth/login
       const res = await fetch(`${apiBase}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -151,6 +145,7 @@ export default function AdminLoginPage() {
 
       const responseData = await res.json();
       localStorage.setItem("token", responseData.access_token);
+      localStorage.setItem("admin_token", responseData.access_token);
       localStorage.setItem("admin_email", data.email);
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new Event("user-auth-change"));
@@ -163,38 +158,40 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
       <FadeIn delay={0.1} direction="up">
-        <div className="max-w-md w-full glass-card p-8 border border-ink-800 space-y-8">
+        <div className="max-w-md w-full rounded-2xl border border-ink-800 bg-ink-950/90 backdrop-blur-md p-8 sm:p-10 shadow-2xl space-y-8 relative overflow-hidden">
+          {/* Subtle Accent Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
+
           {/* Header */}
           <div className="text-center space-y-3">
-            <div className="w-12 h-12 bg-brand-600/20 text-brand-400 flex items-center justify-center mx-auto border border-brand-500/30">
-              <Shield className="w-6 h-6" />
+            <div className="w-14 h-14 bg-brand-600/15 text-brand-400 flex items-center justify-center mx-auto rounded-2xl border border-brand-500/30 shadow-inner">
+              <Shield className="w-7 h-7" />
             </div>
-            <h2 className="text-2xl font-extrabold text-white">Admin Authentication</h2>
+            <h2 className="text-2xl font-black text-white tracking-tight">Admin Authentication</h2>
             <p className="text-xs text-ink-400">
-              Secure JWT portal for <span className="text-brand-400 font-semibold">InternVision Tech</span> administrators
+              Secure administrative access for <span className="text-brand-300 font-bold">InternVision Tech</span> platform
             </p>
           </div>
 
-          {/* Error message */}
+          {/* Error banner */}
           {error && (
-            <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center font-medium">
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center font-medium">
               {error}
             </div>
           )}
 
-          {/* ─── Google Sign-In Section ────────────────────────────────── */}
+          {/* Google Sign-In Section */}
           <div className="space-y-3">
-            <p className="text-xs text-ink-400 text-center font-medium uppercase tracking-wider">
+            <p className="text-[11px] text-ink-400 text-center font-bold uppercase tracking-wider">
               Quick Sign-In
             </p>
 
-            {/* Google renders its own styled button here */}
             {googleClientId && !googleClientId.includes("<your") ? (
               <div className="relative">
                 {googleLoading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink-950/80">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink-950/80 rounded-lg">
                     <Loader2 className="w-5 h-5 animate-spin text-brand-400" />
                   </div>
                 )}
@@ -204,18 +201,17 @@ export default function AdminLoginPage() {
                   className="w-full min-h-[44px]"
                 />
                 {!googleReady && (
-                  <div className="w-full py-3 flex items-center justify-center gap-2 bg-ink-800 border border-ink-700 text-ink-400 text-sm">
+                  <div className="w-full py-3 rounded-lg flex items-center justify-center gap-2 bg-ink-900 border border-ink-800 text-ink-400 text-xs font-semibold">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Loading Google Sign-In…
                   </div>
                 )}
               </div>
             ) : (
-              /* Placeholder shown when no client ID is configured */
-              <div className="w-full py-3 flex items-center justify-center gap-2 bg-ink-800 border border-ink-700 text-ink-400 text-sm cursor-not-allowed opacity-60 select-none">
+              <div className="w-full py-3 rounded-lg flex items-center justify-center gap-2 bg-ink-900 border border-ink-800 text-ink-400 text-xs font-semibold cursor-not-allowed opacity-60 select-none">
                 <Globe2 className="w-4 h-4" />
                 Sign in with Google
-                <span className="ml-2 text-[10px] text-red-400">(GOOGLE_CLIENT_ID not set)</span>
+                <span className="text-[10px] text-red-400 ml-1">(GOOGLE_CLIENT_ID not set)</span>
               </div>
             )}
           </div>
@@ -223,44 +219,45 @@ export default function AdminLoginPage() {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-ink-800" />
-            <span className="text-[10px] text-ink-500 font-medium uppercase tracking-widest">or use credentials</span>
+            <span className="text-[10px] text-ink-400 font-bold uppercase tracking-widest">or credentials</span>
             <div className="flex-1 h-px bg-ink-800" />
           </div>
 
-          {/* ─── Standard Login Form ───────────────────────────────────── */}
+          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-sm">
             <div className="space-y-1.5">
-              <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+              <label className="text-xs text-ink-300 font-semibold flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-brand-400" /> Admin Email
               </label>
               <input
                 id="admin-email"
                 type="email"
+                placeholder="admin@internvision.tech"
                 {...register("email")}
-                className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition"
+                className="w-full bg-ink-900 border border-ink-800 rounded-xl px-4 py-3 text-white placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs"
               />
               {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+              <label className="text-xs text-ink-300 font-semibold flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-brand-400" /> Password
               </label>
               <input
                 id="admin-password"
                 type="password"
+                placeholder="••••••••"
                 {...register("password")}
-                className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition"
+                className="w-full bg-ink-900 border border-ink-800 rounded-xl px-4 py-3 text-white placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs"
               />
               {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
             </div>
-
 
             <button
               id="admin-login-btn"
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full py-3.5 font-bold bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-2 transition disabled:opacity-50"
+              className="w-full py-3.5 font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-2 transition-all shadow-md hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-sm mt-2"
             >
               {loading ? (
                 <>
@@ -268,11 +265,17 @@ export default function AdminLoginPage() {
                 </>
               ) : (
                 <>
-                  Login to Dashboard <ArrowRight className="w-4 h-4" />
+                  Login to Admin Console <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
+
+          {/* Security Marker Footer */}
+          <div className="pt-2 border-t border-ink-800/80 flex items-center justify-center gap-2 text-[11px] text-ink-400 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>256-bit Encrypted Token Verification</span>
+          </div>
         </div>
       </FadeIn>
     </div>

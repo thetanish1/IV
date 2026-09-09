@@ -1,65 +1,109 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState, useCallback, useMemo, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import {
   Shield,
-  LogOut,
   Users,
   CreditCard,
   BookOpen,
-  FileText,
-  MessageSquare,
+  FolderGit2,
   Unlock,
   Key,
   Award,
-  Settings as SettingsIcon,
   HelpCircle,
   LayoutDashboard,
   Mail,
-  RefreshCw,
-  FolderGit2,
-  Search,
-  Sun,
-  Moon,
-  Sparkles,
-  ChevronDown,
-  ChevronRight,
-  ExternalLink,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Globe,
-  Activity,
-  Layers,
-  CheckCircle2,
-  Clock,
-  ArrowUpRight,
-  Filter,
-  SlidersHorizontal
+  MessageSquare,
 } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
+import { trackAdminAction } from "@/lib/admin-telemetry";
 import AuthGuard from "@/components/AuthGuard";
 import { getInitialTheme, applyTheme } from "@/lib/theme";
 
-// Modals & Common
-import { ResumePreviewModal, ImageLightboxModal } from "@/components/admin/common";
-
-// Tab Components
+// Modals & Common Primitives
 import {
-  OverviewTab,
-  ApplicantsTab,
-  SubmissionsTab,
-  UnlockRequestsTab,
-  DoubtsHelpdeskTab,
-  ContactsTab,
-  CertificatesTab,
-  UsersTab,
-  CourseEnrollmentsTab,
-  PaymentsAuditTab,
-  BrandedMailerTab,
-  SettingsIAMTab,
-} from "@/components/admin/tabs";
+  ResumePreviewModal,
+  ImageLightboxModal,
+  AdminContainer,
+  AdminErrorBoundary,
+} from "@/components/admin/common";
+
+// Modular Admin Layout Components
+import AdminTopbar from "@/components/admin/layout/AdminTopbar";
+import AdminSidebar, { NavGroup } from "@/components/admin/layout/AdminSidebar";
+import AdminPageHeader from "@/components/admin/layout/AdminPageHeader";
+
+// Tab Loading Fallback Skeleton
+const TabLoadingSkeleton = () => (
+  <div className="space-y-6 animate-pulse">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="p-5 rounded-xl border border-ink-800 bg-ink-950">
+          <div className="flex items-center justify-between mb-3">
+            <div className="h-3 w-16 rounded bg-ink-800" />
+            <div className="h-4 w-4 rounded bg-ink-800" />
+          </div>
+          <div className="h-7 w-24 rounded bg-ink-800/80 mt-2" />
+        </div>
+      ))}
+    </div>
+    <div className="rounded-2xl border border-ink-800 bg-ink-950 p-6 space-y-4">
+      <div className="h-6 w-48 rounded bg-ink-800" />
+      <div className="h-32 w-full rounded bg-ink-900" />
+    </div>
+  </div>
+);
+
+// OverviewTab is eagerly imported for instant initial paint
+import { OverviewTab } from "@/components/admin/tabs";
+
+// Dynamic Code Splitting for secondary tabs
+const ApplicantsTab = dynamic(
+  () => import("@/components/admin/tabs/ApplicantsTab"),
+  { loading: TabLoadingSkeleton }
+);
+const SubmissionsTab = dynamic(
+  () => import("@/components/admin/tabs/SubmissionsTab"),
+  { loading: TabLoadingSkeleton }
+);
+const UnlockRequestsTab = dynamic(
+  () => import("@/components/admin/tabs/UnlockRequestsTab"),
+  { loading: TabLoadingSkeleton }
+);
+const DoubtsHelpdeskTab = dynamic(
+  () => import("@/components/admin/tabs/DoubtsHelpdeskTab"),
+  { loading: TabLoadingSkeleton }
+);
+const ContactsTab = dynamic(
+  () => import("@/components/admin/tabs/ContactsTab"),
+  { loading: TabLoadingSkeleton }
+);
+const CertificatesTab = dynamic(
+  () => import("@/components/admin/tabs/CertificatesTab"),
+  { loading: TabLoadingSkeleton }
+);
+const UsersTab = dynamic(
+  () => import("@/components/admin/tabs/UsersTab").then((m) => m.UsersTab),
+  { loading: TabLoadingSkeleton }
+);
+const CourseEnrollmentsTab = dynamic(
+  () => import("@/components/admin/tabs/CourseEnrollmentsTab").then((m) => m.CourseEnrollmentsTab),
+  { loading: TabLoadingSkeleton }
+);
+const PaymentsAuditTab = dynamic(
+  () => import("@/components/admin/tabs/PaymentsAuditTab").then((m) => m.PaymentsAuditTab),
+  { loading: TabLoadingSkeleton }
+);
+const BrandedMailerTab = dynamic(
+  () => import("@/components/admin/tabs/BrandedMailerTab"),
+  { loading: TabLoadingSkeleton }
+);
+const SettingsIAMTab = dynamic(
+  () => import("@/components/admin/tabs/SettingsIAMTab").then((m) => m.SettingsIAMTab),
+  { loading: TabLoadingSkeleton }
+);
 
 const apiBase = (
   process.env.NEXT_PUBLIC_API_URL ||
@@ -87,27 +131,36 @@ export type TabKey =
   | "mailer"
   | "settings";
 
-interface NavGroup {
-  groupTitle: string;
-  items: {
-    key: TabKey;
-    label: string;
-    icon: React.ReactNode;
-    count?: number;
-    badge?: string;
-  }[];
-}
-
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const searchParams = useSearchParams();
+
+  const initialTab = (searchParams.get("tab") as TabKey) || "overview";
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [searchQuery, setSearchQuery] = useState("");
-  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  // Sync tab selection with URL State (Part 32: URL State vs Local State)
+  const handleTabChange = useCallback((tab: TabKey) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+    trackAdminAction({
+      action: "tab_switched",
+      category: "navigation",
+      label: tab,
+    });
+    const url = new URL(window.location.href);
+    if (tab === "overview") {
+      url.searchParams.delete("tab");
+    } else {
+      url.searchParams.set("tab", tab);
+    }
+    window.history.replaceState({}, "", url.toString());
+  }, []);
 
   // Admin Profile & RBAC
   const [currentAdmin, setCurrentAdmin] = useState<any>(null);
@@ -324,10 +377,11 @@ export default function AdminDashboardPage() {
     localStorage.removeItem("token");
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_user");
+    localStorage.removeItem("admin_email");
     router.push("/admin/login");
   };
 
-  // Navigation Groups modeled after Enterprise Dashboard Hierarchy
+  // Modular Navigation Groups
   const navGroups: NavGroup[] = useMemo(() => [
     {
       groupTitle: "Core & Platform",
@@ -388,490 +442,115 @@ export default function AdminDashboardPage() {
     },
   ], [stats, submissionsCount, unlockRequestsCount, doubtsCount, registrations, newContactsCount]);
 
-  // Active Tab Info Header
+  // Tab Header Details
   const tabInfo: Record<TabKey, { title: string; subtitle: string; icon: React.ReactNode }> = {
     overview: {
       title: "Overview",
       subtitle: "Platform KPI telemetry, analytics summaries, and live system status.",
-      icon: <LayoutDashboard className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <LayoutDashboard className="w-5 h-5 text-brand-400" />,
     },
     applicants: {
       title: "Applications",
       subtitle: "Review candidate profiles, download resumes, and manage acceptance status.",
-      icon: <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <Users className="w-5 h-5 text-brand-400" />,
     },
     submissions: {
       title: "Task Submissions",
       subtitle: "Audit student project milestones, GitHub repositories, and live demo URLs.",
-      icon: <FolderGit2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <FolderGit2 className="w-5 h-5 text-brand-400" />,
     },
     unlocks: {
       title: "Unlock Requests",
       subtitle: "Authorize early access to time-gated curriculum modules and advance tasks.",
-      icon: <Unlock className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <Unlock className="w-5 h-5 text-brand-400" />,
     },
     doubts: {
       title: "Doubts Helpdesk",
       subtitle: "Respond to technical inquiries, inspect code snippets, and assist students.",
-      icon: <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <HelpCircle className="w-5 h-5 text-brand-400" />,
     },
     contacts: {
       title: "Contact Inquiries",
       subtitle: "Manage corporate partnerships, student queries, and reply via Brevo SMTP.",
-      icon: <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <MessageSquare className="w-5 h-5 text-brand-400" />,
     },
     certificates: {
       title: "Digital Certificates",
       subtitle: "Generate tamper-proof credentials and manage the public verification registry.",
-      icon: <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <Award className="w-5 h-5 text-brand-400" />,
     },
     users: {
       title: "User Accounts",
       subtitle: "Manage student accounts, credentials, authentication providers, and roles.",
-      icon: <Key className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <Key className="w-5 h-5 text-brand-400" />,
     },
     enrollments: {
       title: "Course Enrollments",
       subtitle: "Review bootcamp registrations, grant access, and monitor student intake.",
-      icon: <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <BookOpen className="w-5 h-5 text-brand-400" />,
     },
     payments: {
       title: "Payments Audit",
       subtitle: "Razorpay financial transaction ledger, payment verification, and order auditing.",
-      icon: <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <CreditCard className="w-5 h-5 text-brand-400" />,
     },
     mailer: {
       title: "Branded Dispatcher",
       subtitle: "Send rich HTML broadcast newsletters and notifications to students.",
-      icon: <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <Mail className="w-5 h-5 text-brand-400" />,
     },
     settings: {
       title: "IAM & Platform Settings",
       subtitle: "Admin access controls, sub-admin role assignment, and platform feature flags.",
-      icon: <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      icon: <Shield className="w-5 h-5 text-brand-400" />,
     },
   };
 
   return (
-    <AuthGuard>
-      <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-        theme === "dark" 
-          ? "bg-[#121214] text-[#EDEDED]" 
-          : "bg-[#F7F7F8] text-[#111827]"
-      }`}>
-        {/* ─── CLOUDFLARE TOPBAR ────────────────────────────────────────── */}
-        <header className={`sticky top-0 z-50 h-14 border-b flex items-center justify-between px-4 sm:px-6 transition-colors duration-200 backdrop-blur-md ${
-          theme === "dark"
-            ? "bg-[#18181B]/95 border-[#27272A] text-[#EDEDED]"
-            : "bg-white/95 border-[#E5E7EB] text-[#111827]"
-        }`}>
-          {/* Topbar Left: Brand / Account Selector */}
-          <div className="flex items-center gap-3">
-            {/* InternVision Tech Logo as on homepage */}
-            <div 
-              className="flex items-center gap-2.5 cursor-pointer select-none group" 
-              onClick={() => setActiveTab("overview")}
-              title="InternVision Tech Admin"
-            >
-              <div className="bg-white p-1 rounded-md flex items-center justify-center border border-gray-200 dark:border-zinc-700 shadow-sm">
-                <Image 
-                  src="/logo.jpg" 
-                  alt="InternVision Logo" 
-                  width={140} 
-                  height={36} 
-                  className="h-6 w-auto object-contain" 
-                  priority
-                />
-              </div>
-              <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-white hidden md:inline">
-                InternVision <span className="text-[#0051C3] dark:text-[#3B82F6]">Tech</span>
-              </span>
-            </div>
+    <div className="min-h-screen flex flex-col font-sans bg-ink-950 text-ink-50 transition-colors duration-200">
+      {/* Topbar Component */}
+      <AdminTopbar
+        currentAdmin={currentAdmin}
+        theme={theme}
+        refreshing={refreshing}
+        onToggleTheme={toggleTheme}
+        onRefreshData={fetchAllData}
+        onNavigateTab={(tab) => handleTabChange(tab as TabKey)}
+        onLogout={handleLogout}
+        onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+      />
 
-            {/* Account Selector Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-                  theme === "dark"
-                    ? "border-[#2E2E33] bg-[#222226] text-[#E0E0E0] hover:bg-[#2A2A30]"
-                    : "border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:bg-[#F3F4F6]"
-                }`}
-              >
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-                <span className="max-w-[150px] truncate">{currentAdmin?.email || "Enterprise Admin"}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-              </button>
+      {/* Main App Canvas */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar Component */}
+        <AdminSidebar
+          navGroups={navGroups}
+          activeTab={activeTab}
+          sidebarCollapsed={sidebarCollapsed}
+          mobileMenuOpen={mobileMenuOpen}
+          searchQuery={searchQuery}
+          onSelectTab={handleTabChange}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onCloseMobileMenu={() => setMobileMenuOpen(false)}
+          onSearchChange={setSearchQuery}
+        />
 
-              {accountDropdownOpen && (
-                <div
-                  className={`absolute left-0 mt-1.5 w-64 rounded-lg shadow-xl border py-1 z-50 text-xs ${
-                    theme === "dark"
-                      ? "bg-[#1E1E22] border-[#2E2E33] text-[#EDEDED]"
-                      : "bg-white border-[#E5E7EB] text-[#111827]"
-                  }`}
-                >
-                  <div className="px-3 py-2 border-b border-inherit font-medium opacity-70">
-                    Active Account
-                  </div>
-                  <div className="px-3 py-2 flex items-center justify-between">
-                    <span className="font-semibold">{currentAdmin?.full_name || "Admin"}</span>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
-                      {currentAdmin?.role || "super_admin"}
-                    </span>
-                  </div>
-                  <div className="px-3 pb-2 text-[11px] text-gray-500 truncate">
-                    {currentAdmin?.email}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <AdminContainer size="2xl" gutter={false} className="space-y-6">
+            {/* Header Banner */}
+            <AdminPageHeader
+              title={tabInfo[activeTab]?.title}
+              subtitle={tabInfo[activeTab]?.subtitle}
+              icon={tabInfo[activeTab]?.icon}
+              refreshing={refreshing}
+              onRefresh={fetchAllData}
+            />
 
-          {/* Topbar Right: Search trigger, Ask AI, Theme Toggle, Support, Profile */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Ask AI Button (Enterprise Blue Style) */}
-            <button
-              onClick={() => setActiveTab("doubts")}
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${
-                theme === "dark"
-                  ? "border-[#2E2E33] bg-[#222226] text-[#EDEDED] hover:border-blue-500/50"
-                  : "border-[#E5E7EB] bg-white text-[#374151] hover:border-blue-600"
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>Ask AI</span>
-            </button>
-
-            {/* Support / Documentation Link */}
-            <button
-              onClick={() => window.open("/docs", "_blank")}
-              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                theme === "dark"
-                  ? "text-gray-400 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>Support</span>
-            </button>
-
-            {/* Theme Switcher Toggle (Light / Dark mode) */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-md border text-xs font-medium transition-colors flex items-center justify-center ${
-                theme === "dark"
-                  ? "border-[#2E2E33] bg-[#222226] text-amber-400 hover:bg-[#2A2A30]"
-                  : "border-[#E5E7EB] bg-white text-gray-700 hover:bg-[#F3F4F6]"
-              }`}
-              title={theme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
-            >
-              {theme === "dark" ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4 text-blue-600" />
-              )}
-            </button>
-
-            {/* Refresh Telemetry Button */}
-            <button
-              onClick={fetchAllData}
-              disabled={refreshing}
-              className={`p-2 rounded-md border text-xs font-medium transition-colors ${
-                theme === "dark"
-                  ? "border-[#2E2E33] bg-[#222226] text-gray-300 hover:text-white hover:bg-[#2A2A30]"
-                  : "border-[#E5E7EB] bg-white text-gray-700 hover:bg-[#F3F4F6]"
-              }`}
-              title="Refresh telemetry"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-blue-600 dark:text-blue-400" : ""}`} />
-            </button>
-
-            {/* Profile Avatar & Menu */}
-            <div className="relative">
-              <button
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-700 to-blue-500 text-white font-bold text-xs flex items-center justify-center shadow-sm"
-              >
-                {(currentAdmin?.full_name || currentAdmin?.email || "A").slice(0, 1).toUpperCase()}
-              </button>
-
-              {profileDropdownOpen && (
-                <div
-                  className={`absolute right-0 mt-1.5 w-48 rounded-lg shadow-xl border py-1 z-50 text-xs ${
-                    theme === "dark"
-                      ? "bg-[#1E1E22] border-[#2E2E33] text-[#EDEDED]"
-                      : "bg-white border-[#E5E7EB] text-[#111827]"
-                  }`}
-                >
-                  <div className="px-3 py-2 border-b border-inherit">
-                    <p className="font-semibold truncate">{currentAdmin?.full_name || "Admin"}</p>
-                    <p className="text-[10px] text-gray-500 truncate">{currentAdmin?.email}</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setActiveTab("settings");
-                      setProfileDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2"
-                  >
-                    <SettingsIcon className="w-3.5 h-3.5" />
-                    <span>IAM Settings</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 hover:bg-rose-500/10 text-rose-500 flex items-center gap-2 border-t border-inherit"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* ─── CLOUDFLARE MAIN APP CONTAINER ────────────────────────────── */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* ─── LEFT SIDEBAR ─────────────────────────────────────────── */}
-          <aside
-            className={`flex-shrink-0 border-r transition-all duration-200 flex flex-col justify-between ${
-              sidebarCollapsed ? "w-16" : "w-64"
-            } ${
-              theme === "dark"
-                ? "bg-[#161619] border-[#27272A]"
-                : "bg-[#FFFFFF] border-[#E5E7EB]"
-            }`}
-          >
-            <div className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
-              {/* Quick Search Input */}
-              {!sidebarCollapsed && (
-                <div className="relative mb-2">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 opacity-40" />
-                  <input
-                    type="text"
-                    placeholder="Quick search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-8 pr-12 py-1.5 rounded-md text-xs border outline-none transition-colors ${
-                      theme === "dark"
-                        ? "bg-[#1F1F23] border-[#2E2E33] text-[#EDEDED] focus:border-blue-500"
-                        : "bg-[#F9FAFB] border-[#E5E7EB] text-[#111827] focus:border-blue-600"
-                    }`}
-                  />
-                  <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1 py-0.2 rounded border ${
-                    theme === "dark"
-                      ? "border-[#2E2E33] bg-[#2A2A30] text-gray-400"
-                      : "border-gray-200 bg-gray-100 text-gray-500"
-                  }`}>
-                    Ctrl K
-                  </span>
-                </div>
-              )}
-
-              {/* Grouped Navigation Links */}
-              {navGroups.map((group, gIdx) => {
-                const filteredItems = group.items.filter(
-                  (i) => !searchQuery || i.label.toLowerCase().includes(searchQuery.toLowerCase())
-                );
-                if (filteredItems.length === 0) return null;
-
-                return (
-                  <div key={gIdx} className="space-y-1">
-                    {!sidebarCollapsed && (
-                      <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                        {group.groupTitle}
-                      </div>
-                    )}
-
-                    {filteredItems.map((item) => {
-                      const isActive = activeTab === item.key;
-                      return (
-                        <button
-                          key={item.key}
-                          onClick={() => setActiveTab(item.key)}
-                          title={sidebarCollapsed ? item.label : undefined}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                            isActive
-                              ? theme === "dark"
-                                ? "bg-[#25252A] text-white shadow-sm font-semibold border-l-2 border-blue-500"
-                                : "bg-blue-50 text-blue-700 font-semibold border-l-2 border-blue-600"
-                              : theme === "dark"
-                              ? "text-[#A1A1AA] hover:text-white hover:bg-[#1F1F23]"
-                              : "text-[#4B5563] hover:text-[#111827] hover:bg-[#F9FAFB]"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span className={isActive ? "text-blue-600 dark:text-blue-400" : "opacity-70"}>
-                              {item.icon}
-                            </span>
-                            {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
-                          </div>
-
-                          {!sidebarCollapsed && (
-                            <div className="flex items-center gap-1.5">
-                              {item.badge && (
-                                <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
-                                  theme === "dark"
-                                    ? "bg-[#2E2E33] text-gray-300"
-                                    : "bg-gray-200 text-gray-700"
-                                }`}>
-                                  {item.badge}
-                                </span>
-                              )}
-                              {item.count !== undefined && item.count > 0 && (
-                                <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                                  isActive
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-blue-500/15 text-blue-600 dark:text-blue-400"
-                                }`}>
-                                  {item.count}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bottom Sidebar Collapse Action */}
-            <div className={`p-2 border-t ${
-              theme === "dark" ? "border-[#27272A]" : "border-[#E5E7EB]"
-            }`}>
-              <button
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className={`w-full flex items-center justify-center p-1.5 rounded-md text-xs text-gray-400 hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 transition-colors`}
-                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              >
-                {sidebarCollapsed ? (
-                  <PanelLeftOpen className="w-4 h-4" />
-                ) : (
-                  <div className="flex items-center gap-2 w-full px-2 text-xs">
-                    <PanelLeftClose className="w-4 h-4" />
-                    <span>Collapse menu</span>
-                  </div>
-                )}
-              </button>
-            </div>
-          </aside>
-
-          {/* ─── MAIN CONTENT CANVAS ──────────────────────────────────── */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
-              {/* Enterprise Header Card Banner */}
-              <div className={`p-6 rounded-xl border transition-colors ${
-                theme === "dark"
-                  ? "bg-[#18181B] border-[#27272A]"
-                  : "bg-white border-[#E5E7EB] shadow-sm"
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className={`p-2.5 rounded-lg border ${
-                      theme === "dark"
-                        ? "bg-[#222226] border-[#2E2E33]"
-                        : "bg-blue-50 border-blue-200"
-                    }`}>
-                      {tabInfo[activeTab]?.icon}
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        {tabInfo[activeTab]?.title}
-                      </h1>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {tabInfo[activeTab]?.subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Header Actions */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => window.open("/docs", "_blank")}
-                      className={`px-3 py-1.5 rounded-md text-xs font-medium border flex items-center gap-1.5 transition-colors ${
-                        theme === "dark"
-                          ? "border-[#2E2E33] bg-[#222226] text-gray-300 hover:text-white"
-                          : "border-[#E5E7EB] bg-white text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Documentation</span>
-                    </button>
-
-                    <button
-                      onClick={fetchAllData}
-                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors flex items-center gap-1.5"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-                      <span>Sync Data</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tab Content Display / Component Simulation Loading Skeleton */}
+            {/* Tab Content Display with Error Boundary Isolation */}
+            <AdminErrorBoundary fallbackTitle={`Error rendering ${tabInfo[activeTab]?.title}`}>
               {loading ? (
-                <div className="space-y-6 animate-pulse">
-                  {/* Top KPI Telemetry Skeleton Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div
-                        key={i}
-                        className={`p-5 rounded-xl border ${
-                          theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-gray-200 shadow-sm"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className={`h-3 w-16 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                          <div className={`h-4 w-4 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                        </div>
-                        <div className={`h-7 w-24 rounded mt-2 ${theme === "dark" ? "bg-white/15" : "bg-gray-300"}`} />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Filter Bar Skeleton */}
-                  <div
-                    className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 ${
-                      theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-gray-200 shadow-sm"
-                    }`}
-                  >
-                    <div className={`h-9 w-full sm:w-80 rounded-lg ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      <div className={`h-9 w-28 rounded-lg ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                      <div className={`h-9 w-28 rounded-lg ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                    </div>
-                  </div>
-
-                  {/* Table Skeleton */}
-                  <div
-                    className={`rounded-2xl border overflow-hidden ${
-                      theme === "dark" ? "bg-[#18181B] border-[#27272A]" : "bg-white border-gray-200 shadow-sm"
-                    }`}
-                  >
-                    <div className={`p-4 border-b ${theme === "dark" ? "border-[#27272A] bg-[#141417]" : "border-gray-200 bg-gray-50"}`}>
-                      <div className="grid grid-cols-5 gap-4">
-                        {[1, 2, 3, 4, 5].map((c) => (
-                          <div key={c} className={`h-3 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="divide-y divide-gray-100 dark:divide-[#27272A]">
-                      {[1, 2, 3, 4, 5, 6].map((row) => (
-                        <div key={row} className="p-4 grid grid-cols-5 gap-4 items-center">
-                          <div className={`h-4 w-32 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                          <div className={`h-4 w-24 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                          <div className={`h-4 w-28 rounded ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                          <div className={`h-6 w-20 rounded-full ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                          <div className={`h-4 w-16 rounded ml-auto ${theme === "dark" ? "bg-white/10" : "bg-gray-200"}`} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <TabLoadingSkeleton />
               ) : (
                 <>
                   {activeTab === "overview" && (
@@ -882,7 +561,7 @@ export default function AdminDashboardPage() {
                       submissionsCount={submissionsCount}
                       unlockRequestsCount={unlockRequestsCount}
                       doubtsCount={doubtsCount}
-                      onNavigateTab={(tab) => setActiveTab(tab as TabKey)}
+                      onNavigateTab={(tab) => handleTabChange(tab as TabKey)}
                     />
                   )}
 
@@ -947,24 +626,34 @@ export default function AdminDashboardPage() {
                   )}
                 </>
               )}
-            </div>
-          </main>
-        </div>
-
-        {/* Global Modal Viewers */}
-        <ResumePreviewModal
-          resume={previewResumeUrl ? { url: previewResumeUrl, name: previewResumeTitle } : null}
-          onClose={() => {
-            setPreviewResumeUrl(null);
-            setPreviewResumeTitle("");
-          }}
-        />
-
-        <ImageLightboxModal
-          imageUrl={expandedImage}
-          onClose={() => setExpandedImage(null)}
-        />
+            </AdminErrorBoundary>
+          </AdminContainer>
+        </main>
       </div>
+
+      {/* Global Modal Viewers */}
+      <ResumePreviewModal
+        resume={previewResumeUrl ? { url: previewResumeUrl, name: previewResumeTitle } : null}
+        onClose={() => {
+          setPreviewResumeUrl(null);
+          setPreviewResumeTitle("");
+        }}
+      />
+
+      <ImageLightboxModal
+        imageUrl={expandedImage}
+        onClose={() => setExpandedImage(null)}
+      />
+    </div>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <AuthGuard>
+      <Suspense fallback={<TabLoadingSkeleton />}>
+        <AdminDashboardContent />
+      </Suspense>
     </AuthGuard>
   );
 }
