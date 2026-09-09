@@ -17,11 +17,11 @@ export function Heading({
   const chosenSize = size || (`h${level}` as const);
 
   const sizeStyles = {
-    display: "text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight",
-    h1: "text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight",
-    h2: "text-xl sm:text-2xl font-bold tracking-tight text-white",
-    h3: "text-lg font-bold text-white tracking-tight",
-    h4: "text-base font-semibold text-white",
+    display: "text-3xl sm:text-4xl font-black tracking-tight text-gray-900 dark:text-white leading-tight",
+    h1: "text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight",
+    h2: "text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white",
+    h3: "text-lg font-bold text-gray-900 dark:text-white tracking-tight",
+    h4: "text-base font-semibold text-gray-900 dark:text-white",
   };
 
   const combinedClasses = twMerge(clsx(sizeStyles[chosenSize], className));
@@ -42,7 +42,7 @@ export function Eyebrow({
     <span
       className={twMerge(
         clsx(
-          "inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-brand-400 bg-brand-500/10 px-2.5 py-1 rounded-full border border-brand-500/30",
+          "inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-brand-700 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2.5 py-1 rounded-full border border-brand-200 dark:border-brand-500/30",
           className
         )
       )}
@@ -74,10 +74,10 @@ export function Text({
   };
 
   const variantStyles = {
-    primary: "text-white",
-    muted: "text-ink-300",
-    subtle: "text-ink-400",
-    brand: "text-brand-300",
+    primary: "text-gray-900 dark:text-white",
+    muted: "text-gray-600 dark:text-ink-300",
+    subtle: "text-gray-500 dark:text-ink-400",
+    brand: "text-brand-600 dark:text-brand-300",
   };
 
   return (

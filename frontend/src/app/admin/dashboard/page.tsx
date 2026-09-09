@@ -35,23 +35,26 @@ import AdminTopbar from "@/components/admin/layout/AdminTopbar";
 import AdminSidebar, { NavGroup } from "@/components/admin/layout/AdminSidebar";
 import AdminPageHeader from "@/components/admin/layout/AdminPageHeader";
 
-// Tab Loading Fallback Skeleton
+// Tab Loading Fallback Skeleton (Supports Light and Dark mode)
 const TabLoadingSkeleton = () => (
   <div className="space-y-6 animate-pulse">
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="p-5 rounded-xl border border-ink-800 bg-ink-950">
+        <div
+          key={i}
+          className="p-5 rounded-xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950 shadow-sm"
+        >
           <div className="flex items-center justify-between mb-3">
-            <div className="h-3 w-16 rounded bg-ink-800" />
-            <div className="h-4 w-4 rounded bg-ink-800" />
+            <div className="h-3 w-16 rounded bg-gray-200 dark:bg-ink-800" />
+            <div className="h-4 w-4 rounded bg-gray-200 dark:bg-ink-800" />
           </div>
-          <div className="h-7 w-24 rounded bg-ink-800/80 mt-2" />
+          <div className="h-7 w-24 rounded bg-gray-300 dark:bg-ink-800/80 mt-2" />
         </div>
       ))}
     </div>
-    <div className="rounded-2xl border border-ink-800 bg-ink-950 p-6 space-y-4">
-      <div className="h-6 w-48 rounded bg-ink-800" />
-      <div className="h-32 w-full rounded bg-ink-900" />
+    <div className="rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950 p-6 space-y-4 shadow-sm">
+      <div className="h-6 w-48 rounded bg-gray-200 dark:bg-ink-800" />
+      <div className="h-32 w-full rounded bg-gray-100 dark:bg-ink-900" />
     </div>
   </div>
 );
@@ -144,7 +147,7 @@ function AdminDashboardContent() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Sync tab selection with URL State (Part 32: URL State vs Local State)
+  // Sync tab selection with URL State
   const handleTabChange = useCallback((tab: TabKey) => {
     setActiveTab(tab);
     setMobileMenuOpen(false);
@@ -447,67 +450,67 @@ function AdminDashboardContent() {
     overview: {
       title: "Overview",
       subtitle: "Platform KPI telemetry, analytics summaries, and live system status.",
-      icon: <LayoutDashboard className="w-5 h-5 text-brand-400" />,
+      icon: <LayoutDashboard className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     applicants: {
       title: "Applications",
       subtitle: "Review candidate profiles, download resumes, and manage acceptance status.",
-      icon: <Users className="w-5 h-5 text-brand-400" />,
+      icon: <Users className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     submissions: {
       title: "Task Submissions",
       subtitle: "Audit student project milestones, GitHub repositories, and live demo URLs.",
-      icon: <FolderGit2 className="w-5 h-5 text-brand-400" />,
+      icon: <FolderGit2 className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     unlocks: {
       title: "Unlock Requests",
       subtitle: "Authorize early access to time-gated curriculum modules and advance tasks.",
-      icon: <Unlock className="w-5 h-5 text-brand-400" />,
+      icon: <Unlock className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     doubts: {
       title: "Doubts Helpdesk",
       subtitle: "Respond to technical inquiries, inspect code snippets, and assist students.",
-      icon: <HelpCircle className="w-5 h-5 text-brand-400" />,
+      icon: <HelpCircle className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     contacts: {
       title: "Contact Inquiries",
       subtitle: "Manage corporate partnerships, student queries, and reply via Brevo SMTP.",
-      icon: <MessageSquare className="w-5 h-5 text-brand-400" />,
+      icon: <MessageSquare className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     certificates: {
       title: "Digital Certificates",
       subtitle: "Generate tamper-proof credentials and manage the public verification registry.",
-      icon: <Award className="w-5 h-5 text-brand-400" />,
+      icon: <Award className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     users: {
       title: "User Accounts",
       subtitle: "Manage student accounts, credentials, authentication providers, and roles.",
-      icon: <Key className="w-5 h-5 text-brand-400" />,
+      icon: <Key className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     enrollments: {
       title: "Course Enrollments",
       subtitle: "Review bootcamp registrations, grant access, and monitor student intake.",
-      icon: <BookOpen className="w-5 h-5 text-brand-400" />,
+      icon: <BookOpen className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     payments: {
       title: "Payments Audit",
       subtitle: "Razorpay financial transaction ledger, payment verification, and order auditing.",
-      icon: <CreditCard className="w-5 h-5 text-brand-400" />,
+      icon: <CreditCard className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     mailer: {
       title: "Branded Dispatcher",
       subtitle: "Send rich HTML broadcast newsletters and notifications to students.",
-      icon: <Mail className="w-5 h-5 text-brand-400" />,
+      icon: <Mail className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     settings: {
       title: "IAM & Platform Settings",
       subtitle: "Admin access controls, sub-admin role assignment, and platform feature flags.",
-      icon: <Shield className="w-5 h-5 text-brand-400" />,
+      icon: <Shield className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-ink-950 text-ink-50 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col font-sans bg-[#F8F9FA] dark:bg-ink-950 text-gray-900 dark:text-ink-50 transition-colors duration-200">
       {/* Topbar Component */}
       <AdminTopbar
         currentAdmin={currentAdmin}
@@ -536,7 +539,7 @@ function AdminDashboardContent() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#F8F9FA] dark:bg-ink-950">
           <AdminContainer size="2xl" gutter={false} className="space-y-6">
             {/* Header Banner */}
             <AdminPageHeader

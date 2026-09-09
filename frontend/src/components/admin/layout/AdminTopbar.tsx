@@ -39,7 +39,7 @@ export default function AdminTopbar({
     {
       label: currentAdmin?.full_name || "Admin",
       description: currentAdmin?.email || "admin@internvision.tech",
-      icon: <User className="w-3.5 h-3.5 text-brand-400" />,
+      icon: <User className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />,
       badge: currentAdmin?.role || "super_admin",
       onClick: () => onNavigateTab("settings"),
     },
@@ -49,20 +49,20 @@ export default function AdminTopbar({
     {
       label: "IAM & Platform Settings",
       description: "Manage roles & permissions",
-      icon: <SettingsIcon className="w-3.5 h-3.5 text-brand-400" />,
+      icon: <SettingsIcon className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />,
       onClick: () => onNavigateTab("settings"),
     },
     {
       label: "Sign Out",
       description: "Terminate active admin session",
-      icon: <LogOut className="w-3.5 h-3.5 text-red-400" />,
+      icon: <LogOut className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />,
       danger: true,
       onClick: onLogout,
     },
   ];
 
   return (
-    <header className="sticky top-0 z-50 h-14 border-b border-ink-800 bg-ink-950/90 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 transition-colors duration-200">
+    <header className="sticky top-0 z-50 h-14 border-b border-gray-200 dark:border-ink-800 bg-white/95 dark:bg-ink-950/90 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 transition-colors duration-200 shadow-sm">
       {/* Brand & Mobile Hamburger Toggle & Account Selector */}
       <div className="flex items-center gap-3">
         {/* Mobile menu trigger button */}
@@ -70,7 +70,7 @@ export default function AdminTopbar({
           <button
             onClick={onToggleMobileMenu}
             aria-label="Open mobile navigation menu"
-            className="md:hidden p-2 rounded-lg border border-ink-800 bg-ink-900 text-ink-300 hover:text-white transition-colors"
+            className="md:hidden p-2 rounded-lg border border-gray-200 dark:border-ink-800 bg-gray-50 dark:bg-ink-900 text-gray-700 dark:text-ink-300 hover:bg-gray-100 dark:hover:text-white transition-colors"
           >
             <Menu className="w-4 h-4" />
           </button>
@@ -81,7 +81,7 @@ export default function AdminTopbar({
           onClick={() => onNavigateTab("overview")}
           title="InternVision Tech Admin"
         >
-          <div className="bg-white p-1 rounded-md flex items-center justify-center border border-ink-700 shadow-sm">
+          <div className="bg-white p-1 rounded-md flex items-center justify-center border border-gray-200 dark:border-ink-700 shadow-sm">
             <Image
               src="/logo.jpg"
               alt="InternVision Logo"
@@ -91,8 +91,8 @@ export default function AdminTopbar({
               priority
             />
           </div>
-          <span className="font-bold text-sm tracking-tight text-white hidden sm:inline">
-            InternVision <span className="text-brand-400">Tech</span>
+          <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-white hidden sm:inline">
+            InternVision <span className="text-brand-600 dark:text-brand-400">Tech</span>
           </span>
         </div>
 
@@ -103,8 +103,8 @@ export default function AdminTopbar({
             align="left"
             items={accountItems}
             trigger={
-              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-ink-800 bg-ink-900 text-ink-200 hover:bg-ink-800 hover:text-white transition-colors">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-ink-800 bg-gray-50 dark:bg-ink-900 text-gray-800 dark:text-ink-200 hover:bg-gray-100 dark:hover:bg-ink-800 dark:hover:text-white transition-colors">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                 <span className="max-w-[140px] truncate">
                   {currentAdmin?.email || "Enterprise Admin"}
                 </span>
@@ -121,9 +121,9 @@ export default function AdminTopbar({
         <button
           onClick={() => onNavigateTab("doubts")}
           aria-label="Ask AI Assistant"
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-ink-800 bg-ink-900 text-ink-200 hover:border-brand-500/60 hover:text-white transition-all shadow-sm"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-ink-800 bg-gray-50 dark:bg-ink-900 text-gray-800 dark:text-ink-200 hover:border-brand-500 dark:hover:border-brand-500/60 hover:text-brand-600 dark:hover:text-white transition-all shadow-sm"
         >
-          <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+          <Sparkles className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
           <span>Ask AI</span>
         </button>
 
@@ -131,7 +131,7 @@ export default function AdminTopbar({
         <button
           onClick={() => window.open("/docs", "_blank")}
           aria-label="View documentation"
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-ink-400 hover:text-white transition-colors"
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-ink-400 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <HelpCircle className="w-3.5 h-3.5" />
           <span>Support</span>
@@ -141,12 +141,13 @@ export default function AdminTopbar({
         <button
           onClick={onToggleTheme}
           aria-label={theme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
-          className="p-2 rounded-lg border border-ink-800 bg-ink-900 text-amber-400 hover:bg-ink-800 transition-colors flex items-center justify-center"
+          className="p-2 rounded-lg border border-gray-200 dark:border-ink-800 bg-gray-50 dark:bg-ink-900 text-gray-700 dark:text-amber-400 hover:bg-gray-100 dark:hover:bg-ink-800 transition-colors flex items-center justify-center shadow-sm"
+          title={theme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
         >
           {theme === "dark" ? (
-            <Sun className="w-4 h-4" />
+            <Sun className="w-4 h-4 text-amber-400" />
           ) : (
-            <Moon className="w-4 h-4 text-brand-400" />
+            <Moon className="w-4 h-4 text-brand-600" />
           )}
         </button>
 
@@ -155,11 +156,12 @@ export default function AdminTopbar({
           onClick={onRefreshData}
           disabled={refreshing}
           aria-label="Refresh telemetry data"
-          className="p-2 rounded-lg border border-ink-800 bg-ink-900 text-ink-300 hover:text-white hover:bg-ink-800 transition-colors"
+          className="p-2 rounded-lg border border-gray-200 dark:border-ink-800 bg-gray-50 dark:bg-ink-900 text-gray-700 dark:text-ink-300 hover:bg-gray-100 dark:hover:text-white dark:hover:bg-ink-800 transition-colors shadow-sm"
+          title="Refresh telemetry"
         >
           <RefreshCw
             className={`w-4 h-4 ${
-              refreshing ? "animate-spin text-brand-400" : ""
+              refreshing ? "animate-spin text-brand-600 dark:text-brand-400" : ""
             }`}
           />
         </button>
@@ -173,7 +175,7 @@ export default function AdminTopbar({
             <div
               role="button"
               aria-label="User profile menu"
-              className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-600 to-brand-400 text-white font-black text-xs flex items-center justify-center shadow-md border border-brand-300/30 hover:scale-105 transition-transform"
+              className="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-700 to-brand-500 text-white font-black text-xs flex items-center justify-center shadow-md border border-brand-300/30 hover:scale-105 transition-transform cursor-pointer"
             >
               {(currentAdmin?.full_name || currentAdmin?.email || "A")
                 .slice(0, 1)

@@ -26,17 +26,17 @@ export default function AdminButton({
 
   const variantStyles = {
     primary:
-      "bg-white text-black hover:bg-ink-100 shadow-sm border border-transparent disabled:opacity-50",
+      "bg-gray-900 text-white hover:bg-black shadow-sm border border-transparent dark:bg-white dark:text-black dark:hover:bg-ink-100 disabled:opacity-50",
     brand:
       "bg-brand-600 hover:bg-brand-500 text-white shadow-sm border border-brand-500/30 disabled:opacity-50",
     secondary:
-      "bg-ink-900 hover:bg-ink-800 text-ink-200 hover:text-white border border-ink-800 disabled:opacity-50",
+      "bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200 dark:bg-ink-900 dark:hover:bg-ink-800 dark:text-ink-200 dark:border-ink-800 disabled:opacity-50",
     outline:
-      "bg-transparent hover:bg-ink-900 text-ink-300 hover:text-white border border-ink-700 hover:border-brand-500 disabled:opacity-50",
+      "bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 hover:border-gray-400 dark:bg-transparent dark:hover:bg-ink-900 dark:text-ink-300 dark:border-ink-700 dark:hover:border-brand-500 disabled:opacity-50 shadow-sm",
     danger:
-      "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 disabled:opacity-50",
+      "bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 dark:border-red-500/30 disabled:opacity-50",
     ghost:
-      "bg-transparent hover:bg-ink-800/60 text-ink-400 hover:text-white disabled:opacity-50",
+      "bg-transparent hover:bg-gray-100 text-gray-600 hover:text-gray-900 dark:text-ink-400 dark:hover:text-white dark:hover:bg-ink-800/60 disabled:opacity-50",
   };
 
   return (

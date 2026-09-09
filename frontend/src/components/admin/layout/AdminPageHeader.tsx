@@ -22,17 +22,17 @@ export default function AdminPageHeader({
   customActions,
 }: AdminPageHeaderProps) {
   return (
-    <div className="p-6 rounded-xl border border-ink-800 bg-ink-950/90 backdrop-blur-sm shadow-sm transition-colors">
+    <div className="p-6 rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950/90 backdrop-blur-sm shadow-sm transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
-          <div className="p-2.5 rounded-lg border border-ink-800 bg-ink-900 text-brand-400 shrink-0">
+          <div className="p-2.5 rounded-xl border border-blue-100 dark:border-ink-800 bg-blue-50 dark:bg-ink-900 text-blue-600 dark:text-brand-400 shrink-0 shadow-sm">
             {icon}
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">
+            <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
               {title}
             </h1>
-            <p className="text-xs text-ink-400 mt-0.5">{subtitle}</p>
+            <p className="text-xs text-gray-500 dark:text-ink-400 mt-0.5">{subtitle}</p>
           </div>
         </div>
 

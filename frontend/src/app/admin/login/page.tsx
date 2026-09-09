@@ -158,41 +158,41 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-[#F8F9FA] dark:bg-ink-950 transition-colors duration-200">
       <FadeIn delay={0.1} direction="up">
-        <div className="max-w-md w-full rounded-2xl border border-ink-800 bg-ink-950/90 backdrop-blur-md p-8 sm:p-10 shadow-2xl space-y-8 relative overflow-hidden">
+        <div className="max-w-md w-full rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950/90 backdrop-blur-md p-8 sm:p-10 shadow-2xl space-y-8 relative overflow-hidden">
           {/* Subtle Accent Glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Header */}
           <div className="text-center space-y-3">
-            <div className="w-14 h-14 bg-brand-600/15 text-brand-400 flex items-center justify-center mx-auto rounded-2xl border border-brand-500/30 shadow-inner">
+            <div className="w-14 h-14 bg-brand-50 dark:bg-brand-600/15 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto rounded-2xl border border-brand-200 dark:border-brand-500/30 shadow-sm">
               <Shield className="w-7 h-7" />
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tight">Admin Authentication</h2>
-            <p className="text-xs text-ink-400">
-              Secure administrative access for <span className="text-brand-300 font-bold">InternVision Tech</span> platform
+            <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Admin Authentication</h2>
+            <p className="text-xs text-gray-500 dark:text-ink-400">
+              Secure administrative access for <span className="text-brand-600 dark:text-brand-300 font-bold">InternVision Tech</span> platform
             </p>
           </div>
 
           {/* Error banner */}
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center font-medium">
+            <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 text-xs text-center font-semibold shadow-sm">
               {error}
             </div>
           )}
 
           {/* Google Sign-In Section */}
           <div className="space-y-3">
-            <p className="text-[11px] text-ink-400 text-center font-bold uppercase tracking-wider">
+            <p className="text-[11px] text-gray-400 dark:text-ink-400 text-center font-bold uppercase tracking-wider">
               Quick Sign-In
             </p>
 
             {googleClientId && !googleClientId.includes("<your") ? (
               <div className="relative">
                 {googleLoading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-ink-950/80 rounded-lg">
-                    <Loader2 className="w-5 h-5 animate-spin text-brand-400" />
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-ink-950/80 rounded-lg">
+                    <Loader2 className="w-5 h-5 animate-spin text-brand-600 dark:text-brand-400" />
                   </div>
                 )}
                 <div
@@ -201,56 +201,56 @@ export default function AdminLoginPage() {
                   className="w-full min-h-[44px]"
                 />
                 {!googleReady && (
-                  <div className="w-full py-3 rounded-lg flex items-center justify-center gap-2 bg-ink-900 border border-ink-800 text-ink-400 text-xs font-semibold">
+                  <div className="w-full py-3 rounded-xl flex items-center justify-center gap-2 bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 text-gray-500 dark:text-ink-400 text-xs font-semibold shadow-sm">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Loading Google Sign-In…
                   </div>
                 )}
               </div>
             ) : (
-              <div className="w-full py-3 rounded-lg flex items-center justify-center gap-2 bg-ink-900 border border-ink-800 text-ink-400 text-xs font-semibold cursor-not-allowed opacity-60 select-none">
+              <div className="w-full py-3 rounded-xl flex items-center justify-center gap-2 bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 text-gray-500 dark:text-ink-400 text-xs font-semibold cursor-not-allowed opacity-60 select-none shadow-sm">
                 <Globe2 className="w-4 h-4" />
                 Sign in with Google
-                <span className="text-[10px] text-red-400 ml-1">(GOOGLE_CLIENT_ID not set)</span>
+                <span className="text-[10px] text-red-500 ml-1">(GOOGLE_CLIENT_ID not set)</span>
               </div>
             )}
           </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-ink-800" />
-            <span className="text-[10px] text-ink-400 font-bold uppercase tracking-widest">or credentials</span>
-            <div className="flex-1 h-px bg-ink-800" />
+            <div className="flex-1 h-px bg-gray-200 dark:bg-ink-800" />
+            <span className="text-[10px] text-gray-400 dark:text-ink-400 font-bold uppercase tracking-widest">or credentials</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-ink-800" />
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-sm">
             <div className="space-y-1.5">
-              <label className="text-xs text-ink-300 font-semibold flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-brand-400" /> Admin Email
+              <label className="text-xs text-gray-700 dark:text-ink-300 font-semibold flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" /> Admin Email
               </label>
               <input
                 id="admin-email"
                 type="email"
                 placeholder="admin@internvision.tech"
                 {...register("email")}
-                className="w-full bg-ink-900 border border-ink-800 rounded-xl px-4 py-3 text-white placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs"
+                className="w-full bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs shadow-inner"
               />
-              {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs text-ink-300 font-semibold flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-brand-400" /> Password
+              <label className="text-xs text-gray-700 dark:text-ink-300 font-semibold flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" /> Password
               </label>
               <input
                 id="admin-password"
                 type="password"
                 placeholder="••••••••"
                 {...register("password")}
-                className="w-full bg-ink-900 border border-ink-800 rounded-xl px-4 py-3 text-white placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs"
+                className="w-full bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs shadow-inner"
               />
-              {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password.message}</p>}
             </div>
 
             <button
@@ -272,8 +272,8 @@ export default function AdminLoginPage() {
           </form>
 
           {/* Security Marker Footer */}
-          <div className="pt-2 border-t border-ink-800/80 flex items-center justify-center gap-2 text-[11px] text-ink-400 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="pt-2 border-t border-gray-100 dark:border-ink-800/80 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-ink-400 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>256-bit Encrypted Token Verification</span>
           </div>
         </div>

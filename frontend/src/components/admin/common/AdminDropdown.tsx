@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
 
 export interface DropdownItem {
   label: string;
@@ -49,7 +48,7 @@ export default function AdminDropdown({
 
       {/* Animated Dropdown Menu */}
       <div
-        className={`absolute mt-2 w-56 rounded-xl border border-ink-800 bg-ink-950 text-ink-100 py-1.5 z-50 text-xs shadow-2xl backdrop-blur-md transition-all duration-180 ease-out origin-top ${
+        className={`absolute mt-2 w-56 rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950 text-gray-900 dark:text-ink-100 py-1.5 z-50 text-xs shadow-xl backdrop-blur-md transition-all duration-180 ease-out origin-top ${
           align === "right" ? "right-0" : "left-0"
         } ${
           isOpen
@@ -58,7 +57,7 @@ export default function AdminDropdown({
         }`}
       >
         {title && (
-          <div className="px-3.5 py-2 border-b border-ink-800 text-[10px] font-bold uppercase tracking-wider text-ink-400">
+          <div className="px-3.5 py-2 border-b border-gray-100 dark:border-ink-800 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-ink-400">
             {title}
           </div>
         )}
@@ -73,8 +72,8 @@ export default function AdminDropdown({
               }}
               className={`w-full text-left px-3.5 py-2 flex items-center justify-between transition-colors ${
                 item.danger
-                  ? "hover:bg-red-500/10 text-red-400"
-                  : "text-ink-300 hover:text-white hover:bg-ink-900"
+                  ? "hover:bg-red-50 text-red-600 dark:hover:bg-red-500/10 dark:text-red-400"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50 dark:text-ink-300 dark:hover:text-white dark:hover:bg-ink-900"
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
@@ -82,7 +81,7 @@ export default function AdminDropdown({
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{item.label}</p>
                   {item.description && (
-                    <p className="text-[10px] text-ink-400 truncate">
+                    <p className="text-[10px] text-gray-500 dark:text-ink-400 truncate">
                       {item.description}
                     </p>
                   )}
@@ -90,7 +89,7 @@ export default function AdminDropdown({
               </div>
 
               {item.badge && (
-                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-ink-800 text-brand-400 border border-brand-500/30">
+                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 dark:bg-ink-800 dark:text-brand-400 dark:border-brand-500/30">
                   {item.badge}
                 </span>
               )}
