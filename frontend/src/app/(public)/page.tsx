@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   CheckCircle2,
@@ -22,7 +23,6 @@ import {
   Check,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
-import HeroVideoPlayer from "@/components/HeroVideoPlayer";
 import { apiRequest } from "@/lib/api-client";
 
 interface DomainTrack {
@@ -148,35 +148,53 @@ export default function HomePage() {
 
   return (
     <div className="space-y-24 pb-20">
-      {/* ─── HERO SECTION ────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-12 sm:pt-16 pb-12">
-        <div className="absolute inset-0 bg-ink-950 -z-10" />
+      {/* ─── HERO SECTION WITH LIVE SCI-FI BACKGROUND ─────────────────── */}
+      <section className="relative overflow-hidden min-h-[75vh] flex flex-col justify-center items-center text-center pt-20 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+        {/* Animated Live Background Image */}
+        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none">
+          <Image
+            src="/hero-bg.png"
+            alt="InternVision Tech Live Ambient Background"
+            fill
+            priority
+            quality={95}
+            className="object-cover object-center opacity-70 scale-105 transition-transform duration-1000 motion-safe:animate-pulse"
+            style={{ animationDuration: "10s" }}
+          />
+          {/* Contrast & Gradient Overlay Masks */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#06080e]/60 via-[#07090e]/75 to-ink-950" />
+          <div className="absolute inset-0 bg-radial-at-c from-transparent via-black/40 to-ink-950" />
+          <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-ink-950 to-transparent" />
+        </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-semibold uppercase tracking-wider -rotate-1 shadow-lg">
+        {/* Hero Content Layer (Prominently Above Background) */}
+        <div className="max-w-4xl mx-auto space-y-8 z-10 flex flex-col items-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-500 text-white text-xs font-semibold uppercase tracking-wider -rotate-1 shadow-lg backdrop-blur-md">
             <Rocket className="w-3.5 h-3.5" />
             Virtual Pre-Hire Internship Program 2026
           </div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.08] max-w-4xl">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.08] max-w-4xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
             Transform Your Passion Into A <br />
-            <span className="text-brand-400">Production Tech Career</span>
+            <span className="text-brand-400 bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-blue-300 to-brand-300">
+              Production Tech Career
+            </span>
           </h1>
 
-          <p className="text-base sm:text-lg text-ink-300 max-w-2xl leading-relaxed mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-ink-200 max-w-2xl leading-relaxed mx-auto drop-shadow-md font-medium">
             Gain industry-grade engineering experience with hands-on weekly tasks, real client projects, and verified digital certificates across 9 high-demand technology tracks.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-2 w-full">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-3 w-full">
             <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/apply"
-                className="w-full sm:w-auto px-8 py-4 font-bold bg-white text-black hover:bg-ink-100 flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 shadow-lg"
+                className="w-full sm:w-auto px-8 py-4 font-bold bg-white text-black hover:bg-ink-100 flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 shadow-2xl shadow-brand-500/20"
               >
                 Apply For Virtual Internship
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <p className="text-xs text-ink-500 mt-2 font-medium flex items-center gap-1.5">
+              <p className="text-xs text-ink-300 mt-2.5 font-medium flex items-center gap-1.5 drop-shadow-sm">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Virtual • Flexible Durations (1M / 3M / 6M)
               </p>
             </div>
@@ -184,20 +202,15 @@ export default function HomePage() {
             <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/verify-certificate"
-                className="w-full sm:w-auto px-8 py-4 font-bold bg-transparent hover:bg-ink-900 text-white border border-ink-700 hover:border-brand-500 flex items-center justify-center gap-2.5 transition-all shadow-sm group"
+                className="w-full sm:w-auto px-8 py-4 font-bold bg-ink-950/80 hover:bg-ink-900 text-white border border-ink-600 hover:border-brand-400 flex items-center justify-center gap-2.5 transition-all shadow-xl backdrop-blur-md group"
               >
                 <ShieldCheck className="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform" />
                 Certificate Verification
               </Link>
-              <p className="text-xs text-ink-500 mt-2 font-medium flex items-center gap-1.5">
+              <p className="text-xs text-ink-300 mt-2.5 font-medium flex items-center gap-1.5 drop-shadow-sm">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Instant Credential Authenticity
               </p>
             </div>
-          </div>
-
-          {/* ─── CONTINUOUS LIVE VIDEO SHOWCASE (GIF-LIKE) ─────────────── */}
-          <div className="w-full max-w-4xl pt-4">
-            <HeroVideoPlayer src="/hero-video.mp4" />
           </div>
         </div>
       </section>
