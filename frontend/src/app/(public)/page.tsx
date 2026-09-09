@@ -22,6 +22,7 @@ import {
   Check,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
+import HeroVideoPlayer from "@/components/HeroVideoPlayer";
 import { apiRequest } from "@/lib/api-client";
 
 interface DomainTrack {
@@ -195,18 +196,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Asymmetric art element */}
-        <div className="col-[2/-1] lg:col-[3/-1] self-stretch hidden lg:flex items-end justify-end pb-16 relative">
-          <div className="w-full h-full border-l border-t border-ink-800/50 bg-ink-950 relative overflow-hidden mt-32 ml-16">
-            <div className="absolute inset-0 bg-grid-ink-800/30 bg-[length:32px_32px]" />
-            <div className="absolute top-1/2 -translate-y-1/2 -left-12 space-y-4">
-              <Float delay={0} yOffset={10}>
-                <div className="w-48 h-32 bg-ink-800 border border-ink-700" />
-              </Float>
-              <Float delay={0.5} yOffset={15}>
-                <div className="w-64 h-32 bg-brand-600/10 border border-brand-500/30 ml-8" />
-              </Float>
-            </div>
+        {/* Hero Video Showcase */}
+        <div className="col-[2/-1] lg:col-[3/-1] self-stretch flex items-center justify-center pt-8 lg:pt-16 pb-8 lg:pb-16 px-0 lg:px-6 relative z-10">
+          <div className="w-full max-w-xl">
+            <HeroVideoPlayer src="/hero-video.mp4" />
           </div>
         </div>
       </section>
