@@ -8,6 +8,7 @@ import {
   signInWithGooglePopup,
   signInWithEmail,
   registerWithEmail,
+  resetUserPassword,
 } from "@/lib/firebase";
 
 interface UserAuthModalProps {
@@ -26,7 +27,7 @@ export default function UserAuthModal({
   subtitle = "Sign in using Google or Email & Password to access your application.",
 }: UserAuthModalProps) {
   const [tab, setTab] = useState<"google" | "email">("google");
-  const [emailMode, setEmailMode] = useState<"login" | "register">("login");
+  const [emailMode, setEmailMode] = useState<"login" | "register" | "forgot">("login");
 
   // Form states
   const [email, setEmail] = useState("");
@@ -36,6 +37,7 @@ export default function UserAuthModal({
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetSuccessMessage, setResetSuccessMessage] = useState("");
 
   const apiBase = (
     process.env.NEXT_PUBLIC_API_URL ||
@@ -47,6 +49,7 @@ export default function UserAuthModal({
   useEffect(() => {
     if (isOpen) {
       setError("");
+      setResetSuccessMessage("");
       setPassword("");
     }
   }, [isOpen]);
@@ -203,6 +206,35 @@ export default function UserAuthModal({
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setError("Please enter your registered email address.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setResetSuccessMessage("");
+
+    try {
+      await resetUserPassword(email.trim());
+      setResetSuccessMessage(
+        `Password reset email sent to ${email.trim()}! Please check your inbox (and spam folder) to set a new password.`
+      );
+    } catch (err: any) {
+      if (err.code === "auth/user-not-found") {
+        setError("No account found with this email address. Please register first.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Please enter a valid email address.");
+      } else {
+        setError(err.message || "Failed to send password reset email. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -248,6 +280,13 @@ export default function UserAuthModal({
           {error && (
             <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
               {error}
+            </div>
+          )}
+
+          {resetSuccessMessage && (
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+              <span>{resetSuccessMessage}</span>
             </div>
           )}
 
@@ -377,7 +416,52 @@ export default function UserAuthModal({
           )}
 
           {/* EMAIL & PASSWORD TAB */}
-          {tab === "email" && (
+          {tab === "email" && emailMode === "forgot" && (
+            <form onSubmit={handleForgotPassword} className="space-y-4 text-sm">
+              <div className="space-y-1">
+                <p className="text-xs text-ink-300 leading-relaxed">
+                  Enter your registered email address below. We'll send you a secure link to reset your password.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. yourname@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmailMode("login");
+                    setError("");
+                    setResetSuccessMessage("");
+                  }}
+                  className="w-1/3 py-2.5 bg-ink-900 hover:bg-ink-800 text-ink-300 border border-ink-700 font-bold transition text-xs"
+                >
+                  Back to Sign In
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-2/3 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-bold transition flex items-center justify-center gap-2 text-xs disabled:opacity-50 shadow-[2px_2px_0px_#ffffff]"
+                >
+                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Send Reset Link →"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {tab === "email" && emailMode !== "forgot" && (
             <form onSubmit={handleEmailAuth} className="space-y-4 text-sm">
               <div className="flex justify-between items-center text-xs pb-1">
                 <span className="text-ink-400">
@@ -388,6 +472,7 @@ export default function UserAuthModal({
                   onClick={() => {
                     setEmailMode(emailMode === "login" ? "register" : "login");
                     setError("");
+                    setResetSuccessMessage("");
                   }}
                   className="text-brand-400 font-bold hover:underline"
                 >
@@ -426,9 +511,24 @@ export default function UserAuthModal({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-brand-400" /> Password *
-                </label>
+                <div className="flex justify-between items-center">
+                  <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-brand-400" /> Password *
+                  </label>
+                  {emailMode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmailMode("forgot");
+                        setError("");
+                        setResetSuccessMessage("");
+                      }}
+                      className="text-[11px] text-brand-400 hover:underline font-medium"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
                 <input
                   type="password"
                   required

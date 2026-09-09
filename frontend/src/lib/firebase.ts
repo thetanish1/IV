@@ -5,6 +5,7 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   updateProfile,
   signOut,
   User as FirebaseUser,
@@ -62,6 +63,13 @@ export async function registerWithEmail(email: string, pass: string, fullName?: 
     }
   }
   return result.user;
+}
+
+/**
+ * Send password reset email via Firebase
+ */
+export async function resetUserPassword(email: string): Promise<void> {
+  await sendPasswordResetEmail(auth, email.trim());
 }
 
 /**
