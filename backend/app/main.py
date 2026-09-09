@@ -238,6 +238,8 @@ app.add_middleware(LoggingAndRequestIDMiddleware)
 
 # Add CORS Middleware last so it wraps all requests & error responses (outer)
 origins = [
+    "https://internvisiontech.me",
+    "https://www.internvisiontech.me",
     "https://iv-theta.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001",
