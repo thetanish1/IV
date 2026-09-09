@@ -59,12 +59,12 @@ export default function ApplePreviewCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Auto-advance every 4 seconds when not hovering
+  // Auto-advance every 2 seconds when not hovering
   useEffect(() => {
     if (isHovered) return;
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % APPLE_SLIDES.length);
-    }, 4000);
+    }, 2000);
     return () => clearInterval(timer);
   }, [isHovered]);
 

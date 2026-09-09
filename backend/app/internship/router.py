@@ -74,7 +74,8 @@ async def upload_resume(file: UploadFile = File(...)):
                 resource_type="auto",
                 public_id=f"resume_{uuid.uuid4().hex}",
                 use_filename=True,
-                unique_filename=True
+                unique_filename=True,
+                flags="attachment:false"
             )
             secure_url = upload_result.get("secure_url") or upload_result.get("url")
             if secure_url:
@@ -101,9 +102,49 @@ async def upload_resume(file: UploadFile = File(...)):
     }
 
 
+@router.get("/applications/resume-proxy")
+def proxy_resume_stream(url: str):
+    """
+    Proxies remote Cloudinary or S3 hosted resume PDF/DOC files
+    so that browser admin preview iframe and object embeds work without CORS or iframe blocking.
+    """
+    import urllib.request
+    from fastapi.responses import Response
+
+    if not url or not (url.startswith("http://") or url.startswith("https://")):
+        raise HTTPException(status_code=400, detail="Invalid resume file URL")
+
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) InternVision/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=15) as response:
+            file_bytes = response.read()
+            content_type = response.headers.get("Content-Type", "application/pdf")
+
+            # Default to PDF if generic or octet-stream
+            if "octet-stream" in content_type.lower() or url.lower().endswith(".pdf"):
+                content_type = "application/pdf"
+
+            return Response(
+                content=file_bytes,
+                media_type=content_type,
+                headers={
+                    "Content-Disposition": "inline; filename=resume.pdf",
+                    "Cache-Control": "public, max-age=86400",
+                    "Access-Control-Allow-Origin": "*",
+                }
+            )
+    except Exception as e:
+        logger.error(f"Failed to proxy resume from {url}: {e}")
+        # If proxy fetch fails, fallback redirect directly to url
+        return RedirectResponse(url=url)
+
+
 @router.get("/applications/resume/{filename:path}")
 def get_resume_file(filename: str):
-    """Serve or download uploaded resume file, redirecting to Cloudinary if applicable."""
+    """Serve or download uploaded resume file, redirecting or proxying to Cloudinary if applicable."""
     # If the stored filename is a full URL or Cloudinary path
     if filename.startswith("http://") or filename.startswith("https://"):
         return RedirectResponse(url=filename)

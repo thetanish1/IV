@@ -924,6 +924,276 @@ export default function StudentPortalPage() {
                 )}
               </div>
             ))}
+
+            {/* ─── Month 2: Milestone Project Submission (3M & 6M) ─── */}
+            {portalData.month2_project && (
+              <div
+                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
+                  portalData.month2_project.submission
+                    ? "border-emerald-500/40 bg-emerald-950/10"
+                    : portalData.month2_project.is_unlocked
+                    ? "border-brand-500/40 bg-brand-950/15"
+                    : "border-ink-800 opacity-80"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
+                        MONTH 2 MILESTONE PROJECT
+                      </span>
+                      {portalData.month2_project.submission ? (
+                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(portalData.month2_project.submission.status || "submitted").toUpperCase()}
+                        </span>
+                      ) : portalData.month2_project.is_unlocked ? (
+                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
+                          Ready for Submission
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Locked (Opens Day 28)
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-base font-bold text-white">{portalData.month2_project.title}</h3>
+                    <p className="text-xs text-ink-300">{portalData.month2_project.objective}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {portalData.month2_project.is_unlocked ? (
+                      <button
+                        onClick={() => handleOpenSubmitModal(portalData.month2_project!)}
+                        className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
+                      >
+                        {portalData.month2_project.submission ? "Update Project" : "Submit Month 2 Project →"}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setUnlockTask(portalData.month2_project!);
+                          setUnlockSuccessMsg("");
+                          setUnlockErrorMsg("");
+                        }}
+                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        {portalData.month2_project.unlock_request?.status === "pending" ? "Unlock Requested" : "Request Unlock"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {portalData.month2_project.submission && (
+                  <div className="p-4 bg-ink-950 border border-ink-800 rounded-lg space-y-2 text-xs">
+                    {portalData.month2_project.submission.project_topic && (
+                      <p className="text-xs font-bold text-brand-300">
+                        Project Topic: {portalData.month2_project.submission.project_topic}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-4 text-ink-300">
+                      {portalData.month2_project.submission.github_url && (
+                        <a
+                          href={portalData.month2_project.submission.github_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-brand-400 hover:underline"
+                        >
+                          <Code2 className="w-3.5 h-3.5" /> GitHub Repo <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      {portalData.month2_project.submission.live_url && (
+                        <a
+                          href={portalData.month2_project.submission.live_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-emerald-400 hover:underline"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" /> Live Demo <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      {portalData.month2_project.submission.submitted_at && (
+                        <span className="text-ink-500">
+                          Submitted on {new Date(portalData.month2_project.submission.submitted_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    {portalData.month2_project.submission.notes && (
+                      <p className="text-ink-400 italic">“{portalData.month2_project.submission.notes}”</p>
+                    )}
+                    {portalData.month2_project.submission.admin_feedback && (
+                      <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded mt-2 text-xs">
+                        <strong className="text-brand-400">Mentor Review Feedback:</strong>
+                        <p className="text-ink-200 mt-0.5">{portalData.month2_project.submission.admin_feedback}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ─── Month 3: Portfolio Showcase Submission (3M & 6M) ─── */}
+            {portalData.month3_portfolio && (
+              <div
+                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
+                  portalData.month3_portfolio.submission
+                    ? "border-emerald-500/40 bg-emerald-950/10"
+                    : portalData.month3_portfolio.is_unlocked
+                    ? "border-brand-500/40 bg-brand-950/15"
+                    : "border-ink-800 opacity-80"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
+                        MONTH 3 DEVELOPER PORTFOLIO
+                      </span>
+                      {portalData.month3_portfolio.submission ? (
+                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(portalData.month3_portfolio.submission.status || "submitted").toUpperCase()}
+                        </span>
+                      ) : portalData.month3_portfolio.is_unlocked ? (
+                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
+                          Ready for Submission
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Locked (Opens Day 56)
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-base font-bold text-white">{portalData.month3_portfolio.title}</h3>
+                    <p className="text-xs text-ink-300">{portalData.month3_portfolio.objective}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {portalData.month3_portfolio.is_unlocked ? (
+                      <button
+                        onClick={() => handleOpenSubmitModal(portalData.month3_portfolio!)}
+                        className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
+                      >
+                        {portalData.month3_portfolio.submission ? "Update Portfolio" : "Submit Portfolio →"}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setUnlockTask(portalData.month3_portfolio!);
+                          setUnlockSuccessMsg("");
+                          setUnlockErrorMsg("");
+                        }}
+                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        {portalData.month3_portfolio.unlock_request?.status === "pending" ? "Unlock Requested" : "Request Unlock"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {portalData.month3_portfolio.submission && (
+                  <div className="p-4 bg-ink-950 border border-ink-800 rounded-lg space-y-2 text-xs">
+                    <div className="flex flex-wrap gap-4 text-ink-300">
+                      {portalData.month3_portfolio.submission.live_url && (
+                        <a
+                          href={portalData.month3_portfolio.submission.live_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-emerald-400 hover:underline"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" /> Live Portfolio URL <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      {portalData.month3_portfolio.submission.github_url && (
+                        <a
+                          href={portalData.month3_portfolio.submission.github_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-brand-400 hover:underline"
+                        >
+                          <Code2 className="w-3.5 h-3.5" /> Source Code Repo <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      {portalData.month3_portfolio.submission.submitted_at && (
+                        <span className="text-ink-500">
+                          Submitted on {new Date(portalData.month3_portfolio.submission.submitted_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    {portalData.month3_portfolio.submission.notes && (
+                      <p className="text-ink-400 italic">“{portalData.month3_portfolio.submission.notes}”</p>
+                    )}
+                    {portalData.month3_portfolio.submission.admin_feedback && (
+                      <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded mt-2 text-xs">
+                        <strong className="text-brand-400">Mentor Review Feedback:</strong>
+                        <p className="text-ink-200 mt-0.5">{portalData.month3_portfolio.submission.admin_feedback}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ─── Months 4–6: Enterprise Capstone Submission (6M only) ─── */}
+            {portalData.month4_6_capstone && (
+              <div
+                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
+                  portalData.month4_6_capstone.submission
+                    ? "border-purple-500/40 bg-purple-950/10"
+                    : portalData.month4_6_capstone.is_unlocked
+                    ? "border-purple-500/40 bg-purple-950/15"
+                    : "border-ink-800 opacity-80"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded border border-purple-500/20">
+                        MONTHS 4–6 CAPSTONE PROJECT
+                      </span>
+                      {portalData.month4_6_capstone.submission ? (
+                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(portalData.month4_6_capstone.submission.status || "submitted").toUpperCase()}
+                        </span>
+                      ) : portalData.month4_6_capstone.is_unlocked ? (
+                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
+                          Ready for Submission
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Locked (Opens Day 84)
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-base font-bold text-white">{portalData.month4_6_capstone.title}</h3>
+                    <p className="text-xs text-ink-300">{portalData.month4_6_capstone.objective}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {portalData.month4_6_capstone.is_unlocked ? (
+                      <button
+                        onClick={() => handleOpenSubmitModal(portalData.month4_6_capstone!)}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
+                      >
+                        {portalData.month4_6_capstone.submission ? "Update Capstone" : "Submit Capstone →"}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setUnlockTask(portalData.month4_6_capstone!);
+                          setUnlockSuccessMsg("");
+                          setUnlockErrorMsg("");
+                        }}
+                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
+                      >
+                        <Lock className="w-3.5 h-3.5 text-amber-400" />
+                        {portalData.month4_6_capstone.unlock_request?.status === "pending" ? "Unlock Requested" : "Request Unlock"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1085,7 +1355,7 @@ export default function StudentPortalPage() {
             )}
 
             <form onSubmit={handleSubmitTask} className="space-y-4 text-xs">
-              {submittingTask.key === "month2_project" && (
+              {(submittingTask.key === "month2_project" || submittingTask.key === "month4_6_capstone") && (
                 <div className="space-y-1.5">
                   <label className="text-ink-300 font-semibold">Project Title / Topic Name *</label>
                   <input
@@ -1101,7 +1371,8 @@ export default function StudentPortalPage() {
 
               <div className="space-y-1.5">
                 <label className="text-ink-300 font-semibold flex items-center gap-1.5">
-                  <Code2 className="w-3.5 h-3.5 text-brand-400" /> GitHub Repository URL *
+                  <Code2 className="w-3.5 h-3.5 text-brand-400" />
+                  {submittingTask.key === "month3_portfolio" ? "Portfolio GitHub Repository URL *" : "GitHub Repository URL *"}
                 </label>
                 <input
                   type="url"
@@ -1115,11 +1386,15 @@ export default function StudentPortalPage() {
 
               <div className="space-y-1.5">
                 <label className="text-ink-300 font-semibold flex items-center gap-1.5">
-                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400" /> Live Demo / Deployed Link (Optional)
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                  {submittingTask.key === "month3_portfolio"
+                    ? "Live Deployed Portfolio URL (Vercel / Netlify / Domain) *"
+                    : "Live Demo / Deployed Link (Optional / Recommended)"}
                 </label>
                 <input
                   type="url"
-                  placeholder="https://your-project.vercel.app"
+                  required={submittingTask.key === "month3_portfolio"}
+                  placeholder={submittingTask.key === "month3_portfolio" ? "https://yourportfolio.vercel.app" : "https://your-project.vercel.app"}
                   value={subForm.live_url}
                   onChange={(e) => setSubForm({ ...subForm, live_url: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none"

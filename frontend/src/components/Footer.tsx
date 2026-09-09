@@ -72,29 +72,31 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Programs</h4>
             <ul className="space-y-2">
-              <li><span className="hover:text-white transition cursor-pointer">1 Month Foundation Internship</span></li>
-              <li><span className="hover:text-white transition cursor-pointer">3 Months Advanced Program</span></li>
-              <li><span className="hover:text-white transition cursor-pointer">6 Months Industrial Co-Op</span></li>
+              <li><Link href="/apply" className="hover:text-white transition">1 Month Foundation</Link></li>
+              <li><Link href="/apply" className="hover:text-white transition">3 Months Advanced Track</Link></li>
+              <li><Link href="/apply" className="hover:text-white transition">6 Months Industrial Co-Op</Link></li>
+              <li><Link href="/portal" className="hover:text-white transition text-brand-400">Student Portal</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Connect</h4>
-            <div className="flex gap-4 mb-4">
-              <a href="#" className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
-                <ExternalLink className="w-4 h-4" />
-              </a>
-              <a href="#" className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
-                <MessageCircle className="w-4 h-4" />
-              </a>
-              <a href="#" className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
-                <Users className="w-4 h-4" />
-              </a>
-              <a href="mailto:internvisiontechhr@gmail.com" className="w-8 h-8 bg-ink-800 flex items-center justify-center hover:bg-ink-700 hover:text-white transition">
+            <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Legal & Policies</h4>
+            <ul className="space-y-2 mb-5">
+              <li><Link href="/terms" className="hover:text-white transition">Terms & Conditions</Link></li>
+              <li><Link href="/rules" className="hover:text-white transition">Internship Rules</Link></li>
+              <li><Link href="/agreement" className="hover:text-white transition">Student Agreement</Link></li>
+            </ul>
+
+            <h4 className="font-semibold text-white mb-2 text-xs uppercase tracking-wider">Connect</h4>
+            <div className="flex gap-2.5 mb-4">
+              <a href="mailto:internvisiontechhr@gmail.com" title="Email HR" className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center hover:bg-ink-800 hover:text-brand-400 transition">
                 <Mail className="w-4 h-4" />
               </a>
+              <Link href="/contact" title="Support Helpdesk" className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center hover:bg-ink-800 hover:text-brand-400 transition">
+                <MessageCircle className="w-4 h-4" />
+              </Link>
             </div>
-            <p className="text-xs text-ink-500">© 2026 InternVision Tech Inc. All rights reserved.</p>
+            <p className="text-[11px] text-ink-500">© 2026 InternVision Tech Inc. All rights reserved.</p>
           </div>
         </div>
       </div>

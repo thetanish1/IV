@@ -9,15 +9,29 @@ interface ResumePreviewModalProps {
 }
 
 export default function ResumePreviewModal({ resume, onClose }: ResumePreviewModalProps) {
-  const [viewerMode, setViewerMode] = useState<"google" | "direct">("google");
+  const [viewerMode, setViewerMode] = useState<"object" | "google" | "direct">("object");
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [iframeKey, setIframeKey] = useState(1);
 
   if (!resume) return null;
 
-  // Build secure viewers
-  const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(resume.url)}&embedded=true`;
-  const activeUrl = viewerMode === "google" ? googleViewerUrl : resume.url;
+  const rawUrl = resume.url;
+  const isHttp = rawUrl.startsWith("http://") || rawUrl.startsWith("https://");
+
+  const apiBase = (
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "http://localhost:8000/api"
+  ).replace(/\/$/, "");
+
+  // Stream proxy URL to prevent CORS/X-Frame issues
+  const proxyUrl = isHttp
+    ? `${apiBase}/applications/resume-proxy?url=${encodeURIComponent(rawUrl)}`
+    : rawUrl;
+
+  const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(rawUrl)}&embedded=true`;
+
+  const activeUrl = viewerMode === "google" ? googleViewerUrl : viewerMode === "direct" ? rawUrl : proxyUrl;
 
   const handleReload = () => {
     setIframeLoaded(false);
@@ -44,7 +58,7 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
                 Candidate Resume Document — {resume.name}
               </h3>
               <div className="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-lg font-mono">
-                {resume.url}
+                {rawUrl}
               </div>
             </div>
           </div>
@@ -56,6 +70,21 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
               <button
                 type="button"
                 onClick={() => {
+                  setViewerMode("object");
+                  handleReload();
+                }}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all ${
+                  viewerMode === "object"
+                    ? "bg-white dark:bg-[#18181B] text-blue-600 dark:text-blue-400 shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title="Direct PDF Engine with high-fidelity streaming"
+              >
+                PDF Engine
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   setViewerMode("google");
                   handleReload();
                 }}
@@ -64,7 +93,7 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
                     ? "bg-white dark:bg-[#18181B] text-blue-600 dark:text-blue-400 shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
-                title="Google Docs Cloud PDF Engine (Prevents cross-origin blocking)"
+                title="Google Docs Cloud PDF Engine"
               >
                 Cloud Engine
               </button>
@@ -79,9 +108,9 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
                     ? "bg-white dark:bg-[#18181B] text-blue-600 dark:text-blue-400 shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
-                title="Direct Browser Stream Engine"
+                title="Direct Cloudinary Stream"
               >
-                Direct Stream
+                Direct Link
               </button>
             </div>
 
@@ -95,7 +124,7 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
             </button>
 
             <a
-              href={resume.url}
+              href={rawUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
@@ -104,7 +133,7 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
             </a>
 
             <a
-              href={resume.url}
+              href={rawUrl}
               download
               target="_blank"
               rel="noopener noreferrer"
@@ -129,42 +158,59 @@ export default function ResumePreviewModal({ resume, onClose }: ResumePreviewMod
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/80 dark:bg-[#18181B]/80 z-10 space-y-3">
               <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-600 rounded-full animate-spin" />
               <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                Rendering resume document via {viewerMode === "google" ? "Cloud Engine" : "Direct Stream"}...
+                Rendering resume document via {viewerMode === "google" ? "Cloud Engine" : viewerMode === "direct" ? "Direct Stream" : "PDF Engine"}...
               </p>
             </div>
           )}
 
-          <iframe
-            key={`${activeUrl}-${iframeKey}`}
-            src={activeUrl}
-            onLoad={() => setIframeLoaded(true)}
-            className="w-full flex-1 border-0"
-            title="Candidate Resume Preview"
-          />
+          {viewerMode === "object" ? (
+            <object
+              key={`${activeUrl}-${iframeKey}`}
+              data={activeUrl}
+              type="application/pdf"
+              className="w-full flex-1 border-0"
+              onLoad={() => setIframeLoaded(true)}
+            >
+              <iframe
+                src={googleViewerUrl}
+                onLoad={() => setIframeLoaded(true)}
+                className="w-full h-full border-0"
+                title="Fallback Resume Preview"
+              />
+            </object>
+          ) : (
+            <iframe
+              key={`${activeUrl}-${iframeKey}`}
+              src={activeUrl}
+              onLoad={() => setIframeLoaded(true)}
+              className="w-full flex-1 border-0"
+              title="Candidate Resume Preview"
+            />
+          )}
 
           {/* Bottom Fallback Bar */}
           <div className="p-2 px-4 bg-gray-50 dark:bg-[#18181B] border-t border-gray-200 dark:border-[#27272A] flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-              Document securely loaded from Cloud Storage
+              Document loaded from Secure Storage
             </span>
             <div className="flex items-center gap-3">
-              {viewerMode === "direct" && (
+              {viewerMode !== "object" && (
+                <button
+                  type="button"
+                  onClick={() => setViewerMode("object")}
+                  className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                >
+                  Switch to PDF Engine
+                </button>
+              )}
+              {viewerMode !== "google" && (
                 <button
                   type="button"
                   onClick={() => setViewerMode("google")}
                   className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                 >
-                  Switch to Cloud Engine if blank
-                </button>
-              )}
-              {viewerMode === "google" && (
-                <button
-                  type="button"
-                  onClick={() => setViewerMode("direct")}
-                  className="text-blue-600 dark:text-blue-400 font-semibold hover:underline"
-                >
-                  Switch to Direct Stream
+                  Switch to Cloud Engine
                 </button>
               )}
             </div>
