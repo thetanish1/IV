@@ -160,11 +160,18 @@ export default function Navbar() {
         className="sticky top-0 z-50 glass-card border-b border-ink-800"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
-            <div className="bg-white p-1 rounded-md flex items-center justify-center">
-              <Image src="/logo.jpg" alt="InternVision Logo" width={160} height={40} className="h-7 w-auto object-contain" />
+          <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight group">
+            <div className="relative flex items-center justify-center shrink-0">
+              <Image
+                src="/logo.png"
+                alt="InternVision Tech Logo"
+                width={36}
+                height={36}
+                className="h-8 w-8 object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-200"
+                priority
+              />
             </div>
-            <span className="text-white tracking-wide">
+            <span className="text-white tracking-wide text-lg sm:text-xl font-bold flex items-center gap-1.5">
               InternVision <span className="text-brand-400">Tech</span>
             </span>
           </Link>

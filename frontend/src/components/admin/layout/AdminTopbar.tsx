@@ -81,13 +81,13 @@ export default function AdminTopbar({
           onClick={() => onNavigateTab("overview")}
           title="InternVision Tech Admin"
         >
-          <div className="bg-white p-1 rounded-md flex items-center justify-center border border-gray-200 dark:border-ink-700 shadow-sm">
+          <div className="relative flex items-center justify-center shrink-0">
             <Image
-              src="/logo.jpg"
-              alt="InternVision Logo"
-              width={140}
-              height={36}
-              className="h-6 w-auto object-contain"
+              src="/logo.png"
+              alt="InternVision Tech Logo"
+              width={30}
+              height={30}
+              className="h-7 w-7 object-contain group-hover:scale-105 transition-transform duration-200"
               priority
             />
           </div>
