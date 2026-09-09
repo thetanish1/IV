@@ -18,7 +18,7 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       setShow(false);
       sessionStorage.setItem("iv_splash_seen", "true");
-    }, 1200);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -28,7 +28,7 @@ export default function SplashScreen() {
       {show && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
+          exit={{ opacity: 0, transition: { duration: 0.35, ease: "easeInOut" } }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#07090e] overflow-hidden select-none pointer-events-auto"
         >
           {/* Ambient Background Graphic */}
