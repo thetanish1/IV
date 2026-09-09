@@ -24,7 +24,7 @@ import {
   Check,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
-import PlatformVideoCarousel from "@/components/PlatformVideoCarousel";
+import ApplePreviewCarousel from "@/components/ApplePreviewCarousel";
 import { apiRequest } from "@/lib/api-client";
 
 interface DomainTrack {
@@ -444,7 +444,7 @@ export default function HomePage() {
         </motion.section>
       )}
 
-      {/* ─── PLATFORM PREVIEW VIDEO SHOWCASE (3D CAROUSEL) ────────── */}
+      {/* ─── PLATFORM FEATURE PREVIEWS (APPLE-STYLE CAROUSEL) ────── */}
       <motion.section
         initial={{ opacity: 0, y: 35 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -454,17 +454,17 @@ export default function HomePage() {
       >
         <div className="text-center space-y-3 mb-6 max-w-2xl mx-auto">
           <span className="text-xs font-bold text-brand-400 uppercase tracking-wider">
-            ✦ Interactive Platform Overview
+            ✦ Platform Experience
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
             See InternVision In Action
           </h2>
           <p className="text-ink-400 text-sm sm:text-base leading-relaxed">
-            Watch our platform walkthroughs across courses, instant certificate verification, internship applications, and student support.
+            Explore industry bootcamps, verified digital credentials, student task dashboards, and 1:1 senior mentorship.
           </p>
         </div>
 
-        <PlatformVideoCarousel />
+        <ApplePreviewCarousel />
       </motion.section>
 
       {/* ─── CTA SECTION ────────────────────────────────────────────── */}
