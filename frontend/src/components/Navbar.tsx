@@ -106,10 +106,10 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
-    // Ensure scrolling is always enabled and any lingering modal/Razorpay backdrop is cleaned up on route change
+    // Ensure scrolling is always enabled and any lingering payment gateway backdrop is cleaned up on route change
     document.body.style.overflow = "";
     document.documentElement.style.overflow = "";
-    document.querySelectorAll(".razorpay-container").forEach((el) => el.remove());
+    document.querySelectorAll(".razorpay-container, [id^='cf-checkout'], [id*='cashfree']").forEach((el) => el.remove());
     if (pathname.startsWith("/admin")) {
       setShowAuthModal(false);
     }

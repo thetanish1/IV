@@ -44,7 +44,12 @@ def startup_event():
         for col_def in [
             "ALTER TABLE admins ADD COLUMN role VARCHAR(50) DEFAULT 'super_admin'",
             "ALTER TABLE admins ADD COLUMN permissions JSON DEFAULT '[]'",
-            "ALTER TABLE admins ADD COLUMN created_by VARCHAR(255)"
+            "ALTER TABLE admins ADD COLUMN created_by VARCHAR(255)",
+            "ALTER TABLE payments ADD COLUMN gateway_name VARCHAR(50) DEFAULT 'cashfree'",
+            "ALTER TABLE payments ADD COLUMN cf_order_id VARCHAR(255)",
+            "ALTER TABLE payments ADD COLUMN cf_payment_id VARCHAR(255)",
+            "ALTER TABLE payments ADD COLUMN payment_session_id VARCHAR(500)",
+            "ALTER TABLE payments ALTER COLUMN razorpay_order_id DROP NOT NULL"
         ]:
             try:
                 db.execute(text(col_def))

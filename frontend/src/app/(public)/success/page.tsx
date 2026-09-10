@@ -45,11 +45,11 @@ function SuccessContent() {
  {!isApplication && (
  <>
  <div className="flex justify-between text-ink-400">
- <span>Razorpay Payment ID:</span>
+ <span>Cashfree Payment ID:</span>
  <span className="font-mono text-ink-200">{paymentId ||"N/A"}</span>
  </div>
  <div className="flex justify-between text-ink-400">
- <span>Razorpay Order ID:</span>
+ <span>Cashfree Order ID:</span>
  <span className="font-mono text-ink-200">{orderId ||"N/A"}</span>
  </div>
  <div className="flex justify-between text-ink-400">

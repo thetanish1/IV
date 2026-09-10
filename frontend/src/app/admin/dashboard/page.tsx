@@ -494,7 +494,7 @@ function AdminDashboardContent() {
     },
     payments: {
       title: "Payments Audit",
-      subtitle: "Razorpay financial transaction ledger, payment verification, and order auditing.",
+      subtitle: "Cashfree financial transaction ledger, payment verification, and order auditing.",
       icon: <CreditCard className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     mailer: {

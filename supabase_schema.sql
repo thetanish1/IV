@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS course_registrations (
 CREATE INDEX IF NOT EXISTS idx_course_reg_email ON course_registrations (student_email);
 CREATE INDEX IF NOT EXISTS idx_course_reg_status ON course_registrations (status);
 
--- 6. Payments Table (Razorpay Orders & Transactions)
+-- 6. Payments Table (Cashfree Orders & Financial Ledger)
 CREATE TABLE IF NOT EXISTS payments (
     id SERIAL PRIMARY KEY,
     registration_id INTEGER REFERENCES course_registrations (id) ON DELETE SET NULL,
@@ -193,6 +193,7 @@ CREATE TABLE IF NOT EXISTS payments (
     signature VARCHAR(500),
     amount_inr INTEGER NOT NULL DEFAULT 0,
     status VARCHAR(50) DEFAULT 'created',
+    gateway_name VARCHAR(50) DEFAULT 'cashfree',
     student_email VARCHAR(255) NOT NULL,
     raw_response JSONB,
     course_id VARCHAR(100),
@@ -200,6 +201,9 @@ CREATE TABLE IF NOT EXISTS payments (
     student_phone VARCHAR(50),
     amount NUMERIC(10, 2),
     currency VARCHAR(10) DEFAULT 'INR',
+    cf_order_id VARCHAR(255),
+    cf_payment_id VARCHAR(255),
+    payment_session_id VARCHAR(500),
     razorpay_order_id VARCHAR(255),
     razorpay_payment_id VARCHAR(255),
     razorpay_signature VARCHAR(500),

@@ -15,9 +15,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 24 hours
     
-    # Razorpay Settings (Test Mode)
-    RAZORPAY_KEY_ID: str = "rzp_test_internvision123"
-    RAZORPAY_KEY_SECRET: str = "secret_internvision_key_456"
+    # Cashfree Payment Gateway Settings (Sandbox / Production)
+    CASHFREE_APP_ID: str = "TEST_CF_APP_ID_DEMO"
+    CASHFREE_SECRET_KEY: str = "TEST_CF_SECRET_KEY_DEMO"
+    CASHFREE_ENVIRONMENT: str = "sandbox"  # 'sandbox' or 'production'
+    CASHFREE_API_VERSION: str = "2023-08-01"
 
     # Google OAuth (Identity Services)
     GOOGLE_CLIENT_ID: str = ""  # Set this in .env — e.g. "xxxxx.apps.googleusercontent.com"

@@ -20,6 +20,8 @@ import app.shared.email_service as email_service
 email_service._send_smtp_email = lambda *args, **kwargs: True
 
 def init_db_performance():
+    from app.main import startup_event
+    startup_event()
     with engine.connect() as conn:
         if engine.url.drivername.startswith("sqlite"):
             conn.execute(text("PRAGMA journal_mode=WAL;"))

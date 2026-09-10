@@ -1,6 +1,6 @@
 # InternVision Tech - Configuration & Setup Guide
 
-This guide covers step-by-step instructions to configure **Supabase**, **Firebase Auth**, **SMTP Email Notifications**, and **Razorpay** for the InternVision Tech platform.
+This guide covers step-by-step instructions to configure **Supabase**, **Firebase Auth**, **SMTP Email Notifications**, and **Cashfree Payment Gateway** for the InternVision Tech platform.
 
 ---
 
@@ -84,7 +84,33 @@ Firebase handles **1-Click Google Sign-In** (without requiring or storing passwo
 
 ---
 
-## 4. Superadmin Access
+## 4. Cashfree Payment Gateway Configuration
+
+InternVision Tech integrates **Cashfree Payment Gateway** ([merchant.cashfree.com](https://merchant.cashfree.com/)) with automated JS SDK checkout modal, order verification, and signed webhooks.
+
+### Step 1: Obtain Cashfree API Keys
+1. Go to [https://merchant.cashfree.com/](https://merchant.cashfree.com/) and create/sign in to your merchant account.
+2. Navigate to **Payment Gateway** → **Developers** → **API Keys**.
+3. Generate and copy your **App ID** and **Secret Key** (Test / Sandbox or Production).
+
+### Step 2: Configure Environment Variables
+- In `backend/.env`:
+  ```env
+  CASHFREE_APP_ID=your_cashfree_app_id
+  CASHFREE_SECRET_KEY=your_cashfree_secret_key
+  CASHFREE_ENVIRONMENT=sandbox          # 'sandbox' for testing, 'production' for live
+  CASHFREE_API_VERSION=2023-08-01
+  ```
+- In `frontend/.env.local`:
+  ```env
+  NEXT_PUBLIC_CASHFREE_MODE=sandbox    # 'sandbox' or 'production'
+  ```
+
+*(For detailed integration architecture, test cards, and webhook setup, see the [CASHFREE_INTEGRATION_GUIDE.md](./CASHFREE_INTEGRATION_GUIDE.md)).*
+
+---
+
+## 5. Superadmin Access
 
 - **Admin Login Route**: `/admin/login`
 - **Superadmin Email**: `tanishdewase222@gmail.com`
@@ -93,11 +119,12 @@ Firebase handles **1-Click Google Sign-In** (without requiring or storing passwo
   - Total applicants and applications management.
   - Resume viewing/downloading.
   - Applicant user accounts and contact records.
+  - Payments Audit ledger and Excel exports.
   - Application status updates (`pending` → `accepted` / `shortlisted`).
 
 ---
 
-## 5. Running the Application Locally
+## 6. Running the Application Locally
 
 ### Backend (FastAPI):
 ```bash

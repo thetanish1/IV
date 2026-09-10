@@ -94,7 +94,7 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">100% TLS / Razorpay</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">100% TLS / Cashfree</div>
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Webhook signature verified</div>
         </div>
       </div>

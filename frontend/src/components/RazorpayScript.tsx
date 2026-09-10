@@ -1,13 +1,7 @@
 "use client";
 
-import Script from "next/script";
+import CashfreeScript from "./CashfreeScript";
 
 export default function RazorpayScript() {
-  return (
-    <Script
-      id="razorpay-checkout"
-      src="https://checkout.razorpay.com/v1/checkout.js"
-      strategy="beforeInteractive"
-    />
-  );
+  return <CashfreeScript />;
 }

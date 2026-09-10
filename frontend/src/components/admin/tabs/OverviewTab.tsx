@@ -50,7 +50,7 @@ export default function OverviewTab({
             value={stats ? formatINR(stats.total_revenue_inr) : "—"}
             icon={<DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
             iconBgColor="bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
-            subtitle="Verified Razorpay ledger"
+            subtitle="Verified Cashfree ledger"
           />
 
           <MetricCard

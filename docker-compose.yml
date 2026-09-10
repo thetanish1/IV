@@ -25,9 +25,9 @@ services:
     container_name: internvision_backend
     environment:
       DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/internvision_db
-      SECRET_KEY: super-secret-key-internvision-tech-2026-production-ready
-      RAZORPAY_KEY_ID: rzp_test_internvision123
-      RAZORPAY_KEY_SECRET: secret_internvision_key_456
+      CASHFREE_APP_ID: TEST_CF_APP_ID_DEMO
+      CASHFREE_SECRET_KEY: TEST_CF_SECRET_KEY_DEMO
+      CASHFREE_ENVIRONMENT: sandbox
     ports:
       - "8000:8000"
     depends_on:
