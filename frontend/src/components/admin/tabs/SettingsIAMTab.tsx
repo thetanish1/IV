@@ -20,6 +20,8 @@ import {
 
 interface SettingsIAMTabProps {
   settings: {
+    show_courses?: boolean;
+    show_careers?: boolean;
     courses_enabled?: boolean;
     careers_enabled?: boolean;
   };
@@ -53,6 +55,8 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const isSuperAdmin = currentAdmin?.is_super_admin || currentAdmin?.role === "super_admin";
+  const isCoursesEnabled = settings.show_courses ?? settings.courses_enabled ?? false;
+  const isCareersEnabled = settings.show_careers ?? settings.careers_enabled ?? false;
 
   const handleToggle = async (key: string, currentValue: boolean) => {
     try {
@@ -163,16 +167,16 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
               <div>
                 <div className="text-sm font-semibold text-gray-900 dark:text-white">Public Courses Catalog</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  Controls navbar & footer link and `/courses` route access.
+                  Controls navbar & footer link, homepage section, and `/courses` route access.
                 </div>
               </div>
             </div>
             <button
-              onClick={() => handleToggle("courses_enabled", !!settings.courses_enabled)}
-              disabled={togglingKey === "courses_enabled"}
+              onClick={() => handleToggle("show_courses", isCoursesEnabled)}
+              disabled={togglingKey === "show_courses" || togglingKey === "courses_enabled"}
               className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity p-1"
             >
-              {settings.courses_enabled ? (
+              {isCoursesEnabled ? (
                 <ToggleRight className="w-8 h-8 text-blue-600 dark:text-blue-400" />
               ) : (
                 <ToggleLeft className="w-8 h-8 text-gray-400 dark:text-gray-600" />
@@ -194,11 +198,11 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
               </div>
             </div>
             <button
-              onClick={() => handleToggle("careers_enabled", !!settings.careers_enabled)}
-              disabled={togglingKey === "careers_enabled"}
+              onClick={() => handleToggle("show_careers", isCareersEnabled)}
+              disabled={togglingKey === "show_careers" || togglingKey === "careers_enabled"}
               className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity p-1"
             >
-              {settings.careers_enabled ? (
+              {isCareersEnabled ? (
                 <ToggleRight className="w-8 h-8 text-blue-600 dark:text-blue-400" />
               ) : (
                 <ToggleLeft className="w-8 h-8 text-gray-400 dark:text-gray-600" />

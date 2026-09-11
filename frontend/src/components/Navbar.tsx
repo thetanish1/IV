@@ -40,7 +40,11 @@ export default function Navbar() {
   useEffect(() => {
     fetchSettings();
     window.addEventListener("site-settings-changed", fetchSettings);
-    return () => window.removeEventListener("site-settings-changed", fetchSettings);
+    window.addEventListener("storage", fetchSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", fetchSettings);
+      window.removeEventListener("storage", fetchSettings);
+    };
   }, [pathname]);
 
   const checkAuth = () => {

@@ -145,7 +145,11 @@ export default function HomePage() {
     };
     checkSettings();
     window.addEventListener("site-settings-changed", checkSettings);
-    return () => window.removeEventListener("site-settings-changed", checkSettings);
+    window.addEventListener("storage", checkSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", checkSettings);
+      window.removeEventListener("storage", checkSettings);
+    };
   }, []);
 
   return (

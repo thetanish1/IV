@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,14 +13,11 @@ import {
   Zap,
   CheckCircle2,
   BrainCircuit,
+  Loader2,
 } from "lucide-react";
 import { FadeIn } from "@/components/animations/FadeIn";
+import { apiRequest } from "@/lib/api-client";
 
-export const metadata = {
-  title: "Careers | InternVision Tech",
-  description:
-    "Join the InternVision Tech team. We are hiring Software Engineering Interns, AI/ML Engineering Interns, Frontend React Developers, and Backend Spring Boot Developers for Virtual & Remote roles.",
-};
 
 const jobs = [
   {
@@ -150,6 +150,63 @@ const jobs = [
 ];
 
 export default function CareersPage() {
+  const [showCareers, setShowCareers] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    checkSettings();
+    window.addEventListener("site-settings-changed", checkSettings);
+    window.addEventListener("storage", checkSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", checkSettings);
+      window.removeEventListener("storage", checkSettings);
+    };
+  }, []);
+
+  const checkSettings = async () => {
+    try {
+      const data = await apiRequest<{ show_careers?: boolean | string }>("/settings");
+      if (data) {
+        setShowCareers(data.show_careers === true || data.show_careers === "true");
+      } else {
+        setShowCareers(false);
+      }
+    } catch {
+      setShowCareers(false);
+    }
+  };
+
+  if (showCareers === false) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-28 text-center space-y-6">
+        <div className="w-16 h-16 bg-ink-900 border border-ink-800 text-ink-400 flex items-center justify-center mx-auto">
+          <Briefcase className="w-8 h-8 text-ink-500" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-white uppercase tracking-tight">
+            Careers Board Offline
+          </h1>
+          <p className="text-ink-400 text-sm max-w-lg mx-auto">
+            Direct hiring and engineering openings are currently offline or paused for the current hiring cycle. Please check back later.
+          </p>
+        </div>
+        <div className="flex justify-center gap-4 pt-4">
+          <a
+            href="/"
+            className="px-6 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold border border-ink-700 transition"
+          >
+            Return Home
+          </a>
+          <a
+            href="/apply"
+            className="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow-brand-600/30"
+          >
+            Apply for Internship
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-20 pb-24">
       {/* ── Hero ── */}

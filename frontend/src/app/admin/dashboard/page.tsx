@@ -173,9 +173,16 @@ function AdminDashboardContent() {
   const [users, setUsers] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
-  const [settings, setSettings] = useState<{ courses_enabled?: boolean; careers_enabled?: boolean }>({
-    courses_enabled: true,
-    careers_enabled: true,
+  const [settings, setSettings] = useState<{
+    show_courses?: boolean;
+    show_careers?: boolean;
+    courses_enabled?: boolean;
+    careers_enabled?: boolean;
+  }>({
+    show_courses: false,
+    show_careers: false,
+    courses_enabled: false,
+    careers_enabled: false,
   });
   const [subAdmins, setSubAdmins] = useState<any[]>([]);
 
@@ -267,7 +274,15 @@ function AdminDashboardContent() {
         setPayments(paymentsRes.value.items || paymentsRes.value.payments || paymentsRes.value || []);
       }
       if (settingsRes.status === "fulfilled" && settingsRes.value) {
-        setSettings(settingsRes.value.settings || settingsRes.value || {});
+        const sData = settingsRes.value.settings || settingsRes.value || {};
+        const isCourses = sData.show_courses === true || sData.show_courses === "true" || sData.courses_enabled === true;
+        const isCareers = sData.show_careers === true || sData.show_careers === "true" || sData.careers_enabled === true;
+        setSettings({
+          show_courses: isCourses,
+          show_careers: isCareers,
+          courses_enabled: isCourses,
+          careers_enabled: isCareers,
+        });
       }
       if (subAdminsRes.status === "fulfilled" && subAdminsRes.value) {
         setSubAdmins(subAdminsRes.value.admins || subAdminsRes.value || []);
@@ -314,7 +329,31 @@ function AdminDashboardContent() {
       method: "PATCH",
       body: JSON.stringify({ [key]: value }),
     });
-    setSettings((prev) => ({ ...prev, [key]: value }));
+
+    const isCourses =
+      key === "show_courses" || key === "courses_enabled"
+        ? value
+        : (settings.show_courses ?? settings.courses_enabled ?? false);
+
+    const isCareers =
+      key === "show_careers" || key === "careers_enabled"
+        ? value
+        : (settings.show_careers ?? settings.careers_enabled ?? false);
+
+    setSettings({
+      show_courses: isCourses,
+      show_careers: isCareers,
+      courses_enabled: isCourses,
+      careers_enabled: isCareers,
+    });
+
+    // Broadcast change to Navbar, Footer, and public pages
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("site-settings-changed"));
+      try {
+        localStorage.setItem("site_settings_updated", Date.now().toString());
+      } catch {}
+    }
   };
 
   const handleSaveSubAdmin = async (adminData: any) => {

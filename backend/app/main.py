@@ -315,12 +315,21 @@ def get_public_settings(db: Session = Depends(get_db)):
     from app.shared.settings_models import SiteSetting
     rows = db.query(SiteSetting).all()
     settings_dict = {
-        "show_courses": False,
-        "show_careers": False,
+        "show_courses": "false",
+        "show_careers": "false",
     }
     for r in rows:
-        settings_dict[r.key] = r.value.lower() == "true"
-    return settings_dict
+        settings_dict[r.key] = str(r.value or "false").lower()
+
+    show_courses_val = settings_dict.get("show_courses", "false") == "true"
+    show_careers_val = settings_dict.get("show_careers", "false") == "true"
+
+    return {
+        "show_courses": show_courses_val,
+        "show_careers": show_careers_val,
+        "courses_enabled": show_courses_val,
+        "careers_enabled": show_careers_val,
+    }
 
 @app.get("/health")
 @app.get("/api/health")

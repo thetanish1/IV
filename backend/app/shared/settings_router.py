@@ -24,9 +24,14 @@ def get_site_settings(db: Session = Depends(get_db)):
     except Exception:
         pass
 
+    show_courses_val = settings_dict.get("show_courses", "false").lower() == "true"
+    show_careers_val = settings_dict.get("show_careers", "false").lower() == "true"
+
     return {
-        "show_courses": settings_dict.get("show_courses", "false").lower() == "true",
-        "show_careers": settings_dict.get("show_careers", "false").lower() == "true",
+        "show_courses": show_courses_val,
+        "show_careers": show_careers_val,
+        "courses_enabled": show_courses_val,
+        "careers_enabled": show_careers_val,
     }
 
 
@@ -38,13 +43,23 @@ def update_site_settings(
 ):
     """Admin endpoint to update platform feature switches."""
     for key, val in body.items():
-        if key in ("show_courses", "show_careers"):
+        # Handle courses toggle
+        if key in ("show_courses", "courses_enabled"):
             str_val = "true" if val is True or str(val).lower() == "true" else "false"
-            setting_row = db.query(SiteSetting).filter(SiteSetting.key == key).first()
+            setting_row = db.query(SiteSetting).filter(SiteSetting.key == "show_courses").first()
             if setting_row:
                 setting_row.value = str_val
             else:
-                db.add(SiteSetting(key=key, value=str_val))
-    db.commit()
+                db.add(SiteSetting(key="show_courses", value=str_val))
 
+        # Handle careers toggle
+        if key in ("show_careers", "careers_enabled"):
+            str_val = "true" if val is True or str(val).lower() == "true" else "false"
+            setting_row = db.query(SiteSetting).filter(SiteSetting.key == "show_careers").first()
+            if setting_row:
+                setting_row.value = str_val
+            else:
+                db.add(SiteSetting(key="show_careers", value=str_val))
+
+    db.commit()
     return get_site_settings(db)
