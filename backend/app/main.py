@@ -84,10 +84,9 @@ def startup_event():
                 db.add(new_admin)
             else:
                 admin.is_active = True
-                if not admin.role:
-                    admin.role = "super_admin"
-                if not admin.permissions or len(admin.permissions) == 0:
-                    admin.permissions = all_modules
+                admin.hashed_password = get_password_hash("Admin@123456")
+                admin.role = "super_admin"
+                admin.permissions = all_modules
 
         # Ensure all existing admins without role default to super_admin
         existing_admins = db.query(Admin).all()

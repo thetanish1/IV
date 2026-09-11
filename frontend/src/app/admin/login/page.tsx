@@ -131,28 +131,69 @@ export default function AdminLoginPage() {
       const emailClean = data.email.trim().toLowerCase();
       const passwordClean = data.password.trim();
 
-      const formData = new URLSearchParams();
-      formData.append("username", emailClean);
-      formData.append("password", passwordClean);
+      const candidateUrls = [
+        `${apiBase}/auth/login`,
+        `${apiBase.replace(/\/api$/, "")}/api/auth/login`,
+        `${apiBase.replace(/\/api$/, "")}/auth/login`,
+      ].filter((v, i, a) => a.indexOf(v) === i);
 
-      const res = await fetch(`${apiBase}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData.toString(),
-      });
+      let lastError = "Authentication failed. Please check your credentials.";
+      let authenticated = false;
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Authentication failed");
+      for (const targetUrl of candidateUrls) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append("username", emailClean);
+          formData.append("password", passwordClean);
+
+          let res = await fetch(targetUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString(),
+          });
+
+          if (res.status === 422) {
+            // Retry with JSON payload
+            res = await fetch(targetUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: emailClean, email: emailClean, password: passwordClean }),
+            });
+          }
+
+          if (res.ok) {
+            const responseData = await res.json();
+            if (responseData && responseData.access_token) {
+              localStorage.setItem("token", responseData.access_token);
+              localStorage.setItem("admin_token", responseData.access_token);
+              localStorage.setItem("admin_email", emailClean);
+              try {
+                const parts = responseData.access_token.split(".");
+                if (parts.length === 3) {
+                  const payload = JSON.parse(atob(parts[1]));
+                  if (payload.role) {
+                    localStorage.setItem("admin_role", payload.role);
+                  }
+                }
+              } catch {}
+              window.dispatchEvent(new Event("storage"));
+              window.dispatchEvent(new Event("user-auth-change"));
+              authenticated = true;
+              router.push("/admin/dashboard");
+              break;
+            }
+          } else if (res.status !== 404) {
+            const errData = await res.json().catch(() => ({}));
+            lastError = errData.detail || lastError;
+          }
+        } catch {
+          // Try next candidate url
+        }
       }
 
-      const responseData = await res.json();
-      localStorage.setItem("token", responseData.access_token);
-      localStorage.setItem("admin_token", responseData.access_token);
-      localStorage.setItem("admin_email", emailClean);
-      window.dispatchEvent(new Event("storage"));
-      window.dispatchEvent(new Event("user-auth-change"));
-      router.push("/admin/dashboard");
+      if (!authenticated) {
+        throw new Error(lastError);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Invalid credentials. Please try again.";
       setError(msg);
