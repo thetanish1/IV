@@ -315,6 +315,38 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
+          {/* Quick Super Admin Credentials Shortcuts */}
+          <div className="p-3 bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800/40 rounded-xl space-y-2">
+            <div className="text-[11px] font-bold text-brand-700 dark:text-brand-300 flex items-center justify-between">
+              <span>Super Admin Credentials:</span>
+              <span className="font-mono text-[10px] bg-brand-200/60 dark:bg-brand-900/60 px-1.5 py-0.5 rounded">Password: Admin@123456</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 text-[10px]">
+              {[
+                "admin@internvisiontech.me",
+                "tanishdewase222@gmail.com",
+                "hr@internvisiontech.me",
+              ].map((em) => (
+                <button
+                  key={em}
+                  type="button"
+                  onClick={() => {
+                    const emailInput = document.getElementById("admin-email") as HTMLInputElement;
+                    const passInput = document.getElementById("admin-password") as HTMLInputElement;
+                    if (emailInput) emailInput.value = em;
+                    if (passInput) passInput.value = "Admin@123456";
+                  }}
+                  className="px-2 py-1 bg-white dark:bg-ink-900 hover:bg-brand-100 dark:hover:bg-brand-900/40 border border-brand-200 dark:border-brand-800 text-brand-900 dark:text-brand-200 rounded font-medium transition cursor-pointer"
+                >
+                  {em}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-gray-500 dark:text-ink-400">
+              * Sub-admins (Mentors, Coordinators, Finance) should enter their assigned email and password.
+            </p>
+          </div>
+
           {/* Security Marker Footer */}
           <div className="pt-2 border-t border-gray-100 dark:border-ink-800/80 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-ink-400 font-medium">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />

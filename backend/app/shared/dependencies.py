@@ -162,9 +162,15 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
         # Check if account exists with different active state or is a known super admin
         from app.shared.security import get_password_hash
         KNOWN_SUPER_ADMIN_EMAILS = [
+            "admin@internvisiontech.me",
             "admin@internvision.tech",
             "tanishdewase222@gmail.com",
-            "internvisiontechhr@gmail.com"
+            "internvisiontechhr@gmail.com",
+            "hr@internvisiontech.me",
+            "support@internvisiontech.me",
+            "info@internvisiontech.me",
+            "billing@internvisiontech.me",
+            "contact@internvisiontech.me"
         ]
         
         existing = db.query(Admin).filter(func.lower(Admin.email) == sub_clean).first()

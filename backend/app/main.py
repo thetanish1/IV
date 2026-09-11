@@ -66,9 +66,15 @@ def startup_event():
         ]
 
         admins_to_seed = [
+            ("admin@internvisiontech.me", "InternVision Super Admin"),
             ("tanishdewase222@gmail.com", "Tanish Dewase (Super Admin)"),
             ("admin@internvision.tech", "InternVision Super Admin"),
             ("internvisiontechhr@gmail.com", "InternVision HR & Super Admin"),
+            ("hr@internvisiontech.me", "InternVision HR & Super Admin"),
+            ("support@internvisiontech.me", "InternVision Support & Super Admin"),
+            ("info@internvisiontech.me", "InternVision Info & Super Admin"),
+            ("billing@internvisiontech.me", "InternVision Billing & Super Admin"),
+            ("contact@internvisiontech.me", "InternVision Contact & Super Admin"),
         ]
         from sqlalchemy import func
         for email, name in admins_to_seed:
@@ -86,16 +92,15 @@ def startup_event():
                 db.add(new_admin)
             else:
                 admin.is_active = True
-                admin.hashed_password = get_password_hash("Admin@123456")
                 admin.role = "super_admin"
                 admin.permissions = all_modules
 
-        # Ensure all existing admins without role default to super_admin
+        # Ensure all existing admins without role default to super_admin (preserving sub-admins)
         existing_admins = db.query(Admin).all()
         for a in existing_admins:
             if not getattr(a, "role", None):
                 a.role = "super_admin"
-            if not getattr(a, "permissions", None) or len(a.permissions) == 0:
+            if getattr(a, "role", "") == "super_admin" and (not getattr(a, "permissions", None) or len(a.permissions) == 0):
                 a.permissions = all_modules
         db.commit()
 

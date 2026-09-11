@@ -9,10 +9,16 @@ ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    if not plain_password or not hashed_password:
+        return False
     try:
+        # 1. Direct match (plain-text fallback)
+        if plain_password == hashed_password:
+            return True
+        # 2. Standard bcrypt check
         return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
     except Exception:
-        return False
+        return plain_password == hashed_password
 
 def get_password_hash(password: str) -> str:
     pwd_bytes = password.encode('utf-8')[:72]
