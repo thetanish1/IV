@@ -3,7 +3,8 @@ const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
-  timeoutMs: number = 90000
+  timeoutMs: number = 90000,
+  maxRetries: number = 2
 ): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const headers = new Headers(options.headers || {});
@@ -21,39 +22,72 @@ export async function apiRequest<T>(
     headers.set("Pragma", "no-cache");
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      cache: "no-store",
-      ...options,
-      headers,
-      signal: options.signal || controller.signal,
-    });
-
-    if (!response.ok) {
-      let errorMessage = "An unexpected error occurred";
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.detail || errorMessage;
-      } catch {
-        errorMessage = response.statusText || `Request failed with status ${response.status}`;
-      }
-      throw new Error(errorMessage);
-    }
-
-    return response.json();
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      if (err.name === "AbortError" || err.message.toLowerCase().includes("abort") || err.message.toLowerCase().includes("timeout")) {
-        throw new Error("Request timed out or connection was interrupted. Please try again.");
-      }
-    }
-    throw err;
-  } finally {
-    clearTimeout(timeoutId);
+  // Normalize path to prevent /api/api
+  let cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  if (API_BASE_URL.endsWith("/api") && cleanEndpoint.startsWith("/api/")) {
+    cleanEndpoint = cleanEndpoint.replace(/^\/api/, "");
   }
+
+  const url = `${API_BASE_URL}${cleanEndpoint}`;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, {
+        cache: "no-store",
+        ...options,
+        headers,
+        signal: options.signal || controller.signal,
+      });
+
+      if (!response.ok) {
+        let errorMessage = "An unexpected error occurred";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch {
+          errorMessage = response.statusText || `Request failed with status ${response.status}`;
+        }
+
+        // Retry 502/503/504 cold-start errors if attempts remain
+        if ((response.status === 502 || response.status === 503 || response.status === 504) && attempt < maxRetries) {
+          await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+          continue;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      return response.json();
+    } catch (err: unknown) {
+      if (attempt < maxRetries && err instanceof Error) {
+        const isNetworkErr =
+          err.name === "AbortError" ||
+          err.message.includes("Failed to fetch") ||
+          err.message.includes("NetworkError") ||
+          err.message.includes("timeout") ||
+          err.message.includes("Load failed");
+
+        if (isNetworkErr) {
+          await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)));
+          continue;
+        }
+      }
+
+      if (err instanceof Error) {
+        if (err.name === "AbortError" || err.message.toLowerCase().includes("abort") || err.message.toLowerCase().includes("timeout")) {
+          throw new Error("Request timed out or connection was interrupted. Please try again.");
+        }
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  throw new Error("Unable to connect to the server after multiple attempts.");
 }
 
 export function getExportUrl(type: 'applications' | 'payments', params?: Record<string, string>): string {
