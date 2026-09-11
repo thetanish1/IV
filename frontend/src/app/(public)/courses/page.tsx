@@ -13,7 +13,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "Full Stack Web Development Bootcamp",
     slug: "full-stack-web-development",
     description: "Master modern web development using Next.js 15, React 19, TypeScript, FastAPI, and PostgreSQL. Build production applications from scratch.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "8 Weeks",
     level: "Intermediate",
     technologies: ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL"],
@@ -26,7 +26,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "Data Science & AI Bootcamp",
     slug: "data-science-ai",
     description: "Master statistical modeling, Exploratory Data Analysis (EDA), machine learning pipelines, Scikit-Learn, deep learning with TensorFlow, and data visualization.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "10 Weeks",
     level: "Intermediate",
     technologies: ["Python", "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "Tableau"],
@@ -39,7 +39,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "Java Programming & Core Engineering",
     slug: "java-programming",
     description: "Master Core Java 21, Object-Oriented Programming (OOP), Data Structures & Algorithms (DSA), multithreading, and enterprise Spring Boot microservices.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "8 Weeks",
     level: "Beginner",
     technologies: ["Java 21", "Spring Boot", "OOP", "DSA", "Hibernate", "MySQL"],
@@ -52,7 +52,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "Android App Development Bootcamp",
     slug: "android-app-development",
     description: "Build high-performance native Android apps with Kotlin, declarative Jetpack Compose UI, MVVM architecture, Coroutines, Retrofit, and Firebase.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "8 Weeks",
     level: "Intermediate",
     technologies: ["Kotlin", "Jetpack Compose", "Android Studio", "Coroutines", "Retrofit", "Firebase"],
@@ -65,7 +65,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "AI & Machine Learning Engineering",
     slug: "ai-machine-learning-engineering",
     description: "Deep dive into Neural Networks, LLMs, LangChain, RAG architecture, PyTorch, and fine-tuning open-source models for enterprise AI systems.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "12 Weeks",
     level: "Advanced",
     technologies: ["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"],
@@ -78,7 +78,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "Cloud DevOps & Kubernetes Mastery",
     slug: "cloud-devops-kubernetes-mastery",
     description: "Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "10 Weeks",
     level: "Intermediate",
     technologies: ["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"],
@@ -91,7 +91,7 @@ const DEFAULT_COURSES: Course[] = [
     title: "Cyber Security & Ethical Hacking",
     slug: "cyber-security-ethical-hacking",
     description: "Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.",
-    price_inr: 0,
+    price_inr: 1,
     duration: "8 Weeks",
     level: "Beginner",
     technologies: ["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
@@ -108,22 +108,23 @@ export default function CoursesPage() {
   const [levelFilter, setLevelFilter] = useState("all");
   const [showCourses, setShowCourses] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    checkSettings();
-    window.addEventListener("site-settings-changed", checkSettings);
-    window.addEventListener("storage", checkSettings);
-    return () => {
-      window.removeEventListener("site-settings-changed", checkSettings);
-      window.removeEventListener("storage", checkSettings);
-    };
-  }, []);
-
   const checkSettings = async () => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("show_courses");
+      if (cached !== null) {
+        setShowCourses(cached === "true");
+      }
+    }
     try {
-      const data = await apiRequest<{ show_courses?: boolean | string }>("/settings");
+      const data = await apiRequest<{ show_courses?: boolean | string }>(`/settings?_t=${Date.now()}`);
       if (data) {
         const isEnabled = data.show_courses === true || data.show_courses === "true";
         setShowCourses(isEnabled);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_courses", String(isEnabled));
+          } catch {}
+        }
       } else {
         setShowCourses(false);
       }
@@ -131,6 +132,23 @@ export default function CoursesPage() {
       setShowCourses(false);
     }
   };
+
+  useEffect(() => {
+    checkSettings();
+    const handleSettingsEvent = (e: any) => {
+      if (e?.detail && typeof e.detail.show_courses !== "undefined") {
+        setShowCourses(Boolean(e.detail.show_courses));
+      } else {
+        checkSettings();
+      }
+    };
+    window.addEventListener("site-settings-changed", handleSettingsEvent);
+    window.addEventListener("storage", checkSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", handleSettingsEvent);
+      window.removeEventListener("storage", checkSettings);
+    };
+  }, []);
 
   useEffect(() => {
     if (showCourses) {

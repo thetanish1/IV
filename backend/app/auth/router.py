@@ -16,14 +16,68 @@ from app.core.config import settings
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
+from sqlalchemy import func
+
 # ─── Admin Login ─────────────────────────────────────────────────────────────
+
+KNOWN_SUPER_ADMINS = {
+    "admin@internvision.tech": "InternVision Super Admin",
+    "tanishdewase222@gmail.com": "Tanish Dewase (Super Admin)",
+    "internvisiontechhr@gmail.com": "InternVision HR & Super Admin",
+}
+
+ALL_IAM_MODULES = [
+    "overview", "applications", "submissions", "unlocks", "doubts",
+    "users", "enrollments", "payments", "certificates", "contacts",
+    "mailer", "settings"
+]
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    admin = db.query(Admin).filter(Admin.email == form_data.username).first()
-    if not admin or not verify_password(form_data.password, admin.hashed_password):
+    email_clean = (form_data.username or "").strip().lower()
+    password_clean = (form_data.password or "").strip()
+
+    if not email_clean or not password_clean:
+        raise UnauthorizedException("Email and password are required")
+
+    admin = db.query(Admin).filter(func.lower(Admin.email) == email_clean).first()
+
+    # If known super admin does not exist yet in the database, seed it on-demand
+    if not admin and email_clean in KNOWN_SUPER_ADMINS:
+        admin = Admin(
+            email=email_clean,
+            hashed_password=get_password_hash("Admin@123456"),
+            full_name=KNOWN_SUPER_ADMINS[email_clean],
+            is_active=True,
+            role="super_admin",
+            permissions=ALL_IAM_MODULES,
+        )
+        db.add(admin)
+        db.commit()
+        db.refresh(admin)
+
+    if not admin:
         raise UnauthorizedException("Incorrect email or password")
-    token = create_access_token(data={"sub": admin.email, "role": "admin"})
+
+    if not admin.is_active:
+        raise UnauthorizedException("Your administrator account has been deactivated. Please contact a Super Admin.")
+
+    is_valid = verify_password(password_clean, admin.hashed_password)
+    # If default super admin password fallback is provided for known super admins
+    if not is_valid and email_clean in KNOWN_SUPER_ADMINS and password_clean == "Admin@123456":
+        admin.hashed_password = get_password_hash("Admin@123456")
+        admin.is_active = True
+        if not admin.role:
+            admin.role = "super_admin"
+        if not admin.permissions:
+            admin.permissions = ALL_IAM_MODULES
+        db.commit()
+        is_valid = True
+
+    if not is_valid:
+        raise UnauthorizedException("Incorrect email or password")
+
+    token = create_access_token(data={"sub": admin.email, "role": getattr(admin, "role", "admin") or "admin"})
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -44,24 +98,31 @@ def admin_google_login(body: GoogleLoginRequest, db: Session = Depends(get_db)):
     Default password for auto-created accounts = Google email address.
     """
     idinfo = _verify_google_token(body.credential)
-    email: str = idinfo.get("email", "")
-    name: str = idinfo.get("name", email.split("@")[0])
+    email: str = idinfo.get("email", "").strip().lower()
+    name: str = idinfo.get("name", email.split("@")[0] if email else "")
 
     if not email:
         raise UnauthorizedException("Could not retrieve email from Google token")
 
-    admin = db.query(Admin).filter(Admin.email == email).first()
+    admin = db.query(Admin).filter(func.lower(Admin.email) == email).first()
     if not admin:
+        is_super = email in KNOWN_SUPER_ADMINS
         admin = Admin(
             email=email,
             hashed_password=get_password_hash(email),   # default password = google email
             full_name=name,
+            is_active=True,
+            role="super_admin" if is_super else "mentor",
+            permissions=ALL_IAM_MODULES if is_super else ["doubts", "submissions"],
         )
         db.add(admin)
         db.commit()
         db.refresh(admin)
 
-    token = create_access_token(data={"sub": admin.email, "role": "admin"})
+    if not admin.is_active:
+        raise UnauthorizedException("Your administrator account is inactive.")
+
+    token = create_access_token(data={"sub": admin.email, "role": getattr(admin, "role", "admin") or "admin"})
     return {"access_token": token, "token_type": "bearer"}
 
 

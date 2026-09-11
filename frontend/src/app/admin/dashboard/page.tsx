@@ -509,11 +509,6 @@ function AdminDashboardContent() {
   };
 
   const handleUpdateSetting = async (key: string, value: boolean) => {
-    await apiRequest(`/admin/settings`, {
-      method: "PATCH",
-      body: JSON.stringify({ [key]: value }),
-    });
-
     const isCourses =
       key === "show_courses" || key === "courses_enabled"
         ? value
@@ -524,6 +519,7 @@ function AdminDashboardContent() {
         ? value
         : (settings.show_careers ?? settings.careers_enabled ?? false);
 
+    // 1. Optimistically update local state immediately
     setSettings({
       show_courses: isCourses,
       show_careers: isCareers,
@@ -531,12 +527,47 @@ function AdminDashboardContent() {
       careers_enabled: isCareers,
     });
 
-    // Broadcast change to Navbar, Footer, and public pages
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("site-settings-changed"));
       try {
+        localStorage.setItem("show_courses", String(isCourses));
+        localStorage.setItem("show_careers", String(isCareers));
         localStorage.setItem("site_settings_updated", Date.now().toString());
       } catch {}
+      window.dispatchEvent(new CustomEvent("site-settings-changed", {
+        detail: { show_courses: isCourses, show_careers: isCareers }
+      }));
+    }
+
+    // 2. Persist to backend
+    try {
+      const updated = await apiRequest<{ show_courses?: boolean; show_careers?: boolean }>(`/admin/settings`, {
+        method: "PATCH",
+        body: JSON.stringify({ 
+          [key]: value,
+          [key === "show_courses" ? "courses_enabled" : "careers_enabled"]: value 
+        }),
+      });
+      if (updated) {
+        const finalCourses = updated.show_courses === true || updated.show_courses === ("true" as any);
+        const finalCareers = updated.show_careers === true || updated.show_careers === ("true" as any);
+        setSettings({
+          show_courses: finalCourses,
+          show_careers: finalCareers,
+          courses_enabled: finalCourses,
+          careers_enabled: finalCareers,
+        });
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_courses", String(finalCourses));
+            localStorage.setItem("show_careers", String(finalCareers));
+          } catch {}
+          window.dispatchEvent(new CustomEvent("site-settings-changed", {
+            detail: { show_courses: finalCourses, show_careers: finalCareers }
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update site settings", err);
     }
   };
 

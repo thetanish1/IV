@@ -63,7 +63,7 @@ export function CourseCard({ course }: CourseCardProps) {
       <div className="pt-6 mt-8 border-t-2 border-ink-800 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] uppercase tracking-wider font-bold mb-1">
-            <Award className="w-3 h-3"/> 100% Free Scholarship
+            <Award className="w-3 h-3"/> Nominal Fee · Cohort Seat
           </div>
           <div className="text-2xl font-black text-white">
             {isApplied ? (
@@ -71,7 +71,7 @@ export function CourseCard({ course }: CourseCardProps) {
                 <CheckCircle2 className="w-5 h-5" /> Applied
               </span>
             ) : (
-              "Free Enrollment"
+              <span>₹{course.price_inr ?? 1} <span className="text-xs text-ink-400 font-normal">only</span></span>
             )}
           </div>
         </div>
@@ -84,7 +84,7 @@ export function CourseCard({ course }: CourseCardProps) {
               : "bg-brand-600 hover:bg-brand-500 text-white"
           }`}
         >
-          {isApplied ? "View Status" : "View & Enroll"}
+          {isApplied ? "View Status" : "Enroll for ₹1"}
           <ArrowRight className="w-3.5 h-3.5"/>
         </Link>
       </div>

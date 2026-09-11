@@ -13,13 +13,33 @@ export default function Footer() {
   });
 
   const fetchSettings = async () => {
-    try {
-      const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>("/settings");
-      if (data) {
+    if (typeof window !== "undefined") {
+      const cachedCourses = localStorage.getItem("show_courses");
+      const cachedCareers = localStorage.getItem("show_careers");
+      if (cachedCourses !== null || cachedCareers !== null) {
         setSettings({
-          show_courses: data.show_courses === true || data.show_courses === "true",
-          show_careers: data.show_careers === true || data.show_careers === "true",
+          show_courses: cachedCourses === "true",
+          show_careers: cachedCareers === "true",
         });
+      }
+    }
+    try {
+      const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>(
+        `/settings?_t=${Date.now()}`
+      );
+      if (data) {
+        const cVal = data.show_courses === true || data.show_courses === "true";
+        const carVal = data.show_careers === true || data.show_careers === "true";
+        setSettings({
+          show_courses: cVal,
+          show_careers: carVal,
+        });
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_courses", String(cVal));
+            localStorage.setItem("show_careers", String(carVal));
+          } catch {}
+        }
       }
     } catch {
       // fallback defaults
@@ -28,10 +48,20 @@ export default function Footer() {
 
   useEffect(() => {
     fetchSettings();
-    window.addEventListener("site-settings-changed", fetchSettings);
+    const handleSettingsEvent = (e: any) => {
+      if (e?.detail) {
+        setSettings({
+          show_courses: Boolean(e.detail.show_courses),
+          show_careers: Boolean(e.detail.show_careers),
+        });
+      } else {
+        fetchSettings();
+      }
+    };
+    window.addEventListener("site-settings-changed", handleSettingsEvent);
     window.addEventListener("storage", fetchSettings);
     return () => {
-      window.removeEventListener("site-settings-changed", fetchSettings);
+      window.removeEventListener("site-settings-changed", handleSettingsEvent);
       window.removeEventListener("storage", fetchSettings);
     };
   }, []);

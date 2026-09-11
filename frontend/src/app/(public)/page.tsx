@@ -136,18 +136,37 @@ export default function HomePage() {
 
   useEffect(() => {
     const checkSettings = async () => {
+      if (typeof window !== "undefined") {
+        const cached = localStorage.getItem("show_courses");
+        if (cached !== null) {
+          setShowCourses(cached === "true");
+        }
+      }
       try {
-        const data = await apiRequest<{ show_courses?: boolean | string }>("/settings");
-        setShowCourses(data?.show_courses === true || data?.show_courses === "true");
+        const data = await apiRequest<{ show_courses?: boolean | string }>(`/settings?_t=${Date.now()}`);
+        const isEnabled = data?.show_courses === true || data?.show_courses === "true";
+        setShowCourses(isEnabled);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_courses", String(isEnabled));
+          } catch {}
+        }
       } catch {
         // default hidden
       }
     };
     checkSettings();
-    window.addEventListener("site-settings-changed", checkSettings);
+    const handleSettingsEvent = (e: any) => {
+      if (e?.detail && typeof e.detail.show_courses !== "undefined") {
+        setShowCourses(Boolean(e.detail.show_courses));
+      } else {
+        checkSettings();
+      }
+    };
+    window.addEventListener("site-settings-changed", handleSettingsEvent);
     window.addEventListener("storage", checkSettings);
     return () => {
-      window.removeEventListener("site-settings-changed", checkSettings);
+      window.removeEventListener("site-settings-changed", handleSettingsEvent);
       window.removeEventListener("storage", checkSettings);
     };
   }, []);
@@ -432,17 +451,23 @@ export default function HomePage() {
             <div className="p-8 bg-ink-950 border border-ink-800 rounded-xl space-y-4">
               <h3 className="text-xl font-bold text-white">Full Stack Web Development</h3>
               <p className="text-xs text-ink-400">Master Next.js 15, FastAPI, and PostgreSQL with hands-on projects.</p>
-              <Link href="/courses/full-stack-web-development" className="inline-block px-4 py-2 bg-brand-600 text-white font-bold text-xs rounded">
-                Enroll Free →
-              </Link>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-emerald-400 font-bold text-sm">₹1 Only · Nominal Fee</span>
+                <Link href="/courses/full-stack-web-development" className="inline-block px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded transition">
+                  Enroll for ₹1 →
+                </Link>
+              </div>
             </div>
 
             <div className="p-8 bg-ink-950 border border-ink-800 rounded-xl space-y-4">
               <h3 className="text-xl font-bold text-white">AI & Machine Learning Engineering</h3>
               <p className="text-xs text-ink-400">Build neural networks, RAG architectures, and fine-tune LLMs.</p>
-              <Link href="/courses/ai-machine-learning-engineering" className="inline-block px-4 py-2 bg-brand-600 text-white font-bold text-xs rounded">
-                Enroll Free →
-              </Link>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-emerald-400 font-bold text-sm">₹1 Only · Nominal Fee</span>
+                <Link href="/courses/ai-machine-learning-engineering" className="inline-block px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded transition">
+                  Enroll for ₹1 →
+                </Link>
+              </div>
             </div>
           </div>
         </motion.section>

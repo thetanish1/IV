@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, Response
 from sqlalchemy.orm import Session
 from app.shared.database import get_db
 from app.shared.dependencies import require_permission
@@ -14,8 +14,12 @@ DEFAULT_SETTINGS = {
 }
 
 @router.get("")
-def get_site_settings(db: Session = Depends(get_db)):
+def get_site_settings(response: Response, db: Session = Depends(get_db)):
     """Public/Admin endpoint to fetch platform feature switch flags."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     settings_dict = dict(DEFAULT_SETTINGS)
     try:
         db_settings = db.query(SiteSetting).all()
@@ -24,8 +28,8 @@ def get_site_settings(db: Session = Depends(get_db)):
     except Exception:
         pass
 
-    show_courses_val = settings_dict.get("show_courses", "false").lower() == "true"
-    show_careers_val = settings_dict.get("show_careers", "false").lower() == "true"
+    show_courses_val = str(settings_dict.get("show_courses", "false")).lower() == "true"
+    show_careers_val = str(settings_dict.get("show_careers", "false")).lower() == "true"
 
     return {
         "show_courses": show_courses_val,
@@ -37,11 +41,16 @@ def get_site_settings(db: Session = Depends(get_db)):
 
 @router.patch("")
 def update_site_settings(
+    response: Response,
     body: Dict[str, Any] = Body(...),
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(require_permission("settings"))
 ):
     """Admin endpoint to update platform feature switches."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     for key, val in body.items():
         # Handle courses toggle
         if key in ("show_courses", "courses_enabled"):
@@ -62,4 +71,4 @@ def update_site_settings(
                 db.add(SiteSetting(key="show_careers", value=str_val))
 
     db.commit()
-    return get_site_settings(db)
+    return get_site_settings(response, db)

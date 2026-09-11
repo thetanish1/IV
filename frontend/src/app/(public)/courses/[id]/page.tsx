@@ -323,7 +323,7 @@ const getDefaultCourse = (slug: string): Course | null => {
     description:
       COURSE_CURRICULUM[slug]?.summary ||
       "Production-grade engineering bootcamp designed to give you industry-ready software engineering skills.",
-    price_inr: 0,
+    price_inr: 1,
     duration:
       slug === "ai-machine-learning-engineering"
         ? "12 Weeks"
@@ -379,22 +379,23 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   });
   const [showCourses, setShowCourses] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    checkSettings();
-    window.addEventListener("site-settings-changed", checkSettings);
-    window.addEventListener("storage", checkSettings);
-    return () => {
-      window.removeEventListener("site-settings-changed", checkSettings);
-      window.removeEventListener("storage", checkSettings);
-    };
-  }, []);
-
   const checkSettings = async () => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("show_courses");
+      if (cached !== null) {
+        setShowCourses(cached === "true");
+      }
+    }
     try {
-      const data = await apiRequest<{ show_courses?: boolean | string }>("/settings");
+      const data = await apiRequest<{ show_courses?: boolean | string }>(`/settings?_t=${Date.now()}`);
       if (data) {
         const isEnabled = data.show_courses === true || data.show_courses === "true";
         setShowCourses(isEnabled);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_courses", String(isEnabled));
+          } catch {}
+        }
       } else {
         setShowCourses(false);
       }
@@ -402,6 +403,23 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
       setShowCourses(false);
     }
   };
+
+  useEffect(() => {
+    checkSettings();
+    const handleSettingsEvent = (e: any) => {
+      if (e?.detail && typeof e.detail.show_courses !== "undefined") {
+        setShowCourses(Boolean(e.detail.show_courses));
+      } else {
+        checkSettings();
+      }
+    };
+    window.addEventListener("site-settings-changed", handleSettingsEvent);
+    window.addEventListener("storage", checkSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", handleSettingsEvent);
+      window.removeEventListener("storage", checkSettings);
+    };
+  }, []);
 
   // Pre-fill user data from localStorage and check applied state
   useEffect(() => {
@@ -591,7 +609,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   {course.duration}
                 </span>
                 <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-3 py-1">
-                  ✦ 100% Free Scholarship Track
+                  ✦ Nominal Fee · ₹1 Only
                 </span>
               </div>
 
@@ -688,7 +706,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
               <div className="space-y-2 border-b border-ink-800 pb-6">
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 uppercase tracking-wider inline-flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> 100% Free Scholarship
+                    <Sparkles className="w-3.5 h-3.5" /> Nominal Fee · ₹1 Only
                   </span>
                   {isAlreadyApplied && (
                     <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/20 px-2.5 py-1 rounded border border-emerald-500/40 uppercase tracking-wider inline-flex items-center gap-1">
@@ -696,9 +714,9 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                     </span>
                   )}
                 </div>
-                <div className="text-4xl font-black text-white tracking-tight">Free Enrollment</div>
+                <div className="text-4xl font-black text-white tracking-tight">₹{course.price_inr ?? 1} <span className="text-base text-ink-400 font-normal">only</span></div>
                 <p className="text-xs text-ink-400 leading-relaxed">
-                  Admission is application-based. Submit your request for administrative review and cohort mentor allocation.
+                  Direct cohort seat reservation with full syllabus access and 1:1 mentor code reviews.
                 </p>
               </div>
 
@@ -731,10 +749,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                       }}
                       className="w-full py-4 text-base font-black uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-0.5 transition-all flex items-center justify-center gap-2.5"
                     >
-                      <Zap className="w-5 h-5" /> Request Free Enrollment
+                      <Zap className="w-5 h-5" /> Enroll for ₹1
                     </button>
                     <p className="text-center text-[11px] text-ink-400">
-                      Acceptance confirmation dispatched via email upon admin review.
+                      Access confirmation dispatched via email upon admin review.
                     </p>
                   </>
                 )}

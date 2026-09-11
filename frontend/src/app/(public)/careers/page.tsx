@@ -152,21 +152,23 @@ const jobs = [
 export default function CareersPage() {
   const [showCareers, setShowCareers] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    checkSettings();
-    window.addEventListener("site-settings-changed", checkSettings);
-    window.addEventListener("storage", checkSettings);
-    return () => {
-      window.removeEventListener("site-settings-changed", checkSettings);
-      window.removeEventListener("storage", checkSettings);
-    };
-  }, []);
-
   const checkSettings = async () => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("show_careers");
+      if (cached !== null) {
+        setShowCareers(cached === "true");
+      }
+    }
     try {
-      const data = await apiRequest<{ show_careers?: boolean | string }>("/settings");
+      const data = await apiRequest<{ show_careers?: boolean | string }>(`/settings?_t=${Date.now()}`);
       if (data) {
-        setShowCareers(data.show_careers === true || data.show_careers === "true");
+        const isEnabled = data.show_careers === true || data.show_careers === "true";
+        setShowCareers(isEnabled);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_careers", String(isEnabled));
+          } catch {}
+        }
       } else {
         setShowCareers(false);
       }
@@ -174,6 +176,23 @@ export default function CareersPage() {
       setShowCareers(false);
     }
   };
+
+  useEffect(() => {
+    checkSettings();
+    const handleSettingsEvent = (e: any) => {
+      if (e?.detail && typeof e.detail.show_careers !== "undefined") {
+        setShowCareers(Boolean(e.detail.show_careers));
+      } else {
+        checkSettings();
+      }
+    };
+    window.addEventListener("site-settings-changed", handleSettingsEvent);
+    window.addEventListener("storage", checkSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", handleSettingsEvent);
+      window.removeEventListener("storage", checkSettings);
+    };
+  }, []);
 
   if (showCareers === false) {
     return (

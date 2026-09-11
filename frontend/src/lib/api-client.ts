@@ -16,11 +16,17 @@ export async function apiRequest<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
+  if (!headers.has("Cache-Control")) {
+    headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+    headers.set("Pragma", "no-cache");
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      cache: "no-store",
       ...options,
       headers,
       signal: options.signal || controller.signal,

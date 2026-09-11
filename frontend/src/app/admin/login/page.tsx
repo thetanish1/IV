@@ -128,9 +128,12 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
+      const emailClean = data.email.trim().toLowerCase();
+      const passwordClean = data.password.trim();
+
       const formData = new URLSearchParams();
-      formData.append("username", data.email);
-      formData.append("password", data.password);
+      formData.append("username", emailClean);
+      formData.append("password", passwordClean);
 
       const res = await fetch(`${apiBase}/auth/login`, {
         method: "POST",
@@ -146,7 +149,7 @@ export default function AdminLoginPage() {
       const responseData = await res.json();
       localStorage.setItem("token", responseData.access_token);
       localStorage.setItem("admin_token", responseData.access_token);
-      localStorage.setItem("admin_email", data.email);
+      localStorage.setItem("admin_email", emailClean);
       window.dispatchEvent(new Event("storage"));
       window.dispatchEvent(new Event("user-auth-change"));
       router.push("/admin/dashboard");

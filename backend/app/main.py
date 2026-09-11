@@ -64,14 +64,17 @@ def startup_event():
         ]
 
         admins_to_seed = [
-            ("tanishdewase222@gmail.com", "Tanish Dewase (Admin)"),
-            ("admin@internvision.tech", "InternVision Admin")
+            ("tanishdewase222@gmail.com", "Tanish Dewase (Super Admin)"),
+            ("admin@internvision.tech", "InternVision Super Admin"),
+            ("internvisiontechhr@gmail.com", "InternVision HR & Super Admin"),
         ]
+        from sqlalchemy import func
         for email, name in admins_to_seed:
-            admin = db.query(Admin).filter(Admin.email == email).first()
+            email_clean = email.strip().lower()
+            admin = db.query(Admin).filter(func.lower(Admin.email) == email_clean).first()
             if not admin:
                 new_admin = Admin(
-                    email=email,
+                    email=email_clean,
                     hashed_password=get_password_hash("Admin@123456"),
                     full_name=name,
                     is_active=True,
@@ -80,6 +83,7 @@ def startup_event():
                 )
                 db.add(new_admin)
             else:
+                admin.is_active = True
                 if not admin.role:
                     admin.role = "super_admin"
                 if not admin.permissions or len(admin.permissions) == 0:
@@ -94,6 +98,13 @@ def startup_event():
                 a.permissions = all_modules
         db.commit()
 
+        # Update all existing courses to ₹1 (INR 1)
+        try:
+            db.execute(text("UPDATE courses SET price_inr = 1"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         # Seed all 7 standard bootcamps if not in database
         from app.courses.models import Course
         all_bootcamps = [
@@ -101,7 +112,7 @@ def startup_event():
                 title="Full Stack Web Development Bootcamp",
                 slug="full-stack-web-development",
                 description="Master modern web development using Next.js 15, React 19, TypeScript, FastAPI, and PostgreSQL. Build production applications from scratch.",
-                price_inr=0,
+                price_inr=1,
                 duration="8 Weeks",
                 level="Intermediate",
                 technologies=["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL"],
@@ -111,7 +122,7 @@ def startup_event():
                 title="Data Science & AI Bootcamp",
                 slug="data-science-ai",
                 description="Master statistical modeling, Exploratory Data Analysis (EDA), machine learning pipelines, Scikit-Learn, deep learning with TensorFlow, and data visualization.",
-                price_inr=0,
+                price_inr=1,
                 duration="10 Weeks",
                 level="Intermediate",
                 technologies=["Python", "Pandas", "NumPy", "Scikit-Learn", "TensorFlow", "Tableau"],
@@ -121,7 +132,7 @@ def startup_event():
                 title="Java Programming & Core Engineering",
                 slug="java-programming",
                 description="Master Core Java 21, Object-Oriented Programming (OOP), Data Structures & Algorithms (DSA), multithreading, and enterprise Spring Boot microservices.",
-                price_inr=0,
+                price_inr=1,
                 duration="8 Weeks",
                 level="Beginner",
                 technologies=["Java 21", "Spring Boot", "OOP", "DSA", "Hibernate", "MySQL"],
@@ -131,7 +142,7 @@ def startup_event():
                 title="Android App Development Bootcamp",
                 slug="android-app-development",
                 description="Build high-performance native Android apps with Kotlin, declarative Jetpack Compose UI, MVVM architecture, Coroutines, Retrofit, and Firebase.",
-                price_inr=0,
+                price_inr=1,
                 duration="8 Weeks",
                 level="Intermediate",
                 technologies=["Kotlin", "Jetpack Compose", "Android Studio", "Coroutines", "Retrofit", "Firebase"],
@@ -141,7 +152,7 @@ def startup_event():
                 title="AI & Machine Learning Engineering",
                 slug="ai-machine-learning-engineering",
                 description="Deep dive into Neural Networks, LLMs, LangChain, RAG architecture, PyTorch, and fine-tuning open-source models for enterprise AI systems.",
-                price_inr=0,
+                price_inr=1,
                 duration="12 Weeks",
                 level="Advanced",
                 technologies=["Python", "PyTorch", "OpenAI API", "LangChain", "Vector DBs"],
@@ -151,7 +162,7 @@ def startup_event():
                 title="Cloud DevOps & Kubernetes Mastery",
                 slug="cloud-devops-kubernetes-mastery",
                 description="Architect high-availability infrastructure with Docker, Kubernetes, Terraform, AWS, and production CI/CD automation pipelines.",
-                price_inr=0,
+                price_inr=1,
                 duration="10 Weeks",
                 level="Intermediate",
                 technologies=["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"],
@@ -161,7 +172,7 @@ def startup_event():
                 title="Cyber Security & Ethical Hacking",
                 slug="cyber-security-ethical-hacking",
                 description="Understand network security, penetration testing, cryptography, web vulnerability assessment, and defensive security strategies.",
-                price_inr=0,
+                price_inr=1,
                 duration="8 Weeks",
                 level="Beginner",
                 technologies=["Linux", "Metasploit", "Wireshark", "Burp Suite", "Python"],
@@ -172,6 +183,8 @@ def startup_event():
             existing = db.query(Course).filter(Course.slug == course_item.slug).first()
             if not existing:
                 db.add(course_item)
+            else:
+                existing.price_inr = 1
 
         # Seed sample verified certificates if none exist
         if db.query(Certificate).count() == 0:
@@ -311,8 +324,11 @@ def root():
 
 @app.get("/settings")
 @app.get("/api/settings")
-def get_public_settings(db: Session = Depends(get_db)):
+def get_public_settings(response: Response, db: Session = Depends(get_db)):
     from app.shared.settings_models import SiteSetting
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     rows = db.query(SiteSetting).all()
     settings_dict = {
         "show_courses": "false",
