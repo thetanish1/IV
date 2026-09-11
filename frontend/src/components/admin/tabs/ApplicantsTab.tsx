@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Users, Eye, Trash2, Download, Loader2, RefreshCw } from "lucide-react";
+import { Users, Eye, Trash2, Download, Loader2, RefreshCw, FileSpreadsheet } from "lucide-react";
 import { InternshipApplicationResponse, PaginatedResult } from "@/types";
 import { apiRequest } from "@/lib/api-client";
 import { FadeIn } from "@/components/animations/FadeIn";
@@ -31,11 +31,57 @@ export default function ApplicantsTab({
   const [appsDuration, setAppsDuration] = useState("all");
   const [appsPage, setAppsPage] = useState(1);
   const [loadingApps, setLoadingApps] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   const [selectedApp, setSelectedApp] = useState<InternshipApplicationResponse | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [deletingAppId, setDeletingAppId] = useState<number | null>(null);
   const [deletingAllApps, setDeletingAllApps] = useState(false);
+
+  const handleExportExcel = async () => {
+    setExportingExcel(true);
+    try {
+      const params = new URLSearchParams();
+      if (appsSearch) params.set("q", appsSearch);
+      if (appsDuration !== "all") params.set("duration", appsDuration);
+
+      const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api").replace(/\/$/, "");
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const queryString = params.toString();
+      const exportUrl = `${API_BASE_URL}/admin/export/applications${queryString ? `?${queryString}` : ""}`;
+      
+      const res = await fetch(exportUrl, {
+        method: "GET",
+        headers,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Export failed with status: ${res.status}`);
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const todayStr = new Date().toISOString().split("T")[0];
+      a.download = `internvision_internship_applications_${todayStr}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Failed to export Excel file:", err);
+      alert("Failed to export Excel file. Please ensure you are authorized as admin and try again.");
+    } finally {
+      setExportingExcel(false);
+    }
+  };
 
   const fetchApplications = useCallback(async () => {
     setLoadingApps(true);
@@ -154,6 +200,20 @@ export default function ApplicantsTab({
               }}
               accentColor="blue"
             />
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              disabled={exportingExcel || appsData.total === 0}
+              className="px-3 py-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:border-emerald-700/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60 rounded-lg flex items-center gap-1.5 transition disabled:opacity-50 shadow-sm"
+              title="Export applicants matching current search/filters as Excel (.xlsx)"
+            >
+              {exportingExcel ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              )}
+              <span>{exportingExcel ? "Exporting..." : "Export Excel"}</span>
+            </button>
             <button
               type="button"
               onClick={fetchApplications}

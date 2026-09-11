@@ -19,9 +19,29 @@ class ExcelService:
             bottom=Side(style='thin', color='CBD5E1')
         )
         alignment_center = Alignment(horizontal="center", vertical="center")
-        alignment_left = Alignment(horizontal="left", vertical="center")
+        alignment_left = Alignment(horizontal="left", vertical="center", wrap_text=False)
 
-        headers = ["ID", "Full Name", "Email", "Phone", "College", "Degree", "Year of Study", "Skills", "Duration", "Status", "Applied At"]
+        headers = [
+            "App ID",
+            "Applicant Name",
+            "Email Address",
+            "Google Auth Email",
+            "Phone Number",
+            "Domain / Role Track",
+            "Duration",
+            "College / University",
+            "Degree / Major",
+            "Year of Study",
+            "Technical Skills",
+            "Application Status",
+            "LinkedIn URL",
+            "GitHub URL",
+            "Portfolio / Project URL",
+            "Resume File",
+            "Experience Description",
+            "Cover Letter / Notes",
+            "Applied Date (UTC)"
+        ]
         ws.append(headers)
 
         for col_num, header in enumerate(headers, 1):
@@ -31,23 +51,32 @@ class ExcelService:
             cell.alignment = alignment_center
             cell.border = thin_border
         
-        ws.row_dimensions[1].height = 26
+        ws.row_dimensions[1].height = 28
 
         for row_idx, app in enumerate(applications, 2):
-            skills_str = ", ".join(app.skills) if isinstance(app.skills, list) else str(app.skills)
+            skills_val = getattr(app, "skills", [])
+            skills_str = ", ".join(skills_val) if isinstance(skills_val, list) else str(skills_val or "")
             created_str = app.created_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(app, 'created_at') and app.created_at else ""
 
             row_data = [
                 app.id,
-                app.full_name,
-                app.email,
-                app.phone,
-                app.college,
-                app.degree,
-                app.year_of_study,
+                app.full_name or "N/A",
+                app.email or "N/A",
+                getattr(app, "google_email", "") or "",
+                app.phone or "N/A",
+                getattr(app, "role_preference", "") or "General",
+                app.duration or "N/A",
+                app.college or "N/A",
+                app.degree or "N/A",
+                app.year_of_study or "N/A",
                 skills_str,
-                app.duration,
-                app.status.upper(),
+                (app.status or "pending").upper(),
+                getattr(app, "linkedin_url", "") or "",
+                getattr(app, "github_url", "") or "",
+                getattr(app, "portfolio_url", "") or "",
+                getattr(app, "resume_filename", "") or "",
+                getattr(app, "experience_description", "") or "",
+                getattr(app, "cover_letter", "") or "",
                 created_str
             ]
             ws.append(row_data)
@@ -55,7 +84,7 @@ class ExcelService:
             for col_idx in range(1, len(headers) + 1):
                 cell = ws.cell(row=row_idx, column=col_idx)
                 cell.border = thin_border
-                if col_idx in [1, 7, 9, 10, 11]:
+                if col_idx in [1, 5, 7, 10, 12, 19]:
                     cell.alignment = alignment_center
                 else:
                     cell.alignment = alignment_left
@@ -63,7 +92,8 @@ class ExcelService:
         for col in ws.columns:
             max_len = max(len(str(cell.value or '')) for cell in col)
             col_letter = get_column_letter(col[0].column)
-            ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
+            # Cap maximum width to 45 so long descriptions don't make columns too huge
+            ws.column_dimensions[col_letter].width = min(max(max_len + 4, 12), 45)
 
         output = io.BytesIO()
         wb.save(output)

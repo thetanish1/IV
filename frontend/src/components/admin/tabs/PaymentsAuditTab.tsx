@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Pagination, AdminSearchBar, StatusBadge } from "../common";
-import { CreditCard, DollarSign, Calendar, ShieldCheck, Trash2 } from "lucide-react";
+import { CreditCard, DollarSign, Calendar, ShieldCheck, Trash2, FileSpreadsheet, Loader2 } from "lucide-react";
 
 interface PaymentsAuditTabProps {
   payments: any[];
@@ -18,6 +18,52 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [exportingExcel, setExportingExcel] = useState(false);
+
+  const handleExportPaymentsExcel = async () => {
+    setExportingExcel(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchTerm) params.set("q", searchTerm);
+      if (statusFilter !== "ALL") params.set("status", statusFilter.toLowerCase());
+
+      const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api").replace(/\/$/, "");
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const queryString = params.toString();
+      const exportUrl = `${API_BASE_URL}/admin/export/payments${queryString ? `?${queryString}` : ""}`;
+      
+      const res = await fetch(exportUrl, {
+        method: "GET",
+        headers,
+      });
+
+      if (!res.ok) {
+        throw new Error(`Export failed with status: ${res.status}`);
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const todayStr = new Date().toISOString().split("T")[0];
+      a.download = `internvision_payments_${todayStr}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Failed to export Payments Excel file:", err);
+      alert("Failed to export Payments Excel file. Please try again.");
+    } finally {
+      setExportingExcel(false);
+    }
+  };
 
   const filteredPayments = useMemo(() => {
     return payments.filter((p) => {
@@ -126,6 +172,20 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
             <option value="PENDING">Pending / Processing</option>
             <option value="FAILED">Failed / Declined</option>
           </select>
+          <button
+            type="button"
+            onClick={handleExportPaymentsExcel}
+            disabled={exportingExcel || payments.length === 0}
+            className="px-3.5 py-2 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:border-emerald-700/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60 rounded-xl flex items-center gap-1.5 transition disabled:opacity-50 shadow-sm"
+            title="Export payment records as Excel (.xlsx)"
+          >
+            {exportingExcel ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            )}
+            <span>{exportingExcel ? "Exporting..." : "Export Excel"}</span>
+          </button>
         </div>
       </div>
 
