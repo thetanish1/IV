@@ -25,6 +25,7 @@ import {
 import { Course } from "@/types";
 import { apiRequest } from "@/lib/api-client";
 import { FadeIn } from "@/components/animations/FadeIn";
+import { CoursePaymentModal } from "@/components/CoursePaymentModal";
 
 // Detailed curriculum content per course slug
 const COURSE_CURRICULUM: Record<
@@ -899,163 +900,22 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      {/* DIRECT PAYMENT & ENROLLMENT MODAL */}
-      {showEnrollModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-ink-950 border-2 border-brand-500 max-w-lg w-full p-6 sm:p-8 space-y-6 relative shadow-[12px_12px_0px_#000000]">
-            <button
-              onClick={() => setShowEnrollModal(false)}
-              className="absolute top-4 right-4 text-ink-400 hover:text-white p-2 text-base font-bold"
-              aria-label="Close"
-            >
-              ✕
-            </button>
-
-            {submittedSuccess ? (
-              <div className="text-center py-6 space-y-5">
-                <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/40">
-                  <CheckCircle2 className="w-10 h-10" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-white uppercase">Payment Verified & Access Unlocked!</h3>
-                  <p className="text-xs text-ink-300 max-w-sm mx-auto leading-relaxed">
-                    Congratulations, <strong className="text-white">{formData.student_name || "Student"}</strong>! Your payment of{" "}
-                    <strong className="text-emerald-400">₹{paymentDetails?.amount_inr || course.price_inr || 1}</strong> for{" "}
-                    <strong className="text-brand-400">{course.title}</strong> has been successfully captured.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-ink-900 border border-ink-800 text-xs text-ink-300 text-left space-y-2 rounded">
-                  <div className="font-bold text-white flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" /> Transaction Audit Summary
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px] text-ink-400 pt-1">
-                    <div>
-                      <span className="font-semibold text-ink-300">Order ID:</span>
-                      <div className="font-mono text-white text-[10px] break-all">{paymentDetails?.order_id || "order_verified"}</div>
-                    </div>
-                    <div>
-                      <span className="font-semibold text-ink-300">Payment ID:</span>
-                      <div className="font-mono text-emerald-400 text-[10px] break-all">{paymentDetails?.payment_id || "pay_captured"}</div>
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-emerald-300 font-semibold pt-1">
-                    ✓ Status: Confirmed & Logged in Admin Panel
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowEnrollModal(false)}
-                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm uppercase tracking-wider transition shadow-[2px_2px_0px_#ffffff]"
-                >
-                  Start Learning Now →
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-1 border-b border-ink-800 pb-4">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5" /> Instant Direct Checkout
-                  </div>
-                  <h3 className="text-2xl font-black text-white tracking-tight pt-1">
-                    Complete Course Enrollment
-                  </h3>
-                  <div className="flex items-center justify-between text-xs pt-1">
-                    <span className="text-ink-400">{course.title}</span>
-                    <span className="font-bold text-emerald-400 text-sm">₹{course.price_inr ?? 1}</span>
-                  </div>
-                </div>
-
-                {errorMsg && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
-                    {errorMsg}
-                  </div>
-                )}
-
-                <form onSubmit={handlePaymentSubmit} className="space-y-4 text-sm">
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-brand-400" /> Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Aarav Sharma"
-                      value={formData.student_name}
-                      onChange={(e) => setFormData({ ...formData, student_name: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-500 text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address (For Receipt & Course Access) *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="e.g. aarav.sharma@example.com"
-                      value={formData.student_email}
-                      onChange={(e) => setFormData({ ...formData, student_email: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-500 text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-brand-400" /> WhatsApp / Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="+91 9876543210"
-                      value={formData.student_phone}
-                      onChange={(e) => setFormData({ ...formData, student_phone: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-500 text-sm"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Building2 className="w-3.5 h-3.5 text-brand-400" /> College / University Name (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. VNIT Nagpur / IIT Bombay"
-                      value={formData.college}
-                      onChange={(e) => setFormData({ ...formData, college: e.target.value })}
-                      className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white focus:outline-none focus:border-brand-500 text-sm"
-                    />
-                  </div>
-
-                  {/* Payment fee summary box */}
-                  <div className="p-3 bg-ink-900 border border-ink-800 rounded flex items-center justify-between text-xs">
-                    <span className="text-ink-400">Total Payable Amount:</span>
-                    <span className="text-base font-black text-emerald-400">₹{course.price_inr ?? 1}</span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3.5 font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 transition disabled:opacity-50 shadow-[4px_4px_0px_#ffffff] cursor-pointer"
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Processing Payment...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-4 h-4" /> Pay ₹{course.price_inr ?? 1} & Unlock Instant Access
-                      </>
-                    )}
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* MULTI-METHOD PAYMENT GATEWAY MODAL (UPI, CARDS, NET BANKING, WALLETS) */}
+      <CoursePaymentModal
+        course={course}
+        isOpen={showEnrollModal}
+        onClose={() => setShowEnrollModal(false)}
+        initialData={{
+          name: formData.student_name,
+          email: formData.student_email,
+          phone: formData.student_phone,
+          college: formData.college,
+        }}
+        onSuccess={(details) => {
+          setIsEnrolled(true);
+          setPaymentDetails(details);
+        }}
+      />
     </div>
   );
 }
