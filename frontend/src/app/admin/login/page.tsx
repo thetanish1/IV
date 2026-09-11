@@ -323,6 +323,7 @@ export default function AdminLoginPage() {
             </div>
             <div className="flex flex-wrap gap-1.5 text-[10px]">
               {[
+                "pathadesuraj75@gmail.com",
                 "admin@internvisiontech.me",
                 "tanishdewase222@gmail.com",
                 "hr@internvisiontech.me",

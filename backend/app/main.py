@@ -66,6 +66,7 @@ def startup_event():
         ]
 
         admins_to_seed = [
+            ("pathadesuraj75@gmail.com", "Suraj Pathade (Super Admin)"),
             ("admin@internvisiontech.me", "InternVision Super Admin"),
             ("tanishdewase222@gmail.com", "Tanish Dewase (Super Admin)"),
             ("admin@internvision.tech", "InternVision Super Admin"),

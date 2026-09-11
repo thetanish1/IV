@@ -11,16 +11,23 @@ if db_url.startswith("postgres://"):
 connect_args = {}
 if db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+else:
+    connect_args = {
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    }
 
 engine_kwargs = {
     "pool_pre_ping": True,
 }
 if not db_url.startswith("sqlite"):
     engine_kwargs.update({
-        "pool_size": 25,
-        "max_overflow": 50,
-        "pool_timeout": 60,
-        "pool_recycle": 1800,
+        "pool_size": 20,
+        "max_overflow": 30,
+        "pool_timeout": 30,
+        "pool_recycle": 280,
     })
 
 engine = create_engine(
