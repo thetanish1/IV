@@ -442,10 +442,10 @@ function CertificateVerifierContent() {
                 Contact HR Support <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <a
-                href="mailto:internvisiontechhr@gmail.com"
+                href="mailto:support@internvisiontech.me"
                 className="px-5 py-2.5 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/30 text-brand-400 rounded transition"
               >
-                Email internvisiontechhr@gmail.com
+                Email support@internvisiontech.me
               </a>
             </div>
           </div>

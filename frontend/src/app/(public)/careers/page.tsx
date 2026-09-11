@@ -402,8 +402,8 @@ export default function CareersPage() {
               </h2>
               <p className="text-brand-100 text-lg leading-relaxed">
                 We&apos;re always looking for exceptional people. Send your portfolio and resume to{" "}
-                <a href="mailto:internvisiontechhr@gmail.com" className="underline font-semibold">
-                  internvisiontechhr@gmail.com
+                <a href="mailto:hr@internvisiontech.me" className="underline font-semibold font-mono">
+                  hr@internvisiontech.me
                 </a>
               </p>
               <Link

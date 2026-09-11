@@ -35,8 +35,8 @@ def _send_smtp_email(to_email: str, subject: str, html_content: str, text_conten
     smtp_port = int(settings.SMTP_PORT or 587)
     smtp_user = settings.SMTP_USER or "b06485001@smtp-brevo.com"
     smtp_password = _get_smtp_password()
-    from_email = settings.SMTP_FROM_EMAIL or "internvisiontechhr@gmail.com"
-    from_name = settings.SMTP_FROM_NAME or "InternVision Tech HR"
+    from_email = settings.SMTP_FROM_EMAIL or "support@internvisiontech.me"
+    from_name = settings.SMTP_FROM_NAME or "InternVision Tech"
 
     if not smtp_user or not smtp_password:
         logger.info(
@@ -179,9 +179,14 @@ def _build_base_email_template(
           <!-- SUPPORT & CONTACT NOTICE -->
           <tr>
             <td style="padding: 14px 28px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.6; word-break: break-word;">
-              <p style="margin: 0;">
-                <strong>Need Technical or Admission Support?</strong> Reach out directly to our mentor desk at
-                <a href="mailto:internvisiontechhr@gmail.com" style="color: {accent_color}; text-decoration: underline; font-weight: 600;">internvisiontechhr@gmail.com</a>.
+              <p style="margin: 0 0 4px 0;">
+                <strong>Department Contacts:</strong>
+                Support: <a href="mailto:support@internvisiontech.me" style="color: {accent_color}; font-weight: 600;">support@internvisiontech.me</a> |
+                HR: <a href="mailto:hr@internvisiontech.me" style="color: {accent_color}; font-weight: 600;">hr@internvisiontech.me</a> |
+                Billing: <a href="mailto:billing@internvisiontech.me" style="color: {accent_color}; font-weight: 600;">billing@internvisiontech.me</a>
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+                Website: <a href="https://www.internvisiontech.me" style="color: {accent_color}; font-weight: 600;">www.internvisiontech.me</a> • Apply: <a href="https://internvisiontech.me/apply" style="color: {accent_color}; font-weight: 600;">internvisiontech.me/apply</a>
               </p>
             </td>
           </tr>
@@ -1090,6 +1095,40 @@ def send_sub_admin_provisioned_email(
         accent_color="#4f46e5"
     )
 
-    text = f"""Dear {display_name},\n\nYou have been provisioned as an administrator ({role_label}) on InternVision Tech.\nPortal: https://iv-theta.vercel.app/admin/login\nEmail: {admin_email}\nTemporary Password: {temporary_password}\n\nBest regards,\nInternVision Tech Super Admin"""
+    text = f"""Dear {display_name},\n\nYou have been provisioned as an administrator ({role_label}) on InternVision Tech.\nPortal: https://www.internvisiontech.me/admin/login\nEmail: {admin_email}\nTemporary Password: {temporary_password}\n\nBest regards,\nInternVision Tech Super Admin"""
     return _send_smtp_email(admin_email, subject, html, text)
+
+
+# ─── 13. CONTACT FORM INQUIRY RECEIVED ADMIN NOTIFICATION ───────────────────
+
+def send_contact_received_admin_alert(
+    sender_name: str,
+    sender_email: str,
+    subject: str,
+    message: str
+) -> bool:
+    """Dispatched to admin / contact desk when a visitor submits the contact form."""
+    admin_target = "contact@internvisiontech.me"
+    email_subject = f"📨 New Contact Inquiry from {sender_name}: {subject}"
+    body_html = f"""
+    <p style="margin: 0 0 14px;"><strong>New Contact Form Submission Received</strong></p>
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+      <p style="margin: 0 0 6px;"><strong>Name:</strong> {escape(sender_name)}</p>
+      <p style="margin: 0 0 6px;"><strong>Email:</strong> <a href="mailto:{escape(sender_email)}">{escape(sender_email)}</a></p>
+      <p style="margin: 0 0 6px;"><strong>Subject:</strong> {escape(subject)}</p>
+      <p style="margin: 12px 0 0; font-size: 13px; color: #334155; line-height: 1.6; white-space: pre-wrap;"><strong>Message:</strong><br/>{escape(message)}</p>
+    </div>
+    """
+    html = _build_base_email_template(
+        badge_text="Inbound Inquiry",
+        badge_color="#2563eb",
+        title="New Contact Message",
+        body_content_html=body_html,
+        cta_text="View in Admin Dashboard →",
+        cta_url="https://www.internvisiontech.me/admin/dashboard?tab=contacts",
+        accent_color="#2563eb"
+    )
+    text = f"New Contact Message from {sender_name} ({sender_email}):\nSubject: {subject}\n\n{message}"
+    return _send_smtp_email(admin_target, email_subject, html, text)
+
 

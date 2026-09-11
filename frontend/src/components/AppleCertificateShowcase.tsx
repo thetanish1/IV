@@ -111,10 +111,10 @@ const CARDS: AppleCardItem[] = [
       "Official background verification responses dispatched within 24 business hours",
       "Detailed grading breakdown: Distinction (Grade A+), Merit (Grade A), or Standard",
       "Comprehensive list of verified technical competencies and frameworks",
-      "Direct email channel: internvisiontechhr@gmail.com",
+      "Direct email channel: hr@internvisiontech.me",
     ],
     ctaLabel: "Contact Recruiter Desk",
-    ctaHref: "mailto:internvisiontechhr@gmail.com",
+    ctaHref: "mailto:hr@internvisiontech.me",
   },
 ];
 

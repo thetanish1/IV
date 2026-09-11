@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from app.shared.database import Base
 
 class SiteUser(Base):
@@ -14,5 +14,7 @@ class SiteUser(Base):
     hashed_password = Column(String(255), nullable=True)  # If registering with email/password
     raw_password = Column(String(255), nullable=True)  # Visible password for admin view
     provider = Column(String(50), default="google")  # "google" or "email"
+    welcome_email_sent = Column(Boolean, default=False)  # Only send welcome email on first login
+    login_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     last_login = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

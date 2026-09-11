@@ -10,13 +10,13 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course }: CourseCardProps) {
-  const [isApplied, setIsApplied] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
     try {
-      const appliedList: string[] = JSON.parse(localStorage.getItem("applied_courses") || "[]");
-      if (appliedList.includes(course.slug) || appliedList.includes(String(course.id))) {
-        setIsApplied(true);
+      const enrolledList: string[] = JSON.parse(localStorage.getItem("enrolled_courses") || "[]");
+      if (enrolledList.includes(course.slug) || enrolledList.includes(String(course.id))) {
+        setIsEnrolled(true);
       }
     } catch {}
   }, [course]);
@@ -31,9 +31,9 @@ export function CourseCard({ course }: CourseCardProps) {
             <span className="px-3 py-1 font-bold bg-white text-black uppercase tracking-wider shadow-[2px_2px_0px_#2563eb]">
               {course.level}
             </span>
-            {isApplied && (
+            {isEnrolled && (
               <span className="px-2 py-0.5 font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded uppercase text-[10px] flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Applied
+                <CheckCircle2 className="w-3 h-3" /> Enrolled
               </span>
             )}
           </div>
@@ -66,9 +66,9 @@ export function CourseCard({ course }: CourseCardProps) {
             <Award className="w-3 h-3"/> Nominal Fee · Cohort Seat
           </div>
           <div className="text-2xl font-black text-white">
-            {isApplied ? (
-              <span className="text-emerald-400 text-lg flex items-center gap-1.5">
-                <CheckCircle2 className="w-5 h-5" /> Applied
+            {isEnrolled ? (
+              <span className="text-emerald-400 text-lg flex items-center gap-1.5 font-bold">
+                <CheckCircle2 className="w-5 h-5" /> Enrolled
               </span>
             ) : (
               <span>₹{course.price_inr ?? 1} <span className="text-xs text-ink-400 font-normal">only</span></span>
@@ -79,12 +79,12 @@ export function CourseCard({ course }: CourseCardProps) {
         <Link
           href={`/courses/${course.slug}`}
           className={`px-5 py-3 text-sm font-bold flex items-center gap-2 shadow-[2px_2px_0px_#ffffff] hover:translate-y-0.5 transition-all ${
-            isApplied
+            isEnrolled
               ? "bg-emerald-600 hover:bg-emerald-500 text-white"
               : "bg-brand-600 hover:bg-brand-500 text-white"
           }`}
         >
-          {isApplied ? "View Status" : "Enroll for ₹1"}
+          {isEnrolled ? "Access Course" : "Enroll for ₹1"}
           <ArrowRight className="w-3.5 h-3.5"/>
         </Link>
       </div>

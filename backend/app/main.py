@@ -49,7 +49,9 @@ def startup_event():
             "ALTER TABLE payments ADD COLUMN cf_order_id VARCHAR(255)",
             "ALTER TABLE payments ADD COLUMN cf_payment_id VARCHAR(255)",
             "ALTER TABLE payments ADD COLUMN payment_session_id VARCHAR(500)",
-            "ALTER TABLE payments ALTER COLUMN razorpay_order_id DROP NOT NULL"
+            "ALTER TABLE payments ALTER COLUMN razorpay_order_id DROP NOT NULL",
+            "ALTER TABLE site_users ADD COLUMN welcome_email_sent BOOLEAN DEFAULT FALSE",
+            "ALTER TABLE site_users ADD COLUMN login_count INTEGER DEFAULT 0",
         ]:
             try:
                 db.execute(text(col_def))

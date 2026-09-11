@@ -184,6 +184,7 @@ def user_register(body: UserRegisterRequest, background_tasks: BackgroundTasks, 
         raise UnauthorizedException("Email and password are required")
     
     user = db.query(SiteUser).filter(SiteUser.email == clean_email).first()
+    is_new = False
     if user:
         # Update existing user's password and details
         user.full_name = body.full_name.strip() or user.full_name or clean_email.split("@")[0]
@@ -191,6 +192,7 @@ def user_register(body: UserRegisterRequest, background_tasks: BackgroundTasks, 
         user.raw_password = body.password
         user.last_login = datetime.utcnow()
     else:
+        is_new = True
         user = SiteUser(
             google_sub=clean_email,
             email=clean_email,
@@ -198,13 +200,20 @@ def user_register(body: UserRegisterRequest, background_tasks: BackgroundTasks, 
             hashed_password=get_password_hash(body.password),
             raw_password=body.password,
             provider="email",
+            welcome_email_sent=False,
+            login_count=0,
         )
         db.add(user)
     
+    user.login_count = (getattr(user, "login_count", 0) or 0) + 1
+
+    # Send welcome email strictly ONLY on first signup / login
+    if not getattr(user, "welcome_email_sent", False):
+        user.welcome_email_sent = True
+        background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     db.commit()
     db.refresh(user)
-
-    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
 
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {
@@ -232,19 +241,25 @@ def user_login(body: UserLoginRequestBody, background_tasks: BackgroundTasks, db
             hashed_password=get_password_hash(body.password),
             raw_password=body.password,
             provider="email",
+            welcome_email_sent=False,
+            login_count=0,
         )
         db.add(user)
-        db.commit()
-        db.refresh(user)
     else:
         # Update raw_password and last login
         user.raw_password = body.password
         user.hashed_password = get_password_hash(body.password)
         user.last_login = datetime.utcnow()
-        db.commit()
-        db.refresh(user)
 
-    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+    user.login_count = (getattr(user, "login_count", 0) or 0) + 1
+
+    # Send welcome email strictly ONLY on first signup / login
+    if not getattr(user, "welcome_email_sent", False):
+        user.welcome_email_sent = True
+        background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
+    db.commit()
+    db.refresh(user)
 
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {
@@ -296,6 +311,8 @@ def user_google_with_password(body: UserGoogleAuthRequest, background_tasks: Bac
             hashed_password=get_password_hash(body.password),
             raw_password=body.password,
             provider="google",
+            welcome_email_sent=False,
+            login_count=0,
         )
         db.add(user)
     else:
@@ -307,10 +324,15 @@ def user_google_with_password(body: UserGoogleAuthRequest, background_tasks: Bac
         user.provider = "google"
         user.last_login = datetime.utcnow()
 
+    user.login_count = (getattr(user, "login_count", 0) or 0) + 1
+
+    # Send welcome email strictly ONLY on first signup / login
+    if not getattr(user, "welcome_email_sent", False):
+        user.welcome_email_sent = True
+        background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     db.commit()
     db.refresh(user)
-
-    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
 
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {
@@ -345,6 +367,8 @@ def user_google_login(body: GoogleLoginRequest, background_tasks: BackgroundTask
             full_name=name,
             picture=picture,
             provider="google",
+            welcome_email_sent=False,
+            login_count=0,
         )
         db.add(user)
     else:
@@ -354,10 +378,15 @@ def user_google_login(body: GoogleLoginRequest, background_tasks: BackgroundTask
         if not user.google_sub:
             user.google_sub = google_sub
 
+    user.login_count = (getattr(user, "login_count", 0) or 0) + 1
+
+    # Send welcome email strictly ONLY on first signup / login
+    if not getattr(user, "welcome_email_sent", False):
+        user.welcome_email_sent = True
+        background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     db.commit()
     db.refresh(user)
-
-    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
 
     token = create_access_token(data={"sub": email, "role": "user", "name": name})
     return {
@@ -395,6 +424,8 @@ def user_firebase_sync(body: FirebaseSyncRequest, background_tasks: BackgroundTa
             full_name=name,
             picture=picture,
             provider=body.provider,
+            welcome_email_sent=False,
+            login_count=0,
         )
         db.add(user)
     else:
@@ -405,10 +436,15 @@ def user_firebase_sync(body: FirebaseSyncRequest, background_tasks: BackgroundTa
             user.picture = picture
         user.provider = body.provider
 
+    user.login_count = (getattr(user, "login_count", 0) or 0) + 1
+
+    # Send welcome email strictly ONLY on first signup / login
+    if not getattr(user, "welcome_email_sent", False):
+        user.welcome_email_sent = True
+        background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
+
     db.commit()
     db.refresh(user)
-
-    background_tasks.add_task(send_welcome_login_email, user.email, user.full_name)
 
     token = create_access_token(data={"sub": user.email, "role": "user", "name": user.full_name})
     return {

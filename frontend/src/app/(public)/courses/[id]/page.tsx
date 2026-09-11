@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   ArrowLeft,
+  ArrowRight,
   Loader2,
   User,
   Mail,
@@ -364,12 +365,18 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   const [course, setCourse] = useState<Course | null>(defaultCourse);
   const [loading, setLoading] = useState(!defaultCourse);
 
-  // Free Enrollment Modal State
+  // Enrollment & Direct Payment State
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [isAlreadyApplied, setIsAlreadyApplied] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<{
+    order_id?: string;
+    payment_id?: string;
+    amount_inr?: number;
+    course_title?: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     student_name: "",
@@ -421,7 +428,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     };
   }, []);
 
-  // Pre-fill user data from localStorage and check applied state
+  // Pre-fill user data from localStorage and check enrolled state
   useEffect(() => {
     const email = localStorage.getItem("user_email") || "";
     const name = localStorage.getItem("user_name") || "";
@@ -434,10 +441,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     }
 
     try {
-      const appliedList: string[] = JSON.parse(localStorage.getItem("applied_courses") || "[]");
+      const enrolledList: string[] = JSON.parse(localStorage.getItem("enrolled_courses") || "[]");
       const currentSlug = resolvedParams?.id || course?.slug;
-      if (currentSlug && (appliedList.includes(currentSlug) || (course?.id && appliedList.includes(String(course.id))))) {
-        setIsAlreadyApplied(true);
+      if (currentSlug && (enrolledList.includes(currentSlug) || (course?.id && enrolledList.includes(String(course.id))))) {
+        setIsEnrolled(true);
       }
     } catch {}
   }, [resolvedParams, course]);
@@ -467,10 +474,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  const handleEnrollSubmit = async (e: React.FormEvent) => {
+  // Direct Course Payment Handler (₹1 Instant Confirmation)
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.student_name || !formData.student_email || !formData.student_phone) {
-      setErrorMsg("Please fill in all required fields.");
+      setErrorMsg("Please fill in all required contact details.");
       return;
     }
 
@@ -478,32 +486,45 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     setErrorMsg("");
 
     try {
-      await apiRequest("/courses/enroll", {
+      const payload = {
+        course_id: typeof course?.id === "number" ? course.id : undefined,
+        course_slug: course?.slug || resolvedParams.id,
+        student_name: formData.student_name.trim(),
+        student_email: formData.student_email.trim().toLowerCase(),
+        student_phone: formData.student_phone.trim(),
+        college: formData.college.trim(),
+        payment_method: "cashfree",
+      };
+
+      const res: any = await apiRequest("/payments/direct-enroll-pay", {
         method: "POST",
-        body: JSON.stringify({
-          course_id: typeof course?.id === "number" ? course.id : undefined,
-          course_slug: course?.slug || resolvedParams.id,
-          student_name: formData.student_name.trim(),
-          student_email: formData.student_email.trim().toLowerCase(),
-          student_phone: formData.student_phone.trim(),
-          college: formData.college.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
 
-      setSubmittedSuccess(true);
-      setIsAlreadyApplied(true);
+      if (res && res.success) {
+        setPaymentDetails({
+          order_id: res.order_id,
+          payment_id: res.payment_id,
+          amount_inr: res.amount_inr || 1,
+          course_title: res.course_title || course?.title,
+        });
+        setSubmittedSuccess(true);
+        setIsEnrolled(true);
 
-      // Save to localStorage
-      try {
-        const appliedList: string[] = JSON.parse(localStorage.getItem("applied_courses") || "[]");
-        const slugToAdd = course?.slug || resolvedParams.id;
-        if (!appliedList.includes(slugToAdd)) {
-          appliedList.push(slugToAdd);
-          localStorage.setItem("applied_courses", JSON.stringify(appliedList));
-        }
-      } catch {}
+        // Save to localStorage
+        try {
+          const enrolledList: string[] = JSON.parse(localStorage.getItem("enrolled_courses") || "[]");
+          const slugToAdd = course?.slug || resolvedParams.id;
+          if (!enrolledList.includes(slugToAdd)) {
+            enrolledList.push(slugToAdd);
+            localStorage.setItem("enrolled_courses", JSON.stringify(enrolledList));
+          }
+        } catch {}
+      } else {
+        throw new Error(res?.message || "Payment could not be completed.");
+      }
     } catch (err: any) {
-      setErrorMsg(err.message || "Enrollment request failed. Please try again.");
+      setErrorMsg(err.message || "Payment transaction could not be completed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -681,6 +702,89 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             </div>
           </FadeIn>
 
+          {/* UNLOCKED COURSE MATERIALS & LEARNING WORKSPACE (Visible upon Enrollment & ₹1 Payment) */}
+          {isEnrolled && (
+            <FadeIn delay={0.28} direction="up">
+              <div className="bg-gradient-to-b from-ink-900 to-ink-950 border-2 border-emerald-500 p-8 sm:p-10 space-y-8 shadow-[8px_8px_0px_#059669]">
+                <div className="border-b border-emerald-500/30 pb-4 flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-wider mb-2">
+                      <Sparkles className="w-4 h-4" /> Enrolled · Lifetime Access Unlocked
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
+                      Course Learning Portal & Deliverables
+                    </h3>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded">
+                    ✓ Verified Active Seat
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-5 bg-ink-950 border border-ink-800 space-y-3">
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-brand-400" /> GitHub Repository & Starter Kit
+                    </h4>
+                    <p className="text-xs text-ink-300 leading-relaxed">
+                      Clone the official course boilerplate, starter branches, and solution guides.
+                    </p>
+                    <a
+                      href="https://github.com/thetanish1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-400 hover:text-brand-300 hover:underline pt-1"
+                    >
+                      Open Repository <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+
+                  <div className="p-5 bg-ink-950 border border-ink-800 space-y-3">
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-amber-400" /> Live Discord & Mentor Workspace
+                    </h4>
+                    <p className="text-xs text-ink-300 leading-relaxed">
+                      Direct access to the private cohort channel with 24/7 senior mentor assistance.
+                    </p>
+                    <a
+                      href="/portal"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 hover:underline pt-1"
+                    >
+                      Enter Student Portal <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Modules Checklist */}
+                <div className="space-y-4 pt-2">
+                  <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                    Assigned Sprint Modules & Hands-on Labs:
+                  </h4>
+                  <div className="space-y-3">
+                    {curriculum.modules.map((mod, idx) => (
+                      <div
+                        key={mod.title}
+                        className="p-4 bg-ink-950/80 border border-ink-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center justify-center border border-emerald-500/40">
+                            {idx + 1}
+                          </span>
+                          <div>
+                            <div className="text-sm font-bold text-white">{mod.title}</div>
+                            <div className="text-xs text-ink-400">{mod.topics.join(" • ")}</div>
+                          </div>
+                        </div>
+                        <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold rounded uppercase tracking-wider self-start sm:self-auto">
+                          Ready to Study
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          )}
+
           {/* LEARNING OUTCOMES */}
           <FadeIn delay={0.25} direction="up">
             <div className="bg-ink-950 border-2 border-ink-800 p-8 sm:p-10 space-y-6 shadow-[8px_8px_0px_#1a1915]">
@@ -708,20 +812,20 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 uppercase tracking-wider inline-flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5" /> Nominal Fee · ₹1 Only
                   </span>
-                  {isAlreadyApplied && (
+                  {isEnrolled && (
                     <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/20 px-2.5 py-1 rounded border border-emerald-500/40 uppercase tracking-wider inline-flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Applied
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Active Access
                     </span>
                   )}
                 </div>
                 <div className="text-4xl font-black text-white tracking-tight">₹{course.price_inr ?? 1} <span className="text-base text-ink-400 font-normal">only</span></div>
                 <p className="text-xs text-ink-400 leading-relaxed">
-                  Direct cohort seat reservation with full syllabus access and 1:1 mentor code reviews.
+                  Direct cohort seat reservation with instant syllabus unlock, live projects, and 1:1 mentor code reviews.
                 </p>
               </div>
 
               <div className="space-y-3">
-                {isAlreadyApplied ? (
+                {isEnrolled ? (
                   <div className="space-y-3">
                     <button
                       type="button"
@@ -731,11 +835,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                       }}
                       className="w-full py-4 text-base font-black uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-0.5 transition-all flex items-center justify-center gap-2.5"
                     >
-                      <CheckCircle2 className="w-5 h-5" /> Applied (Under Review)
+                      <CheckCircle2 className="w-5 h-5" /> Enrolled (View Receipt)
                     </button>
                     <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs text-emerald-300 flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400" />
-                      <span>Application submitted! Admissions team is reviewing.</span>
+                      <span>Payment Verified (₹1 Captured). Full materials unlocked!</span>
                     </div>
                   </div>
                 ) : (
@@ -749,10 +853,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                       }}
                       className="w-full py-4 text-base font-black uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white shadow-[4px_4px_0px_#ffffff] hover:translate-y-0.5 transition-all flex items-center justify-center gap-2.5"
                     >
-                      <Zap className="w-5 h-5" /> Enroll for ₹1
+                      <Zap className="w-5 h-5" /> Pay ₹1 & Enroll Now
                     </button>
                     <p className="text-center text-[11px] text-ink-400">
-                      Access confirmation dispatched via email upon admin review.
+                      Instant automatic activation via Cashfree / Direct Checkout.
                     </p>
                   </>
                 )}
@@ -781,7 +885,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      {/* FREE ENROLLMENT MODAL */}
+      {/* DIRECT PAYMENT & ENROLLMENT MODAL */}
       {showEnrollModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-ink-950 border-2 border-brand-500 max-w-lg w-full p-6 sm:p-8 space-y-6 relative shadow-[12px_12px_0px_#000000]">
@@ -794,47 +898,59 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             </button>
 
             {submittedSuccess ? (
-              <div className="text-center py-8 space-y-5">
+              <div className="text-center py-6 space-y-5">
                 <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/40">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-white uppercase">Enrollment Request Submitted!</h3>
+                  <h3 className="text-2xl font-black text-white uppercase">Payment Verified & Access Unlocked!</h3>
                   <p className="text-xs text-ink-300 max-w-sm mx-auto leading-relaxed">
-                    Thank you, <strong className="text-white">{formData.student_name}</strong>. Your free enrollment request for{" "}
-                    <strong className="text-brand-400">{course.title}</strong> has been received.
+                    Congratulations, <strong className="text-white">{formData.student_name || "Student"}</strong>! Your payment of{" "}
+                    <strong className="text-emerald-400">₹{paymentDetails?.amount_inr || course.price_inr || 1}</strong> for{" "}
+                    <strong className="text-brand-400">{course.title}</strong> has been successfully captured.
                   </p>
                 </div>
 
-                <div className="p-4 bg-ink-900 border border-ink-800 text-xs text-ink-300 text-left space-y-1.5 rounded">
+                <div className="p-4 bg-ink-900 border border-ink-800 text-xs text-ink-300 text-left space-y-2 rounded">
                   <div className="font-bold text-white flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" /> What Happens Next?
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" /> Transaction Audit Summary
                   </div>
-                  <p className="text-ink-400 text-[11px] leading-relaxed">
-                    1. Our admissions team reviews your application.<br />
-                    2. Once accepted, you will receive an official approval email at{" "}
-                    <strong className="text-white">{formData.student_email}</strong> with your cohort access details.
-                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-ink-400 pt-1">
+                    <div>
+                      <span className="font-semibold text-ink-300">Order ID:</span>
+                      <div className="font-mono text-white text-[10px] break-all">{paymentDetails?.order_id || "order_verified"}</div>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-ink-300">Payment ID:</span>
+                      <div className="font-mono text-emerald-400 text-[10px] break-all">{paymentDetails?.payment_id || "pay_captured"}</div>
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-emerald-300 font-semibold pt-1">
+                    ✓ Status: Confirmed & Logged in Admin Panel
+                  </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setShowEnrollModal(false)}
-                  className="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm uppercase tracking-wider transition shadow-[2px_2px_0px_#ffffff]"
+                  className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm uppercase tracking-wider transition shadow-[2px_2px_0px_#ffffff]"
                 >
-                  Close & Continue
+                  Start Learning Now →
                 </button>
               </div>
             ) : (
               <>
                 <div className="space-y-1 border-b border-ink-800 pb-4">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5" /> 100% Free Scholarship
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3.5 h-3.5" /> Instant Direct Checkout
                   </div>
                   <h3 className="text-2xl font-black text-white tracking-tight pt-1">
-                    Apply for Free Enrollment
+                    Complete Course Enrollment
                   </h3>
-                  <p className="text-xs text-ink-400">{course.title}</p>
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-ink-400">{course.title}</span>
+                    <span className="font-bold text-emerald-400 text-sm">₹{course.price_inr ?? 1}</span>
+                  </div>
                 </div>
 
                 {errorMsg && (
@@ -843,7 +959,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                 )}
 
-                <form onSubmit={handleEnrollSubmit} className="space-y-4 text-sm">
+                <form onSubmit={handlePaymentSubmit} className="space-y-4 text-sm">
                   <div className="space-y-1.5">
                     <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5 text-brand-400" /> Full Name *
@@ -860,7 +976,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
                   <div className="space-y-1.5">
                     <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address *
+                      <Mail className="w-3.5 h-3.5 text-brand-400" /> Email Address (For Receipt & Course Access) *
                     </label>
                     <input
                       type="email"
@@ -874,7 +990,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
                   <div className="space-y-1.5">
                     <label className="text-xs text-ink-300 font-medium flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-brand-400" /> WhatsApp Phone Number *
+                      <Phone className="w-3.5 h-3.5 text-brand-400" /> WhatsApp / Phone Number *
                     </label>
                     <input
                       type="tel"
@@ -899,18 +1015,24 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                     />
                   </div>
 
+                  {/* Payment fee summary box */}
+                  <div className="p-3 bg-ink-900 border border-ink-800 rounded flex items-center justify-between text-xs">
+                    <span className="text-ink-400">Total Payable Amount:</span>
+                    <span className="text-base font-black text-emerald-400">₹{course.price_inr ?? 1}</span>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full py-3.5 font-bold uppercase tracking-wider bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-2 transition disabled:opacity-50 shadow-[4px_4px_0px_#ffffff]"
+                    className="w-full py-3.5 font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 transition disabled:opacity-50 shadow-[4px_4px_0px_#ffffff] cursor-pointer"
                   >
                     {submitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" /> Submitting Request...
+                        <Loader2 className="w-4 h-4 animate-spin" /> Processing Payment...
                       </>
                     ) : (
                       <>
-                        <Send className="w-4 h-4" /> Submit Free Enrollment Request
+                        <Zap className="w-4 h-4" /> Pay ₹{course.price_inr ?? 1} & Unlock Instant Access
                       </>
                     )}
                   </button>

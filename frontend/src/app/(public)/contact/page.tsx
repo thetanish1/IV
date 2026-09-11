@@ -39,42 +39,118 @@ export default function ContactPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        <div className="space-y-6">
-          <div className="glass-card p-6 space-y-4 border border-ink-800 hover:border-brand-500/50 transition">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-brand-600/20 text-brand-400 flex items-center justify-center">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">Email Us</h4>
-                <a
-                  href="mailto:internvisiontechhr@gmail.com"
-                  className="text-xs text-brand-400 hover:underline break-all"
-                >
-                  internvisiontechhr@gmail.com
-                </a>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="glass-card p-5 space-y-3 border border-ink-800 hover:border-brand-500/50 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-600/20 text-brand-400 flex items-center justify-center rounded-xl">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Student & Tech Support</h4>
+              <p className="text-[11px] text-ink-400">Doubts, submissions & portal help</p>
             </div>
           </div>
-
-          <div className="glass-card p-6 space-y-4 border border-ink-800 hover:border-emerald-500/50 transition">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-600/20 text-emerald-400 flex items-center justify-center">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">Headquarters</h4>
-                <p className="text-xs text-ink-300">Nagpur, Maharashtra, India</p>
-                <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
-                  ✦ Virtual & Nationwide Operations
-                </span>
-              </div>
-            </div>
-          </div>
+          <a
+            href="mailto:support@internvisiontech.me"
+            className="text-xs text-brand-400 hover:underline font-mono block break-all pt-1 font-semibold"
+          >
+            support@internvisiontech.me
+          </a>
         </div>
 
-        <div className="lg:col-span-2 glass-card p-8 border border-ink-800">
+        <div className="glass-card p-5 space-y-3 border border-ink-800 hover:border-emerald-500/50 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-600/20 text-emerald-400 flex items-center justify-center rounded-xl">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">HR & Careers Desk</h4>
+              <p className="text-[11px] text-ink-400">Applications, onboarding & hiring</p>
+            </div>
+          </div>
+          <a
+            href="mailto:hr@internvisiontech.me"
+            className="text-xs text-emerald-400 hover:underline font-mono block break-all pt-1 font-semibold"
+          >
+            hr@internvisiontech.me
+          </a>
+        </div>
+
+        <div className="glass-card p-5 space-y-3 border border-ink-800 hover:border-amber-500/50 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-600/20 text-amber-400 flex items-center justify-center rounded-xl">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Billing & Payments</h4>
+              <p className="text-[11px] text-ink-400">Fees, invoices & receipts</p>
+            </div>
+          </div>
+          <a
+            href="mailto:billing@internvisiontech.me"
+            className="text-xs text-amber-400 hover:underline font-mono block break-all pt-1 font-semibold"
+          >
+            billing@internvisiontech.me
+          </a>
+        </div>
+
+        <div className="glass-card p-5 space-y-3 border border-ink-800 hover:border-cyan-500/50 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-cyan-600/20 text-cyan-400 flex items-center justify-center rounded-xl">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">General Inquiries</h4>
+              <p className="text-[11px] text-ink-400">Partnerships & general contact</p>
+            </div>
+          </div>
+          <a
+            href="mailto:contact@internvisiontech.me"
+            className="text-xs text-cyan-400 hover:underline font-mono block break-all pt-1 font-semibold"
+          >
+            contact@internvisiontech.me
+          </a>
+        </div>
+
+        <div className="glass-card p-5 space-y-3 border border-ink-800 hover:border-purple-500/50 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-600/20 text-purple-400 flex items-center justify-center rounded-xl">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Executive & Admin</h4>
+              <p className="text-[11px] text-ink-400">Institutional & administrative desk</p>
+            </div>
+          </div>
+          <a
+            href="mailto:admin@internvisiontech.me"
+            className="text-xs text-purple-400 hover:underline font-mono block break-all pt-1 font-semibold"
+          >
+            admin@internvisiontech.me
+          </a>
+        </div>
+
+        <div className="glass-card p-5 space-y-3 border border-ink-800 hover:border-rose-500/50 transition">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-rose-600/20 text-rose-400 flex items-center justify-center rounded-xl">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Information Desk</h4>
+              <p className="text-[11px] text-ink-400">Bootcamps & program syllabus</p>
+            </div>
+          </div>
+          <a
+            href="mailto:info@internvisiontech.me"
+            className="text-xs text-rose-400 hover:underline font-mono block break-all pt-1 font-semibold"
+          >
+            info@internvisiontech.me
+          </a>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto w-full">
+        <div className="glass-card p-8 border border-ink-800">
           {submitted ? (
             <div className="text-center py-12 space-y-4">
               <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">

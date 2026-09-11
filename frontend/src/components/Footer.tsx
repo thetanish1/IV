@@ -121,9 +121,15 @@ export default function Footer() {
               <li><Link href="/agreement" className="hover:text-white transition">Student Agreement</Link></li>
             </ul>
 
-            <h4 className="font-semibold text-white mb-2 text-xs uppercase tracking-wider">Connect</h4>
+            <h4 className="font-semibold text-white mb-2 text-xs uppercase tracking-wider">Official Contacts</h4>
+            <div className="space-y-1.5 text-xs text-ink-400 mb-4">
+              <div>Support: <a href="mailto:support@internvisiontech.me" className="text-brand-400 hover:underline font-mono">support@internvisiontech.me</a></div>
+              <div>HR & Interns: <a href="mailto:hr@internvisiontech.me" className="text-brand-400 hover:underline font-mono">hr@internvisiontech.me</a></div>
+              <div>Billing & Pay: <a href="mailto:billing@internvisiontech.me" className="text-brand-400 hover:underline font-mono">billing@internvisiontech.me</a></div>
+              <div>General: <a href="mailto:contact@internvisiontech.me" className="text-brand-400 hover:underline font-mono">contact@internvisiontech.me</a></div>
+            </div>
             <div className="flex gap-2.5 mb-4">
-              <a href="mailto:internvisiontechhr@gmail.com" title="Email HR" className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center hover:bg-ink-800 hover:text-brand-400 transition">
+              <a href="mailto:support@internvisiontech.me" title="Email Support" className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center hover:bg-ink-800 hover:text-brand-400 transition">
                 <Mail className="w-4 h-4" />
               </a>
               <Link href="/contact" title="Support Helpdesk" className="w-8 h-8 rounded-lg bg-ink-900 border border-ink-800 flex items-center justify-center hover:bg-ink-800 hover:text-brand-400 transition">
