@@ -145,7 +145,7 @@ export const CourseEnrollmentsTab: React.FC<CourseEnrollmentsTabProps> = ({
                         </div>
                         {r.transaction_id && (
                           <div className="text-xs text-gray-400 dark:text-gray-500 font-mono mt-0.5">
-                            Tx: {r.transaction_id.slice(0, 14)}...
+                            Tx: {String(r.transaction_id).slice(0, 14)}...
                           </div>
                         )}
                       </td>

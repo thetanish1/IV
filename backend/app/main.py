@@ -284,19 +284,48 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+from fastapi.exceptions import HTTPException as FastAPIHTTPException
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    origin = request.headers.get("origin") or "https://iv-theta.vercel.app"
+    headers = {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+    }
+    if exc.headers:
+        headers.update(exc.headers)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=headers
+    )
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Ensure CORS headers are attached even if an unhandled internal exception occurs."""
     origin = request.headers.get("origin") or "https://iv-theta.vercel.app"
+    headers = {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+    }
+    if isinstance(exc, (FastAPIHTTPException, StarletteHTTPException)):
+        if exc.headers:
+            headers.update(exc.headers)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=headers
+        )
     return JSONResponse(
         status_code=500,
         content={"detail": f"Internal Server Error: {str(exc)}"},
-        headers={
-            "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-        }
+        headers=headers
     )
 
 # Feature Routers mounted under /api and root for total path compatibility
@@ -316,6 +345,17 @@ for r in [
 ]:
     app.include_router(r, prefix="/api")
     app.include_router(r)
+
+# Direct fallback route aliases for admin profile & legacy requests
+@app.get("/api/admin/me")
+@app.get("/admin/me")
+def get_admin_me(current_admin: Admin = Depends(get_current_admin)):
+    return current_admin
+
+@app.get("/api/admin/admins")
+@app.get("/admin/admins")
+def get_admins_legacy():
+    return {"admins": []}
 
 
 

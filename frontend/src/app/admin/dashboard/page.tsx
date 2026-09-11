@@ -219,7 +219,12 @@ function AdminDashboardContent() {
   // Fetch admin profile
   const fetchAdminProfile = useCallback(async () => {
     try {
-      const res = await apiRequest<any>("/admin/me", { method: "GET" });
+      let res: any = null;
+      try {
+        res = await apiRequest<any>("/auth/me", { method: "GET" });
+      } catch {
+        res = await apiRequest<any>("/admin/me", { method: "GET" });
+      }
       if (res && (res.admin || res.email)) {
         setCurrentAdmin(res.admin || res);
       }
@@ -246,7 +251,12 @@ function AdminDashboardContent() {
       // 1. Fetch authenticated admin profile first
       let adminObj = currentAdmin;
       try {
-        const resMe = await apiRequest<any>("/admin/me");
+        let resMe: any = null;
+        try {
+          resMe = await apiRequest<any>("/auth/me");
+        } catch {
+          resMe = await apiRequest<any>("/admin/me");
+        }
         if (resMe) {
           adminObj = resMe.admin || resMe;
           setCurrentAdmin(adminObj);
@@ -349,11 +359,6 @@ function AdminDashboardContent() {
         promises.push(
           apiRequest<any>("/admin/settings")
             .then((data) => ({ key: "settings", data }))
-            .catch(() => null)
-        );
-        promises.push(
-          apiRequest<any>("/admin/admins")
-            .then((data) => ({ key: "admins", data }))
             .catch(() => null)
         );
       }

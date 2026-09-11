@@ -66,14 +66,15 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
   };
 
   const filteredPayments = useMemo(() => {
-    return payments.filter((p) => {
+    return (payments || []).filter((p) => {
+      if (!p) return false;
       const q = searchTerm.toLowerCase();
       const matchSearch =
         !q ||
-        p.user_email?.toLowerCase().includes(q) ||
-        p.payment_id?.toLowerCase().includes(q) ||
-        p.order_id?.toLowerCase().includes(q) ||
-        p.id?.toLowerCase().includes(q);
+        (p.user_email && String(p.user_email).toLowerCase().includes(q)) ||
+        (p.payment_id && String(p.payment_id).toLowerCase().includes(q)) ||
+        (p.order_id && String(p.order_id).toLowerCase().includes(q)) ||
+        (p.id != null && String(p.id).toLowerCase().includes(q));
 
       const pStatus = (p.status || "").toLowerCase();
       const matchStatus =
@@ -222,7 +223,7 @@ export const PaymentsAuditTab: React.FC<PaymentsAuditTabProps> = ({
                         {p.user_email || "Anonymous Payer"}
                       </div>
                       <div className="text-xs text-gray-400 font-mono mt-0.5">
-                        ID: {p.id ? p.id.slice(0, 16) : "N/A"}
+                        ID: {p.id != null ? String(p.id).slice(0, 16) : "N/A"}
                       </div>
                     </td>
 
