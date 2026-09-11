@@ -496,10 +496,19 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         payment_method: "cashfree",
       };
 
-      const res: any = await apiRequest("/payments/direct-enroll-pay", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      let res: any = null;
+      try {
+        res = await apiRequest("/courses/enroll-direct", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      } catch (firstErr: any) {
+        // Fallback to payments router if needed
+        res = await apiRequest("/payments/direct-enroll-pay", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      }
 
       if (res && res.success) {
         setPaymentDetails({
@@ -524,7 +533,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         throw new Error(res?.message || "Payment could not be completed.");
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "Payment transaction could not be completed. Please try again.");
+      const msg = String(err?.message || "");
+      if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("blocked")) {
+        setErrorMsg("Network request blocked or server starting up. If you use Brave Shields or an AdBlocker, please pause it for this site and try again.");
+      } else {
+        setErrorMsg(msg || "Payment transaction could not be completed. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }

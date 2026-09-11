@@ -259,11 +259,14 @@ app.add_middleware(LoggingAndRequestIDMiddleware)
 origins = [
     "https://internvisiontech.me",
     "https://www.internvisiontech.me",
+    "https://apply.internvisiontech.me",
     "https://iv-theta.vercel.app",
+    "https://internvision.tech",
+    "https://www.internvision.tech",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
-    "https://internvision.tech",
+    "http://127.0.0.1:3001",
 ]
 
 app.add_middleware(
