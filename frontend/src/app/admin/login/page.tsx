@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Lock, Mail, ArrowRight, Loader2, Globe2, Sparkles, CheckCircle2 } from "lucide-react";
+import { Shield, Lock, Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { FadeIn } from "@/components/animations/FadeIn";
-import { AdminButton } from "@/components/admin/common";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -16,35 +15,16 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: object) => void;
-          renderButton: (element: HTMLElement, config: object) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
-  const [googleReady, setGoogleReady] = useState(false);
-  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const apiBase = (
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "http://localhost:8000/api"
   ).replace(/\/$/, "");
-
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   const {
     register,
@@ -57,71 +37,6 @@ export default function AdminLoginPage() {
       password: "",
     },
   });
-
-  useEffect(() => {
-    if (!googleClientId || googleClientId.includes("<your")) return;
-
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (window.google && googleButtonRef.current) {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredential,
-          auto_select: false,
-        });
-        window.google.accounts.id.renderButton(googleButtonRef.current, {
-          theme: "filled_black",
-          size: "large",
-          text: "signin_with",
-          shape: "square",
-          width: googleButtonRef.current.offsetWidth || 400,
-        });
-        setGoogleReady(true);
-      }
-    };
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [googleClientId]);
-
-  const handleGoogleCredential = async (response: { credential: string }) => {
-    setGoogleLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`${apiBase}/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: response.credential }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Google authentication failed");
-      }
-
-      const data = await res.json();
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("admin_token", data.access_token);
-      try {
-        const payload = JSON.parse(atob(data.access_token.split(".")[1]));
-        if (payload.sub) localStorage.setItem("admin_email", payload.sub);
-      } catch {
-        localStorage.setItem("admin_email", "admin");
-      }
-      window.dispatchEvent(new Event("storage"));
-      window.dispatchEvent(new Event("user-auth-change"));
-      router.push("/admin/dashboard");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Google sign-in failed";
-      setError(msg);
-      setGoogleLoading(false);
-    }
-  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
@@ -204,7 +119,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-[#F8F9FA] dark:bg-ink-950 transition-colors duration-200">
       <FadeIn delay={0.1} direction="up">
-        <div className="max-w-md w-full rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950/90 backdrop-blur-md p-8 sm:p-10 shadow-2xl space-y-8 relative overflow-hidden">
+        <div className="max-w-md w-full rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950/90 backdrop-blur-md p-8 sm:p-10 shadow-2xl space-y-7 relative overflow-hidden">
           {/* Subtle Accent Glow */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -226,48 +141,7 @@ export default function AdminLoginPage() {
             </div>
           )}
 
-          {/* Google Sign-In Section */}
-          <div className="space-y-3">
-            <p className="text-[11px] text-gray-400 dark:text-ink-400 text-center font-bold uppercase tracking-wider">
-              Quick Sign-In
-            </p>
-
-            {googleClientId && !googleClientId.includes("<your") ? (
-              <div className="relative">
-                {googleLoading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 dark:bg-ink-950/80 rounded-lg">
-                    <Loader2 className="w-5 h-5 animate-spin text-brand-600 dark:text-brand-400" />
-                  </div>
-                )}
-                <div
-                  ref={googleButtonRef}
-                  id="google-signin-btn"
-                  className="w-full min-h-[44px]"
-                />
-                {!googleReady && (
-                  <div className="w-full py-3 rounded-xl flex items-center justify-center gap-2 bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 text-gray-500 dark:text-ink-400 text-xs font-semibold shadow-sm">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Loading Google Sign-In…
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="w-full py-3 rounded-xl flex items-center justify-center gap-2 bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 text-gray-500 dark:text-ink-400 text-xs font-semibold cursor-not-allowed opacity-60 select-none shadow-sm">
-                <Globe2 className="w-4 h-4" />
-                Sign in with Google
-                <span className="text-[10px] text-red-500 ml-1">(GOOGLE_CLIENT_ID not set)</span>
-              </div>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-ink-800" />
-            <span className="text-[10px] text-gray-400 dark:text-ink-400 font-bold uppercase tracking-widest">or credentials</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-ink-800" />
-          </div>
-
-          {/* Form */}
+          {/* Login Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-sm">
             <div className="space-y-1.5">
               <label className="text-xs text-gray-700 dark:text-ink-300 font-semibold flex items-center gap-1.5">
@@ -276,7 +150,8 @@ export default function AdminLoginPage() {
               <input
                 id="admin-email"
                 type="email"
-                placeholder="admin@internvision.tech"
+                required
+                placeholder="admin@internvisiontech.me"
                 {...register("email")}
                 className="w-full bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs shadow-inner"
               />
@@ -290,6 +165,7 @@ export default function AdminLoginPage() {
               <input
                 id="admin-password"
                 type="password"
+                required
                 placeholder="••••••••"
                 {...register("password")}
                 className="w-full bg-gray-50 dark:bg-ink-900 border border-gray-200 dark:border-ink-800 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-ink-400 focus:outline-none focus:border-brand-500 transition text-xs shadow-inner"
@@ -300,8 +176,8 @@ export default function AdminLoginPage() {
             <button
               id="admin-login-btn"
               type="submit"
-              disabled={loading || googleLoading}
-              className="w-full py-3.5 font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-2 transition-all shadow-md hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-sm mt-2"
+              disabled={loading}
+              className="w-full py-3.5 font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white flex items-center justify-center gap-2 transition-all shadow-md hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-sm mt-3 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -315,38 +191,8 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Quick Super Admin Credentials Shortcuts */}
-          <div className="p-3 bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800/40 rounded-xl space-y-2">
-            <div className="text-[11px] font-bold text-brand-700 dark:text-brand-300 flex items-center justify-between">
-              <span>Super Admin Credentials:</span>
-              <span className="font-mono text-[10px] bg-brand-200/60 dark:bg-brand-900/60 px-1.5 py-0.5 rounded">Password: Admin@123456</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 text-[10px]">
-              {[
-                "pathadesuraj75@gmail.com",
-                "admin@internvisiontech.me",
-                "tanishdewase222@gmail.com",
-                "hr@internvisiontech.me",
-              ].map((em) => (
-                <button
-                  key={em}
-                  type="button"
-                  onClick={() => {
-                    const emailInput = document.getElementById("admin-email") as HTMLInputElement;
-                    const passInput = document.getElementById("admin-password") as HTMLInputElement;
-                    if (emailInput) emailInput.value = em;
-                    if (passInput) passInput.value = "Admin@123456";
-                  }}
-                  className="px-2 py-1 bg-white dark:bg-ink-900 hover:bg-brand-100 dark:hover:bg-brand-900/40 border border-brand-200 dark:border-brand-800 text-brand-900 dark:text-brand-200 rounded font-medium transition cursor-pointer"
-                >
-                  {em}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Security Marker Footer */}
-          <div className="pt-2 border-t border-gray-100 dark:border-ink-800/80 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-ink-400 font-medium">
+          <div className="pt-3 border-t border-gray-100 dark:border-ink-800/80 flex items-center justify-center gap-2 text-[11px] text-gray-500 dark:text-ink-400 font-medium">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>256-bit Encrypted Token Verification</span>
           </div>

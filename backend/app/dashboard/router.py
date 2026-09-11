@@ -26,6 +26,23 @@ from app.auth.models import Admin
 
 router = APIRouter(prefix="/admin", tags=["admin-dashboard"])
 
+@router.get("/me")
+def get_admin_profile(current_admin: Admin = Depends(get_current_admin)):
+    """Returns authenticated Super Admin profile."""
+    return {
+        "id": current_admin.id,
+        "email": current_admin.email,
+        "full_name": current_admin.full_name,
+        "role": "super_admin",
+        "is_super_admin": True,
+        "is_active": True,
+        "permissions": [
+            "overview", "applications", "submissions", "unlocks", "doubts",
+            "users", "enrollments", "payments", "certificates", "contacts",
+            "mailer", "settings"
+        ],
+    }
+
 # ─── 1. Dashboard Overview & Statistics ──────────────────────────────────────
 
 @router.get("/stats", response_model=DashboardStats)

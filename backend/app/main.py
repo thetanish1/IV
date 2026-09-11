@@ -12,7 +12,6 @@ from app.auth.user_models import SiteUser  # ensures site_users table is created
 from app.shared.security import get_password_hash
 from app.shared.database import Base, engine, get_db, SessionLocal
 from app.auth.router import router as auth_router
-from app.auth.iam_router import router as iam_router
 from app.courses.router import router as courses_router
 from app.internship.router import router as internship_router
 from app.internship.admin_router import router as internship_admin_router
@@ -303,7 +302,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Feature Routers mounted under /api and root for total path compatibility
 for r in [
     auth_router,
-    iam_router,
     courses_router,
     internship_router,
     internship_admin_router,
