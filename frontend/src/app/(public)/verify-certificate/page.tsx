@@ -31,6 +31,7 @@ import {
 import { FadeIn } from "@/components/animations/FadeIn";
 import { Float } from "@/components/animations/Float";
 import { apiRequest } from "@/lib/api-client";
+import { AppleCertificateShowcase } from "@/components/AppleCertificateShowcase";
 
 interface VerifiedCertificate {
   certificate_id: string;
@@ -222,7 +223,7 @@ function CertificateVerifierContent() {
         </p>
 
         {/* ─── SEARCH BAR ─── */}
-        <form onSubmit={handleSearchSubmit} className="pt-4 max-w-2xl mx-auto">
+        <form id="search-box" onSubmit={handleSearchSubmit} className="pt-4 max-w-2xl mx-auto scroll-mt-24">
           <div className="relative flex items-center shadow-2xl">
             <div className="absolute left-4 text-ink-400 pointer-events-none">
               <Search className="w-5 h-5 text-brand-400" />
@@ -451,41 +452,8 @@ function CertificateVerifierContent() {
         </FadeIn>
       )}
 
-      {/* ─── CREDENTIAL SECURITY & RECRUITER FAQ ─── */}
-      <section className="border-t border-ink-800 pt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-        <div className="bg-ink-950 p-6 border border-ink-800 space-y-3">
-          <div className="w-10 h-10 bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <h4 className="text-lg font-bold text-white">Tamper-Proof Registry</h4>
-          <p className="text-xs text-ink-400 leading-relaxed">
-            Every InternVision Tech credential contains a unique cryptographic hash tied to student deliverables and
-            mentor sign-offs.
-          </p>
-        </div>
-
-        <div className="bg-ink-950 p-6 border border-ink-800 space-y-3">
-          <div className="w-10 h-10 bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-          <h4 className="text-lg font-bold text-white">Outcome & Code Reviewed</h4>
-          <p className="text-xs text-ink-400 leading-relaxed">
-            Certificates are only issued upon successful completion of production capstone repositories and passing code
-            reviews.
-          </p>
-        </div>
-
-        <div className="bg-ink-950 p-6 border border-ink-800 space-y-3">
-          <div className="w-10 h-10 bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400">
-            <Building2 className="w-5 h-5" />
-          </div>
-          <h4 className="text-lg font-bold text-white">Direct Recruiter Support</h4>
-          <p className="text-xs text-ink-400 leading-relaxed">
-            HR departments and hiring managers can request official candidate performance dossiers directly via{" "}
-            <span className="text-brand-400 font-mono">internvisiontechhr@gmail.com</span>.
-          </p>
-        </div>
-      </section>
+      {/* ─── APPLE STYLE CREDENTIAL SHOWCASE ─── */}
+      <AppleCertificateShowcase />
     </div>
   );
 }
