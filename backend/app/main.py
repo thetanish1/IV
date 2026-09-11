@@ -322,14 +322,7 @@ def root():
         "health": "/health"
     }
 
-from fastapi.responses import JSONResponse, Response, RedirectResponse
-
-@app.get("/brochure")
-@app.get("/api/brochure")
-def get_company_brochure():
-    """Redirect to official company brochure PDF on Cloudinary."""
-    brochure_url = "https://res.cloudinary.com/zmeqoh4x/image/upload/fl_attachment:Internvision_Tech_Brochure/Internvision_Tech-_Brochure.pdf"
-    return RedirectResponse(url=brochure_url, status_code=307)
+from fastapi.responses import JSONResponse, Response
 
 @app.get("/settings")
 @app.get("/api/settings")

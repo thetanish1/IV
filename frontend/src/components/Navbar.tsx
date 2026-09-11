@@ -4,11 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn, Download, FileText } from "lucide-react";
+import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserAuthModal from "@/components/UserAuthModal";
 import { apiRequest } from "@/lib/api-client";
-import { COMPANY_BROCHURE_URL } from "@/lib/constants";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -292,18 +291,6 @@ export default function Navbar() {
               <Phone className="w-4 h-4" />
               Contact
             </Link>
-
-            <a
-              href={COMPANY_BROCHURE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              download="Internvision_Tech_Brochure.pdf"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 font-bold uppercase tracking-wider bg-ink-900 hover:bg-ink-800 text-brand-300 hover:text-white border border-brand-500/30 hover:border-brand-400 transition-all rounded"
-              title="Download Official Company Brochure (PDF)"
-            >
-              <Download className="w-3.5 h-3.5 text-brand-400" />
-              Brochure
-            </a>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -462,18 +449,6 @@ export default function Navbar() {
                 <Phone className="w-4 h-4" />
                 Contact
               </Link>
-
-              <a
-                href={COMPANY_BROCHURE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                download="Internvision_Tech_Brochure.pdf"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 border border-brand-500/30 bg-brand-500/10 text-brand-300 font-semibold hover:bg-brand-500/20 transition-colors"
-              >
-                <Download className="w-4 h-4 text-brand-400" />
-                Download Company Brochure (PDF)
-              </a>
 
               <div className="grid grid-cols-1 gap-3 pt-1">
                 {/* Only show admin portal on mobile if logged in as tanishdewase222@gmail.com */}

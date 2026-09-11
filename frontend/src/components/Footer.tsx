@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, ExternalLink, MessageCircle, Users, Mail, Download, FileText } from "lucide-react";
+import { Sparkles, ExternalLink, MessageCircle, Users, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
-import { COMPANY_BROCHURE_URL } from "@/lib/constants";
 
 export default function Footer() {
   const [settings, setSettings] = useState<{ show_courses: boolean; show_careers: boolean }>({
@@ -99,17 +98,6 @@ export default function Footer() {
                 <li><Link href="/courses" className="hover:text-white transition text-brand-400 hover:text-brand-300">Course Catalog</Link></li>
               )}
               <li><Link href="/apply" className="hover:text-white transition">Internship Application</Link></li>
-              <li>
-                <a
-                  href={COMPANY_BROCHURE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download="Internvision_Tech_Brochure.pdf"
-                  className="hover:text-white transition text-brand-400 hover:text-brand-300 flex items-center gap-1.5"
-                >
-                  <Download className="w-3.5 h-3.5" /> Company Brochure (PDF)
-                </a>
-              </li>
               <li><Link href="/verify-certificate" className="hover:text-white transition flex items-center gap-1.5"><span className="text-brand-400">✓</span> Certificate Verification</Link></li>
               <li><Link href="/contact" className="hover:text-white transition">Contact Support</Link></li>
             </ul>

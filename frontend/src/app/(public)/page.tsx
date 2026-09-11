@@ -22,13 +22,10 @@ import {
   Layers,
   Sparkles,
   Check,
-  Download,
-  FileText,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
 import ApplePreviewCarousel from "@/components/ApplePreviewCarousel";
 import { apiRequest } from "@/lib/api-client";
-import { COMPANY_BROCHURE_URL } from "@/lib/constants";
 
 interface DomainTrack {
   id: string;
@@ -238,47 +235,31 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 pt-3 w-full"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-3 w-full"
           >
             <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/apply"
-                className="w-full sm:w-auto px-7 py-4 font-bold bg-white text-black hover:bg-ink-100 flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 shadow-2xl shadow-brand-500/20"
+                className="w-full sm:w-auto px-8 py-4 font-bold bg-white text-black hover:bg-ink-100 flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 shadow-2xl shadow-brand-500/20"
               >
                 Apply For Virtual Internship
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <p className="text-xs text-ink-300 mt-2.5 font-medium flex items-center gap-1.5 drop-shadow-sm">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Virtual • Flexible Batches
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center w-full sm:w-auto">
-              <a
-                href={COMPANY_BROCHURE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                download="Internvision_Tech_Brochure.pdf"
-                className="w-full sm:w-auto px-7 py-4 font-bold bg-brand-600/90 hover:bg-brand-500 text-white border border-brand-400/50 flex items-center justify-center gap-2.5 transition-all shadow-xl backdrop-blur-md group hover:-translate-y-1"
-              >
-                <Download className="w-4 h-4 text-white group-hover:translate-y-0.5 transition-transform" />
-                Download Brochure
-              </a>
-              <p className="text-xs text-ink-300 mt-2.5 font-medium flex items-center gap-1.5 drop-shadow-sm">
-                <FileText className="w-3.5 h-3.5 text-brand-300" /> Official Program Dossier (PDF)
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Virtual • Flexible Durations (1M / 3M / 6M)
               </p>
             </div>
 
             <div className="flex flex-col items-center w-full sm:w-auto">
               <Link
                 href="/verify-certificate"
-                className="w-full sm:w-auto px-7 py-4 font-bold bg-ink-950/80 hover:bg-ink-900 text-white border border-ink-600 hover:border-brand-400 flex items-center justify-center gap-2.5 transition-all shadow-xl backdrop-blur-md group hover:-translate-y-1"
+                className="w-full sm:w-auto px-8 py-4 font-bold bg-ink-950/80 hover:bg-ink-900 text-white border border-ink-600 hover:border-brand-400 flex items-center justify-center gap-2.5 transition-all shadow-xl backdrop-blur-md group hover:-translate-y-1"
               >
                 <ShieldCheck className="w-4 h-4 text-brand-400 group-hover:scale-110 transition-transform" />
-                Verify Certificate
+                Certificate Verification
               </Link>
               <p className="text-xs text-ink-300 mt-2.5 font-medium flex items-center gap-1.5 drop-shadow-sm">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Instant Hash Authenticity
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Instant Credential Authenticity
               </p>
             </div>
           </motion.div>
