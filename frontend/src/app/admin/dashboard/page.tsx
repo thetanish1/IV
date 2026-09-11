@@ -211,74 +211,10 @@ function AdminDashboardContent() {
     applyTheme(nextTheme);
   };
 
-  // Permission Verification Helper
-  const hasPermission = useCallback((permKey: string) => {
-    if (!currentAdmin) return true; // optimistic while initial auth profile loads
-    const isSuper = currentAdmin.is_super_admin || (currentAdmin.role || "").toLowerCase().trim() === "super_admin";
-    if (isSuper) return true;
-
-    const perms: string[] = currentAdmin.permissions || [];
-    const aliasMap: Record<string, string> = {
-      resolve_doubts: "doubts",
-      doubt: "doubts",
-      doubts_only: "doubts",
-      queries: "doubts",
-      manage_interns: "applications",
-      applicants: "applications",
-      review_submissions: "submissions",
-      unlock_requests: "unlocks",
-      manage_courses: "enrollments",
-      registrations: "enrollments",
-      courses: "enrollments",
-      view_audit_logs: "payments",
-      finance: "payments",
-      finance_management: "payments",
-      payment_management: "payments",
-      send_broadcasts: "mailer",
-      manage_users: "users",
-      iam: "settings",
-    };
-
-    const normalized = new Set(
-      perms.map((p) => aliasMap[p.toLowerCase().trim()] || p.toLowerCase().trim())
-    );
-
-    // Add implicit permissions by role
-    const roleKey = (currentAdmin.role || "").toLowerCase().trim();
-    if (roleKey === "finance_manager" || roleKey === "payment_management") {
-      normalized.add("overview");
-      normalized.add("payments");
-    } else if (roleKey === "doubts_only" || roleKey === "doubt_resolver" || roleKey === "support_desk") {
-      normalized.add("overview");
-      normalized.add("doubts");
-      normalized.add("contacts");
-    } else if (roleKey === "technical_mentor") {
-      normalized.add("overview");
-      normalized.add("submissions");
-      normalized.add("unlocks");
-      normalized.add("doubts");
-    } else if (roleKey === "internship_manager" || roleKey === "mentor") {
-      normalized.add("overview");
-      normalized.add("applications");
-      normalized.add("submissions");
-      normalized.add("unlocks");
-      normalized.add("doubts");
-      normalized.add("certificates");
-    } else if (roleKey === "course_coordinator" || roleKey === "admissions") {
-      normalized.add("overview");
-      normalized.add("enrollments");
-      normalized.add("payments");
-      normalized.add("certificates");
-      normalized.add("contacts");
-    } else if (roleKey === "auditor") {
-      normalized.add("overview");
-      normalized.add("payments");
-      normalized.add("submissions");
-    }
-
-    const target = aliasMap[permKey.toLowerCase().trim()] || permKey.toLowerCase().trim();
-    return normalized.has(target);
-  }, [currentAdmin]);
+  // Super Admin Root Permission Helper (Full Access to all modules)
+  const hasPermission = useCallback((_permKey: string) => {
+    return true;
+  }, []);
 
   // Fetch admin profile
   const fetchAdminProfile = useCallback(async () => {
@@ -664,7 +600,7 @@ function AdminDashboardContent() {
         items: [
           { key: "overview", label: "Overview", icon: <LayoutDashboard className="w-4 h-4" />, perm: "overview" },
           { key: "users", label: "User Accounts", icon: <Key className="w-4 h-4" />, perm: "users" },
-          { key: "settings", label: "IAM & Roles", icon: <Shield className="w-4 h-4" />, badge: "Admin", perm: "settings" },
+          { key: "settings", label: "Platform Settings", icon: <Shield className="w-4 h-4" />, badge: "Admin", perm: "settings" },
         ],
       },
       {
@@ -803,8 +739,8 @@ function AdminDashboardContent() {
       icon: <Mail className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
     settings: {
-      title: "IAM & Platform Settings",
-      subtitle: "Admin access controls, sub-admin role assignment, and platform feature flags.",
+      title: "Platform Settings",
+      subtitle: "System catalog switches, public route controls, and database infrastructure status.",
       icon: <Shield className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
     },
   };

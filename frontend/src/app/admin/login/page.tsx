@@ -343,9 +343,6 @@ export default function AdminLoginPage() {
                 </button>
               ))}
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-ink-400">
-              * Sub-admins (Mentors, Coordinators, Finance) should enter their assigned email and password.
-            </p>
           </div>
 
           {/* Security Marker Footer */}
