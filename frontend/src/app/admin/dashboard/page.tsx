@@ -211,6 +211,75 @@ function AdminDashboardContent() {
     applyTheme(nextTheme);
   };
 
+  // Permission Verification Helper
+  const hasPermission = useCallback((permKey: string) => {
+    if (!currentAdmin) return true; // optimistic while initial auth profile loads
+    const isSuper = currentAdmin.is_super_admin || (currentAdmin.role || "").toLowerCase().trim() === "super_admin";
+    if (isSuper) return true;
+
+    const perms: string[] = currentAdmin.permissions || [];
+    const aliasMap: Record<string, string> = {
+      resolve_doubts: "doubts",
+      doubt: "doubts",
+      doubts_only: "doubts",
+      queries: "doubts",
+      manage_interns: "applications",
+      applicants: "applications",
+      review_submissions: "submissions",
+      unlock_requests: "unlocks",
+      manage_courses: "enrollments",
+      registrations: "enrollments",
+      courses: "enrollments",
+      view_audit_logs: "payments",
+      finance: "payments",
+      finance_management: "payments",
+      payment_management: "payments",
+      send_broadcasts: "mailer",
+      manage_users: "users",
+      iam: "settings",
+    };
+
+    const normalized = new Set(
+      perms.map((p) => aliasMap[p.toLowerCase().trim()] || p.toLowerCase().trim())
+    );
+
+    // Add implicit permissions by role
+    const roleKey = (currentAdmin.role || "").toLowerCase().trim();
+    if (roleKey === "finance_manager" || roleKey === "payment_management") {
+      normalized.add("overview");
+      normalized.add("payments");
+    } else if (roleKey === "doubts_only" || roleKey === "doubt_resolver" || roleKey === "support_desk") {
+      normalized.add("overview");
+      normalized.add("doubts");
+      normalized.add("contacts");
+    } else if (roleKey === "technical_mentor") {
+      normalized.add("overview");
+      normalized.add("submissions");
+      normalized.add("unlocks");
+      normalized.add("doubts");
+    } else if (roleKey === "internship_manager" || roleKey === "mentor") {
+      normalized.add("overview");
+      normalized.add("applications");
+      normalized.add("submissions");
+      normalized.add("unlocks");
+      normalized.add("doubts");
+      normalized.add("certificates");
+    } else if (roleKey === "course_coordinator" || roleKey === "admissions") {
+      normalized.add("overview");
+      normalized.add("enrollments");
+      normalized.add("payments");
+      normalized.add("certificates");
+      normalized.add("contacts");
+    } else if (roleKey === "auditor") {
+      normalized.add("overview");
+      normalized.add("payments");
+      normalized.add("submissions");
+    }
+
+    const target = aliasMap[permKey.toLowerCase().trim()] || permKey.toLowerCase().trim();
+    return normalized.has(target);
+  }, [currentAdmin]);
+
   // Fetch admin profile
   const fetchAdminProfile = useCallback(async () => {
     try {
@@ -237,78 +306,193 @@ function AdminDashboardContent() {
   const fetchAllData = useCallback(async () => {
     try {
       setRefreshing(true);
-      const [
-        statsRes,
-        usersRes,
-        regsRes,
-        paymentsRes,
-        settingsRes,
-        subAdminsRes,
-        contactsRes,
-        subsRes,
-        unlocksRes,
-        doubtsRes,
-      ] = await Promise.allSettled([
-        apiRequest<any>("/admin/stats"),
-        apiRequest<any>("/admin/users"),
-        apiRequest<any>("/admin/registrations"),
-        apiRequest<any>("/admin/payments"),
-        apiRequest<any>("/admin/settings"),
-        apiRequest<any>("/admin/admins"),
-        apiRequest<any>("/admin/contacts"),
-        apiRequest<any>("/admin/submissions"),
-        apiRequest<any>("/admin/unlock-requests"),
-        apiRequest<any>("/admin/doubts"),
-      ]);
 
-      if (statsRes.status === "fulfilled" && statsRes.value) {
-        setStats(statsRes.value.stats || statsRes.value);
+      // 1. Fetch authenticated admin profile first
+      let adminObj = currentAdmin;
+      try {
+        const resMe = await apiRequest<any>("/admin/me");
+        if (resMe) {
+          adminObj = resMe.admin || resMe;
+          setCurrentAdmin(adminObj);
+        }
+      } catch {}
+
+      const isSuper = adminObj?.is_super_admin || (adminObj?.role || "").toLowerCase().trim() === "super_admin";
+      const aliasMap: Record<string, string> = {
+        resolve_doubts: "doubts",
+        doubt: "doubts",
+        doubts_only: "doubts",
+        queries: "doubts",
+        manage_interns: "applications",
+        applicants: "applications",
+        review_submissions: "submissions",
+        unlock_requests: "unlocks",
+        manage_courses: "enrollments",
+        registrations: "enrollments",
+        courses: "enrollments",
+        view_audit_logs: "payments",
+        finance: "payments",
+        finance_management: "payments",
+        payment_management: "payments",
+        send_broadcasts: "mailer",
+        manage_users: "users",
+        iam: "settings",
+      };
+
+      const permsList: string[] = adminObj?.permissions || [];
+      const normalizedPerms = new Set(
+        permsList.map((p) => aliasMap[p.toLowerCase().trim()] || p.toLowerCase().trim())
+      );
+
+      const roleKey = (adminObj?.role || "").toLowerCase().trim();
+      if (roleKey === "finance_manager" || roleKey === "payment_management") {
+        normalizedPerms.add("overview");
+        normalizedPerms.add("payments");
+      } else if (roleKey === "doubts_only" || roleKey === "doubt_resolver" || roleKey === "support_desk") {
+        normalizedPerms.add("overview");
+        normalizedPerms.add("doubts");
+        normalizedPerms.add("contacts");
+      } else if (roleKey === "technical_mentor") {
+        normalizedPerms.add("overview");
+        normalizedPerms.add("submissions");
+        normalizedPerms.add("unlocks");
+        normalizedPerms.add("doubts");
+      } else if (roleKey === "internship_manager" || roleKey === "mentor") {
+        normalizedPerms.add("overview");
+        normalizedPerms.add("applications");
+        normalizedPerms.add("submissions");
+        normalizedPerms.add("unlocks");
+        normalizedPerms.add("doubts");
+        normalizedPerms.add("certificates");
+      } else if (roleKey === "course_coordinator" || roleKey === "admissions") {
+        normalizedPerms.add("overview");
+        normalizedPerms.add("enrollments");
+        normalizedPerms.add("payments");
+        normalizedPerms.add("certificates");
+        normalizedPerms.add("contacts");
+      } else if (roleKey === "auditor") {
+        normalizedPerms.add("overview");
+        normalizedPerms.add("payments");
+        normalizedPerms.add("submissions");
       }
-      if (usersRes.status === "fulfilled" && usersRes.value) {
-        setUsers(usersRes.value.items || usersRes.value.users || usersRes.value || []);
+
+      const canAccess = (k: string) => isSuper || normalizedPerms.has(k);
+
+      // Only query endpoints that the current session is authorized for
+      const promises: Promise<{ key: string; data: any } | null>[] = [];
+
+      if (canAccess("overview")) {
+        promises.push(
+          apiRequest<any>("/admin/stats")
+            .then((data) => ({ key: "stats", data }))
+            .catch(() => null)
+        );
       }
-      if (regsRes.status === "fulfilled" && regsRes.value) {
-        setRegistrations(regsRes.value.items || regsRes.value.registrations || regsRes.value || []);
+      if (canAccess("users")) {
+        promises.push(
+          apiRequest<any>("/admin/users")
+            .then((data) => ({ key: "users", data }))
+            .catch(() => null)
+        );
       }
-      if (paymentsRes.status === "fulfilled" && paymentsRes.value) {
-        setPayments(paymentsRes.value.items || paymentsRes.value.payments || paymentsRes.value || []);
+      if (canAccess("enrollments")) {
+        promises.push(
+          apiRequest<any>("/admin/registrations")
+            .then((data) => ({ key: "registrations", data }))
+            .catch(() => null)
+        );
       }
-      if (settingsRes.status === "fulfilled" && settingsRes.value) {
-        const sData = settingsRes.value.settings || settingsRes.value || {};
-        const isCourses = sData.show_courses === true || sData.show_courses === "true" || sData.courses_enabled === true;
-        const isCareers = sData.show_careers === true || sData.show_careers === "true" || sData.careers_enabled === true;
-        setSettings({
-          show_courses: isCourses,
-          show_careers: isCareers,
-          courses_enabled: isCourses,
-          careers_enabled: isCareers,
-        });
+      if (canAccess("payments")) {
+        promises.push(
+          apiRequest<any>("/admin/payments")
+            .then((data) => ({ key: "payments", data }))
+            .catch(() => null)
+        );
       }
-      if (subAdminsRes.status === "fulfilled" && subAdminsRes.value) {
-        setSubAdmins(subAdminsRes.value.admins || subAdminsRes.value || []);
+      if (canAccess("settings")) {
+        promises.push(
+          apiRequest<any>("/admin/settings")
+            .then((data) => ({ key: "settings", data }))
+            .catch(() => null)
+        );
+        promises.push(
+          apiRequest<any>("/admin/admins")
+            .then((data) => ({ key: "admins", data }))
+            .catch(() => null)
+        );
       }
-      if (contactsRes.status === "fulfilled" && contactsRes.value) {
-        const list = contactsRes.value.items || contactsRes.value.contacts || contactsRes.value || [];
-        setTotalContactsCount(list.length);
-        setNewContactsCount(list.filter((c: any) => c.status === "pending" || !c.status).length);
+      if (canAccess("contacts")) {
+        promises.push(
+          apiRequest<any>("/admin/contacts")
+            .then((data) => ({ key: "contacts", data }))
+            .catch(() => null)
+        );
       }
-      if (subsRes.status === "fulfilled" && subsRes.value) {
-        const list = subsRes.value.items || subsRes.value.submissions || subsRes.value || [];
-        setSubmissionsCount(list.filter((s: any) => s.status === "submitted" || s.status === "pending").length);
+      if (canAccess("submissions")) {
+        promises.push(
+          apiRequest<any>("/admin/submissions")
+            .then((data) => ({ key: "submissions", data }))
+            .catch(() => null)
+        );
       }
-      if (unlocksRes.status === "fulfilled" && unlocksRes.value) {
-        const list = unlocksRes.value.items || unlocksRes.value.unlock_requests || unlocksRes.value || [];
-        setUnlockRequestsCount(list.filter((u: any) => u.status === "pending").length);
+      if (canAccess("unlocks")) {
+        promises.push(
+          apiRequest<any>("/admin/unlock-requests")
+            .then((data) => ({ key: "unlocks", data }))
+            .catch(() => null)
+        );
       }
-      if (doubtsRes.status === "fulfilled" && doubtsRes.value) {
-        const list = doubtsRes.value.items || doubtsRes.value.doubts || doubtsRes.value || [];
-        setDoubtsCount(list.filter((d: any) => d.status === "open" || d.status === "pending").length);
+      if (canAccess("doubts")) {
+        promises.push(
+          apiRequest<any>("/admin/doubts")
+            .then((data) => ({ key: "doubts", data }))
+            .catch(() => null)
+        );
+      }
+
+      const results = await Promise.all(promises);
+      for (const item of results) {
+        if (!item || !item.data) continue;
+        const { key, data } = item;
+        if (key === "stats") setStats(data.stats || data);
+        if (key === "users") setUsers(data.items || data.users || data || []);
+        if (key === "registrations") setRegistrations(data.items || data.registrations || data || []);
+        if (key === "payments") setPayments(data.items || data.payments || data || []);
+        if (key === "settings") {
+          const sData = data.settings || data || {};
+          const isCourses = sData.show_courses === true || sData.show_courses === "true" || sData.courses_enabled === true;
+          const isCareers = sData.show_careers === true || sData.show_careers === "true" || sData.careers_enabled === true;
+          setSettings({
+            show_courses: isCourses,
+            show_careers: isCareers,
+            courses_enabled: isCourses,
+            careers_enabled: isCareers,
+          });
+        }
+        if (key === "admins") setSubAdmins(data.admins || data || []);
+        if (key === "contacts") {
+          const list = data.items || data.contacts || data || [];
+          setTotalContactsCount(list.length);
+          setNewContactsCount(list.filter((c: any) => c.status === "pending" || !c.status).length);
+        }
+        if (key === "submissions") {
+          const list = data.items || data.submissions || data || [];
+          setSubmissionsCount(list.filter((s: any) => s.status === "submitted" || s.status === "pending").length);
+        }
+        if (key === "unlocks") {
+          const list = data.items || data.unlock_requests || data || [];
+          setUnlockRequestsCount(list.filter((u: any) => u.status === "pending").length);
+        }
+        if (key === "doubts") {
+          const list = data.items || data.doubts || data || [];
+          setDoubtsCount(list.filter((d: any) => d.status === "open" || d.status === "pending").length);
+        }
       }
     } finally {
       setRefreshing(false);
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin]);
 
   useEffect(() => {
     fetchAdminProfile();
@@ -423,66 +607,112 @@ function AdminDashboardContent() {
     router.push("/admin/login");
   };
 
-  // Modular Navigation Groups
-  const navGroups: NavGroup[] = useMemo(() => [
-    {
-      groupTitle: "Core & Platform",
-      items: [
-        { key: "overview", label: "Overview", icon: <LayoutDashboard className="w-4 h-4" /> },
-        { key: "users", label: "User Accounts", icon: <Key className="w-4 h-4" /> },
-        { key: "settings", label: "IAM & Roles", icon: <Shield className="w-4 h-4" />, badge: "Admin" },
-      ],
-    },
-    {
-      groupTitle: "Internships & Portal",
-      items: [
-        {
-          key: "applicants",
-          label: "Applications",
-          icon: <Users className="w-4 h-4" />,
-          count: stats?.total_applications,
-        },
-        {
-          key: "submissions",
-          label: "Submissions",
-          icon: <FolderGit2 className="w-4 h-4" />,
-          count: submissionsCount,
-        },
-        {
-          key: "unlocks",
-          label: "Unlock Requests",
-          icon: <Unlock className="w-4 h-4" />,
-          count: unlockRequestsCount,
-        },
-        {
-          key: "doubts",
-          label: "Doubts Desk",
-          icon: <HelpCircle className="w-4 h-4" />,
-          count: doubtsCount,
-        },
-        { key: "certificates", label: "Certificates", icon: <Award className="w-4 h-4" /> },
-      ],
-    },
-    {
-      groupTitle: "Academics & Operations",
-      items: [
-        {
-          key: "enrollments",
-          label: "Course Enrollments",
-          icon: <BookOpen className="w-4 h-4" />,
-          count: registrations.filter((r) => r.status === "pending").length,
-        },
-        { key: "payments", label: "Payments Audit", icon: <CreditCard className="w-4 h-4" /> },
-        {
-          key: "contacts",
-          label: "Contact Inquiries",
-          icon: <MessageSquare className="w-4 h-4" />,
-          count: newContactsCount,
-        },
-        { key: "mailer", label: "Branded Dispatcher", icon: <Mail className="w-4 h-4" /> },
-      ],
-    },
-  ], [stats, submissionsCount, unlockRequestsCount, doubtsCount, registrations, newContactsCount]);
+  const TAB_PERMISSION_MAP: Record<TabKey, string> = {
+    overview: "overview",
+    applicants: "applications",
+    submissions: "submissions",
+    unlocks: "unlocks",
+    doubts: "doubts",
+    contacts: "contacts",
+    certificates: "certificates",
+    users: "users",
+    enrollments: "enrollments",
+    payments: "payments",
+    mailer: "mailer",
+    settings: "settings",
+  };
+
+  // Modular Navigation Groups filtered by active role permissions
+  const navGroups: NavGroup[] = useMemo(() => {
+    const rawGroups: {
+      groupTitle: string;
+      items: { key: TabKey; label: string; icon: React.ReactNode; count?: number; badge?: string; perm: string }[];
+    }[] = [
+      {
+        groupTitle: "Core & Platform",
+        items: [
+          { key: "overview", label: "Overview", icon: <LayoutDashboard className="w-4 h-4" />, perm: "overview" },
+          { key: "users", label: "User Accounts", icon: <Key className="w-4 h-4" />, perm: "users" },
+          { key: "settings", label: "IAM & Roles", icon: <Shield className="w-4 h-4" />, badge: "Admin", perm: "settings" },
+        ],
+      },
+      {
+        groupTitle: "Internships & Portal",
+        items: [
+          {
+            key: "applicants",
+            label: "Applications",
+            icon: <Users className="w-4 h-4" />,
+            count: stats?.total_applications,
+            perm: "applications",
+          },
+          {
+            key: "submissions",
+            label: "Submissions",
+            icon: <FolderGit2 className="w-4 h-4" />,
+            count: submissionsCount,
+            perm: "submissions",
+          },
+          {
+            key: "unlocks",
+            label: "Unlock Requests",
+            icon: <Unlock className="w-4 h-4" />,
+            count: unlockRequestsCount,
+            perm: "unlocks",
+          },
+          {
+            key: "doubts",
+            label: "Doubts Desk",
+            icon: <HelpCircle className="w-4 h-4" />,
+            count: doubtsCount,
+            perm: "doubts",
+          },
+          { key: "certificates", label: "Certificates", icon: <Award className="w-4 h-4" />, perm: "certificates" },
+        ],
+      },
+      {
+        groupTitle: "Academics & Operations",
+        items: [
+          {
+            key: "enrollments",
+            label: "Course Enrollments",
+            icon: <BookOpen className="w-4 h-4" />,
+            count: registrations.filter((r) => r.status === "pending").length,
+            perm: "enrollments",
+          },
+          { key: "payments", label: "Payments Audit", icon: <CreditCard className="w-4 h-4" />, perm: "payments" },
+          {
+            key: "contacts",
+            label: "Contact Inquiries",
+            icon: <MessageSquare className="w-4 h-4" />,
+            count: newContactsCount,
+            perm: "contacts",
+          },
+          { key: "mailer", label: "Branded Dispatcher", icon: <Mail className="w-4 h-4" />, perm: "mailer" },
+        ],
+      },
+    ];
+
+    return rawGroups
+      .map((group) => ({
+        groupTitle: group.groupTitle,
+        items: group.items.filter((item) => hasPermission(item.perm)),
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [stats, submissionsCount, unlockRequestsCount, doubtsCount, registrations, newContactsCount, hasPermission]);
+
+  // Auto-route to first permitted tab if active tab is unauthorized
+  useEffect(() => {
+    if (!currentAdmin) return;
+    const requiredPerm = TAB_PERMISSION_MAP[activeTab];
+    if (requiredPerm && !hasPermission(requiredPerm)) {
+      const firstGroup = navGroups[0];
+      const firstPermitted = firstGroup?.items[0]?.key;
+      if (firstPermitted && firstPermitted !== activeTab) {
+        handleTabChange(firstPermitted);
+      }
+    }
+  }, [currentAdmin, activeTab, hasPermission, navGroups, handleTabChange]);
 
   // Tab Header Details
   const tabInfo: Record<TabKey, { title: string; subtitle: string; icon: React.ReactNode }> = {
@@ -593,6 +823,20 @@ function AdminDashboardContent() {
             <AdminErrorBoundary fallbackTitle={`Error rendering ${tabInfo[activeTab]?.title}`}>
               {loading ? (
                 <TabLoadingSkeleton />
+              ) : !hasPermission(TAB_PERMISSION_MAP[activeTab]) ? (
+                <div className="p-8 sm:p-12 text-center rounded-2xl border border-gray-200 dark:border-ink-800 bg-white dark:bg-ink-950 space-y-4 shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+                    <Shield className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Access Restricted
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-ink-400 max-w-md mx-auto leading-relaxed">
+                    Your sub-admin operator account does not have authorization to view or manage the{" "}
+                    <span className="font-semibold text-gray-900 dark:text-white">{tabInfo[activeTab]?.title}</span> module.
+                    Please contact your Super Admin to request additional role permissions.
+                  </p>
+                </div>
               ) : (
                 <>
                   {activeTab === "overview" && (
@@ -604,6 +848,7 @@ function AdminDashboardContent() {
                       unlockRequestsCount={unlockRequestsCount}
                       doubtsCount={doubtsCount}
                       onNavigateTab={(tab) => handleTabChange(tab as TabKey)}
+                      hasPermission={hasPermission}
                     />
                   )}
 

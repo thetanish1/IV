@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, List, Set
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -16,22 +16,139 @@ ROLE_PERMISSIONS_MAP = {
         "users", "enrollments", "payments", "certificates", "contacts",
         "mailer", "settings"
     ],
+    "full_sub_admin": [
+        "overview", "applications", "submissions", "unlocks", "doubts",
+        "users", "enrollments", "payments", "certificates", "contacts", "mailer"
+    ],
+    "finance_manager": [
+        "overview", "payments"
+    ],
+    "payment_management": [
+        "overview", "payments"
+    ],
+    "financial_manager": [
+        "overview", "payments"
+    ],
     "internship_manager": [
         "overview", "applications", "submissions", "unlocks", "doubts", "certificates"
     ],
+    "mentor": [
+        "overview", "applications", "submissions", "unlocks", "doubts", "certificates"
+    ],
     "technical_mentor": [
-        "submissions", "unlocks", "doubts"
+        "overview", "submissions", "unlocks", "doubts"
     ],
     "course_coordinator": [
-        "overview", "enrollments", "payments", "certificates"
+        "overview", "enrollments", "payments", "certificates", "contacts"
+    ],
+    "admissions": [
+        "overview", "applications", "enrollments", "certificates", "contacts"
     ],
     "support_desk": [
-        "doubts", "contacts"
+        "overview", "doubts", "contacts"
+    ],
+    "doubts_only": [
+        "overview", "doubts", "contacts"
+    ],
+    "doubt_resolver": [
+        "overview", "doubts", "contacts"
+    ],
+    "auditor": [
+        "overview", "payments", "submissions"
     ],
     "custom": [
         "overview"
     ]
 }
+
+PERMISSION_ALIASES = {
+    # Doubts & Helpdesk
+    "resolve_doubts": "doubts",
+    "doubt": "doubts",
+    "doubts_only": "doubts",
+    "doubt_resolver": "doubts",
+    "queries": "doubts",
+    "query": "doubts",
+    "helpdesk": "doubts",
+    # Applications & Interns
+    "manage_interns": "applications",
+    "applicants": "applications",
+    "internships": "applications",
+    "internship": "applications",
+    "interns": "applications",
+    # Submissions
+    "review_submissions": "submissions",
+    "submission": "submissions",
+    "tasks": "submissions",
+    # Unlocks
+    "unlock_requests": "unlocks",
+    "unlock": "unlocks",
+    # Users
+    "manage_users": "users",
+    "user_accounts": "users",
+    "user": "users",
+    # Course Enrollments
+    "manage_courses": "enrollments",
+    "registrations": "enrollments",
+    "courses": "enrollments",
+    "course": "enrollments",
+    # Payment & Finance
+    "view_audit_logs": "payments",
+    "finance": "payments",
+    "finance_management": "payments",
+    "payment_management": "payments",
+    "financial_management": "payments",
+    "payment": "payments",
+    # Certificates
+    "issue_certificates": "certificates",
+    "manage_certificates": "certificates",
+    "certificate": "certificates",
+    # Contacts & Queries
+    "contact_inquiries": "contacts",
+    "contact": "contacts",
+    "support": "contacts",
+    # Mailer & Broadcasts
+    "send_broadcasts": "mailer",
+    "email_dispatcher": "mailer",
+    "broadcasts": "mailer",
+    "email": "mailer",
+    # IAM & Platform Settings
+    "iam": "settings",
+    "platform_settings": "settings",
+    "manage_admins": "settings",
+    "setting": "settings",
+}
+
+def normalize_permissions(raw_permissions: Optional[List[str]], role: Optional[str] = None) -> List[str]:
+    """Expands role presets and resolves synonyms to canonical permission keys."""
+    role_clean = (role or "super_admin").lower().strip()
+    if role_clean == "super_admin":
+        return list(ROLE_PERMISSIONS_MAP["super_admin"])
+    
+    result: Set[str] = set()
+    
+    # 1. Expand standard preset if known
+    if role_clean in ROLE_PERMISSIONS_MAP:
+        result.update(ROLE_PERMISSIONS_MAP[role_clean])
+    
+    # 2. Add and alias-resolve assigned permissions
+    if raw_permissions:
+        for p in raw_permissions:
+            if not p:
+                continue
+            p_clean = str(p).lower().strip()
+            if p_clean in ROLE_PERMISSIONS_MAP["super_admin"]:
+                result.add(p_clean)
+            elif p_clean in PERMISSION_ALIASES:
+                result.add(PERMISSION_ALIASES[p_clean])
+            else:
+                result.add(p_clean)
+                
+    # 3. Fallback to overview if empty
+    if not result:
+        result.add("overview")
+        
+    return sorted(list(result))
 
 def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Admin:
     payload = decode_access_token(token)
@@ -43,7 +160,8 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
     return admin
 
 def require_super_admin(current_admin: Admin = Depends(get_current_admin)) -> Admin:
-    if (current_admin.role or "").lower() != "super_admin":
+    role = (current_admin.role or "").lower().strip()
+    if role != "super_admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Super Admin privilege required to perform this action."
@@ -52,12 +170,14 @@ def require_super_admin(current_admin: Admin = Depends(get_current_admin)) -> Ad
 
 def require_permission(permission_key: str) -> Callable:
     def _permission_guard(current_admin: Admin = Depends(get_current_admin)) -> Admin:
-        role = (current_admin.role or "super_admin").lower()
+        role = (current_admin.role or "super_admin").lower().strip()
         if role == "super_admin":
             return current_admin
         
-        assigned_permissions = current_admin.permissions or ROLE_PERMISSIONS_MAP.get(role, [])
-        if permission_key not in assigned_permissions:
+        assigned_permissions = normalize_permissions(current_admin.permissions, role)
+        canonical_target = PERMISSION_ALIASES.get(permission_key.lower().strip(), permission_key.lower().strip())
+        
+        if canonical_target not in assigned_permissions:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Access denied: You do not have permission to access the '{permission_key}' module."

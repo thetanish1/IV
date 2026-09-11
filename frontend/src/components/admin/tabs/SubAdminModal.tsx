@@ -13,50 +13,76 @@ export interface SubAdminData {
   is_active?: boolean;
 }
 
-const ROLE_PRESETS: { [key: string]: { label: string; perms: string[]; desc: string } } = {
-  mentor: {
-    label: "Internship & Technical Mentor",
-    perms: ["manage_interns", "review_submissions", "resolve_doubts"],
-    desc: "Can review tasks, approve/reject submissions, and answer doubt tickets.",
-  },
-  admissions: {
-    label: "Admissions & Operations Officer",
-    perms: ["manage_interns", "manage_courses", "send_broadcasts"],
-    desc: "Can approve internship requests, course enrollments, and send emails.",
-  },
+const ROLE_PRESETS: { [key: string]: { label: string; role: string; perms: string[]; desc: string } } = {
   doubts_only: {
-    label: "Helpdesk & Support Mentor",
-    perms: ["resolve_doubts"],
-    desc: "Specialized direct responder for doubts desk and code queries.",
+    label: "Doubts & Query Support Desk",
+    role: "doubts_only",
+    perms: ["overview", "doubts", "contacts"],
+    desc: "Specialized direct responder for student technical doubts, code bugs, and inquiries.",
+  },
+  finance_manager: {
+    label: "Payment & Finance Management",
+    role: "finance_manager",
+    perms: ["overview", "payments"],
+    desc: "Inspect Cashfree financial transactions, payment logs, and order verification.",
+  },
+  technical_mentor: {
+    label: "Technical Mentor",
+    role: "technical_mentor",
+    perms: ["overview", "submissions", "unlocks", "doubts"],
+    desc: "Review student code milestones, approve curriculum module unlocks, and resolve doubts.",
+  },
+  mentor: {
+    label: "Internship Operations Manager",
+    role: "internship_manager",
+    perms: ["overview", "applications", "submissions", "unlocks", "doubts", "certificates"],
+    desc: "Manage applicants, evaluate task submissions, unlock roadmap modules, and issue certificates.",
+  },
+  course_coordinator: {
+    label: "Course & Admissions Coordinator",
+    role: "course_coordinator",
+    perms: ["overview", "enrollments", "payments", "certificates", "contacts"],
+    desc: "Review bootcamp registrations, manage course intake, and verify course payments.",
   },
   auditor: {
     label: "Auditor / View-Only Observer",
-    perms: ["view_audit_logs"],
-    desc: "Read-only access to transactions, student logs, and telemetry.",
+    role: "auditor",
+    perms: ["overview", "payments", "submissions"],
+    desc: "Read-only access to payment ledgers, milestone logs, and telemetry.",
   },
   full_sub_admin: {
     label: "General Sub-Admin (All Modules)",
+    role: "full_sub_admin",
     perms: [
-      "manage_interns",
-      "review_submissions",
-      "resolve_doubts",
-      "manage_courses",
-      "manage_users",
-      "view_audit_logs",
-      "send_broadcasts",
+      "overview",
+      "applications",
+      "submissions",
+      "unlocks",
+      "doubts",
+      "certificates",
+      "enrollments",
+      "payments",
+      "contacts",
+      "users",
+      "mailer",
     ],
-    desc: "Full operational access across all student operations excluding IAM provision.",
+    desc: "Full operational access across all student, course, and payment modules excluding IAM provision.",
   },
 };
 
 const ALL_PERMISSIONS: { key: string; label: string; desc: string }[] = [
-  { key: "manage_interns", label: "Manage Internships", desc: "Approve/reject applicants and issue roadmap unlocks" },
-  { key: "review_submissions", label: "Review Submissions", desc: "Grade task submissions, approve or request revisions" },
-  { key: "resolve_doubts", label: "Resolve Doubts & Helpdesk", desc: "Answer student code queries and helpdesk tickets" },
-  { key: "manage_courses", label: "Manage Course Registrations", desc: "Approve or reject bootcamp course applications" },
-  { key: "manage_users", label: "View & Audit Users", desc: "Audit student accounts and credential hints" },
-  { key: "view_audit_logs", label: "View Financial & Audit Logs", desc: "Inspect payment transactions and audit telemetry" },
-  { key: "send_broadcasts", label: "Send Branded Emails", desc: "Draft and dispatch official branded email broadcasts" },
+  { key: "overview", label: "Overview & Telemetry", desc: "View platform KPI summaries and system telemetry" },
+  { key: "doubts", label: "Doubts & Code Query Desk", desc: "Answer student code questions, mentor queries, and helpdesk tickets" },
+  { key: "payments", label: "Payment & Financial Ledger", desc: "Inspect Cashfree transactions, order verification, and financial records" },
+  { key: "applications", label: "Internship Applications", desc: "Review candidate profiles, download resumes, and manage acceptance" },
+  { key: "submissions", label: "Task Milestone Submissions", desc: "Review student GitHub repos, project milestones, and grade tasks" },
+  { key: "unlocks", label: "Curriculum Module Unlocks", desc: "Authorize early access to time-gated curriculum modules" },
+  { key: "enrollments", label: "Course Enrollments", desc: "Manage bootcamp course registrations and student admissions" },
+  { key: "certificates", label: "Digital Certificates", desc: "Issue, verify, inspect, and revoke cryptographic credentials" },
+  { key: "contacts", label: "Contact Inquiries", desc: "Manage incoming student/partner contact requests and send replies" },
+  { key: "users", label: "User Accounts", desc: "Inspect and manage registered student user accounts" },
+  { key: "mailer", label: "Branded Dispatcher", desc: "Draft and dispatch official broadcast announcements" },
+  { key: "settings", label: "IAM & Platform Settings", desc: "Provision sub-admins and platform toggles (Super Admin)" },
 ];
 
 interface SubAdminModalProps {
@@ -76,10 +102,10 @@ export const SubAdminModal: React.FC<SubAdminModalProps> = ({
     email: "",
     full_name: "",
     password: "",
-    role: "admin",
-    permissions: ROLE_PRESETS.mentor.perms,
+    role: "doubts_only",
+    permissions: ROLE_PRESETS.doubts_only.perms,
   });
-  const [selectedPreset, setSelectedPreset] = useState<string>("mentor");
+  const [selectedPreset, setSelectedPreset] = useState<string>("doubts_only");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,7 +115,7 @@ export const SubAdminModal: React.FC<SubAdminModalProps> = ({
         id: editingAdmin.id,
         email: editingAdmin.email,
         full_name: editingAdmin.full_name,
-        role: editingAdmin.role || "admin",
+        role: editingAdmin.role || "doubts_only",
         permissions: editingAdmin.permissions || [],
       });
       setSelectedPreset("custom");
@@ -98,10 +124,10 @@ export const SubAdminModal: React.FC<SubAdminModalProps> = ({
         email: "",
         full_name: "",
         password: "",
-        role: "admin",
-        permissions: ROLE_PRESETS.mentor.perms,
+        role: "doubts_only",
+        permissions: ROLE_PRESETS.doubts_only.perms,
       });
-      setSelectedPreset("mentor");
+      setSelectedPreset("doubts_only");
     }
     setError(null);
   }, [editingAdmin, isOpen]);
@@ -113,6 +139,7 @@ export const SubAdminModal: React.FC<SubAdminModalProps> = ({
     if (presetKey !== "custom" && ROLE_PRESETS[presetKey]) {
       setFormData((prev) => ({
         ...prev,
+        role: ROLE_PRESETS[presetKey].role,
         permissions: [...ROLE_PRESETS[presetKey].perms],
       }));
     }

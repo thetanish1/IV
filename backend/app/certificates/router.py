@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.shared.database import get_db
 from app.shared.exceptions import NotFoundException, BadRequestException
-from app.shared.dependencies import get_current_admin
+from app.shared.dependencies import get_current_admin, require_permission
 from app.auth.models import Admin
 from app.certificates.models import Certificate
 from app.certificates.schemas import CertificateVerifyResponse, CertificateCreate
@@ -43,7 +43,7 @@ def verify_certificate(cert_id: str, db: Session = Depends(get_db)):
 def list_certificates(
     search: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("certificates"))
 ):
     """
     Admin Endpoint: List all issued certificates.
@@ -61,7 +61,7 @@ def list_certificates(
 def list_certificates_admin_alias(
     search: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("certificates"))
 ):
     return list_certificates(search=search, db=db, current_admin=current_admin)
 
@@ -69,7 +69,7 @@ def list_certificates_admin_alias(
 def issue_certificate(
     cert_in: CertificateCreate,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("certificates"))
 ):
     """
     Admin Endpoint: Issue a new certificate.
@@ -102,7 +102,7 @@ def issue_certificate(
 def delete_certificate(
     cert_id: str,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("certificates"))
 ):
     """
     Admin Endpoint: Delete/Revoke a certificate by certificate_id or database id.

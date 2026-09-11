@@ -35,23 +35,34 @@ export default function AdminTopbar({
   onLogout,
   onToggleMobileMenu,
 }: AdminTopbarProps) {
+  const isSuperAdmin =
+    currentAdmin?.is_super_admin ||
+    (currentAdmin?.role || "").toLowerCase().trim() === "super_admin" ||
+    (currentAdmin?.permissions || []).includes("settings");
+
   const accountItems = [
     {
       label: currentAdmin?.full_name || "Admin",
       description: currentAdmin?.email || "admin@internvision.tech",
       icon: <User className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />,
-      badge: currentAdmin?.role || "super_admin",
-      onClick: () => onNavigateTab("settings"),
+      badge: currentAdmin?.role || "operator",
+      onClick: () => {
+        if (isSuperAdmin) onNavigateTab("settings");
+      },
     },
   ];
 
   const profileItems = [
-    {
-      label: "IAM & Platform Settings",
-      description: "Manage roles & permissions",
-      icon: <SettingsIcon className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />,
-      onClick: () => onNavigateTab("settings"),
-    },
+    ...(isSuperAdmin
+      ? [
+          {
+            label: "IAM & Platform Settings",
+            description: "Manage roles & permissions",
+            icon: <SettingsIcon className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />,
+            onClick: () => onNavigateTab("settings"),
+          },
+        ]
+      : []),
     {
       label: "Sign Out",
       description: "Terminate active admin session",

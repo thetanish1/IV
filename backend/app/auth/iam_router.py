@@ -8,6 +8,7 @@ from app.shared.dependencies import (
     require_super_admin,
     require_permission,
     ROLE_PERMISSIONS_MAP,
+    normalize_permissions,
 )
 from app.shared.security import get_password_hash
 from app.shared.email_service import send_sub_admin_provisioned_email
@@ -21,9 +22,9 @@ def get_current_admin_profile(
     current_admin: Admin = Depends(get_current_admin)
 ):
     """Returns the authenticated admin profile with active role and granted permissions."""
-    role = current_admin.role or "super_admin"
-    permissions = current_admin.permissions or ROLE_PERMISSIONS_MAP.get(role.lower(), [])
-    is_super = role.lower() == "super_admin"
+    role = (current_admin.role or "super_admin").lower().strip()
+    is_super = role == "super_admin"
+    permissions = normalize_permissions(current_admin.permissions, role)
 
     return {
         "id": current_admin.id,
@@ -50,7 +51,7 @@ def list_sub_admins(
             "email": a.email,
             "full_name": a.full_name,
             "role": a.role or "super_admin",
-            "permissions": a.permissions or ROLE_PERMISSIONS_MAP.get((a.role or "super_admin").lower(), []),
+            "permissions": normalize_permissions(a.permissions, a.role),
             "is_active": bool(a.is_active),
             "created_by": a.created_by,
             "created_at": a.created_at.isoformat() if a.created_at else None,
@@ -77,10 +78,7 @@ def create_sub_admin_account(
         raise HTTPException(status_code=400, detail=f"Admin account with email '{clean_email}' already exists.")
 
     role_lower = body.role.strip().lower()
-    permissions = body.permissions or []
-
-    if role_lower in ROLE_PERMISSIONS_MAP and (not permissions or len(permissions) == 0):
-        permissions = ROLE_PERMISSIONS_MAP[role_lower]
+    permissions = normalize_permissions(body.permissions, role_lower)
 
     new_admin = Admin(
         email=clean_email,
@@ -95,7 +93,7 @@ def create_sub_admin_account(
     db.commit()
     db.refresh(new_admin)
 
-    # Automatically dispatch administrative onboarding & credentials email to the specified email textbox
+    # Automatically dispatch administrative onboarding & credentials email
     background_tasks.add_task(
         send_sub_admin_provisioned_email,
         admin_email=new_admin.email,
@@ -122,6 +120,7 @@ def create_sub_admin_account(
 
 
 @router.patch("/admins/{admin_id}")
+@router.patch("/admins/{admin_id}/status")
 def update_sub_admin_account(
     admin_id: int,
     body: AdminUpdateBody,
@@ -140,10 +139,10 @@ def update_sub_admin_account(
         role_lower = body.role.strip().lower()
         admin_obj.role = role_lower
         if body.permissions is None and role_lower in ROLE_PERMISSIONS_MAP:
-            admin_obj.permissions = ROLE_PERMISSIONS_MAP[role_lower]
+            admin_obj.permissions = normalize_permissions([], role_lower)
 
     if body.permissions is not None:
-        admin_obj.permissions = body.permissions
+        admin_obj.permissions = normalize_permissions(body.permissions, admin_obj.role)
 
     if body.is_active is not None:
         # Protect against self-deactivation or primary admin deactivation
@@ -184,6 +183,9 @@ def delete_sub_admin_account(
         raise HTTPException(status_code=400, detail="You cannot delete your own active Super Admin account.")
 
     admin_obj = db.query(Admin).filter(Admin.id == admin_id).first()
+    if not admin_obj:
+        raise HTTPException(status_code=404, detail="Sub-Admin account not found.")
+
     if admin_obj.role == "super_admin" and admin_obj.created_by is None:
         raise HTTPException(status_code=400, detail="Primary root Super Admin accounts cannot be deleted.")
 

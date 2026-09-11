@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from app.shared.database import get_db
-from app.shared.dependencies import get_current_admin
+from app.shared.dependencies import require_permission
 from app.auth.models import Admin
 from app.internship.models import InternshipApplication
 from app.payments.models import Payment
@@ -16,7 +16,7 @@ def export_applications_excel(
     duration: Optional[str] = None,
     status: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("applications"))
 ):
     query = db.query(InternshipApplication)
     if q:
@@ -46,7 +46,7 @@ def export_payments_excel(
     q: Optional[str] = None,
     status: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_admin: Admin = Depends(get_current_admin)
+    current_admin: Admin = Depends(require_permission("payments"))
 ):
     query = db.query(Payment)
     if q:

@@ -15,6 +15,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.shared.database import get_db
+from app.shared.dependencies import require_permission
+from app.auth.models import Admin
 from app.core.config import settings
 from app.mailer.models import SentEmail
 from app.internship.models import InternshipApplication, InternshipSubmission
@@ -150,7 +152,10 @@ def build_branded_html(
 
 
 @router.get("/recipients")
-def get_applicant_recipients(db: Session = Depends(get_db)):
+def get_applicant_recipients(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("mailer"))
+):
     """
     Returns a unified list of applicant emails and site users for quick selection in the Mailer.
     """
@@ -207,7 +212,10 @@ def get_applicant_recipients(db: Session = Depends(get_db)):
 
 
 @router.get("/history")
-def get_send_history(db: Session = Depends(get_db)):
+def get_send_history(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("mailer"))
+):
     """
     Returns the last 100 sent emails audit log.
     """
@@ -232,7 +240,11 @@ def get_send_history(db: Session = Depends(get_db)):
 
 
 @router.post("/send")
-async def send_branded_email(request: Request, db: Session = Depends(get_db)):
+async def send_branded_email(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("mailer"))
+):
     """
     Accepts multipart/form-data for sending single/bulk branded emails with shared
     and personalized attachments via Brevo SMTP.
@@ -524,7 +536,8 @@ async def send_branded_email(request: Request, db: Session = Depends(get_db)):
 @router.post("/send-submission-reminders")
 def dispatch_submission_due_reminders(
     target_email: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(require_permission("mailer"))
 ):
     """
     Scans active accepted internship students and dispatches automated
