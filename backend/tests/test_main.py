@@ -8,6 +8,7 @@ os.environ["DATABASE_URL"] = "sqlite:///./test_app.db"
 
 from app.main import app
 from app.shared.database import Base, get_db
+from app.auth.user_models import SiteUser
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_app.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
@@ -94,6 +95,39 @@ def test_admin_stats_protected():
     stats = stats_res.json()
     assert "total_revenue_inr" in stats
     assert "total_applications" in stats
+
+
+def test_health_live():
+    response = client.get("/health/live")
+    assert response.status_code == 200
+    assert response.json()["status"] == "alive"
+
+def test_health_ready():
+    response = client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json()["status"] == "ready"
+    assert response.json()["database"] == "connected"
+
+def test_user_register_does_not_store_plaintext_password():
+    response = client.post(
+        "/api/auth/user/register",
+        json={
+            "email": "newuser@example.com",
+            "password": "Str0ngPass!123",
+            "full_name": "New User"
+        }
+    )
+    assert response.status_code == 200
+
+    user = TestingSessionLocal().query(SiteUser).filter(SiteUser.email == "newuser@example.com").first()
+    assert user is not None
+    assert getattr(user, "raw_password", None) is None
+    assert user.hashed_password != "Str0ngPass!123"
+
+def test_resume_proxy_blocks_internal_hosts():
+    # Loopback localhost check
+    response = client.get("/api/applications/resume-proxy?url=http://127.0.0.1:8000/api/health")
+    assert response.status_code == 403
 
 def test_excel_export():
     login_res = client.post(

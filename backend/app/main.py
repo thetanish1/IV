@@ -1,8 +1,12 @@
+import logging
 from datetime import datetime, timezone
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from app.core.config import settings
 from app.core.middleware import LoggingAndRequestIDMiddleware
@@ -11,6 +15,7 @@ from app.auth.user_models import SiteUser  # ensures site_users table is created
 
 from app.shared.security import get_password_hash
 from app.shared.database import Base, engine, get_db, SessionLocal
+from app.shared.dependencies import get_current_admin
 from app.auth.router import router as auth_router
 from app.courses.router import router as courses_router
 from app.internship.router import router as internship_router
@@ -29,14 +34,8 @@ from app.shared.settings_router import router as settings_router
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    openapi_url="/api/openapi.json"
-)
-
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         # Check / add missing IAM columns to admins table for existing SQLite/Postgres DBs
@@ -254,6 +253,15 @@ def startup_event():
     finally:
         db.close()
 
+    yield
+
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    openapi_url="/api/openapi.json",
+    lifespan=lifespan
+)
+
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
@@ -397,22 +405,61 @@ def get_public_settings(response: Response, db: Session = Depends(get_db)):
         "careers_enabled": show_careers_val,
     }
 
+@app.get("/health/live")
+@app.get("/api/health/live")
+def health_live():
+    """Liveness probe: verifies process is alive and responsive."""
+    return {
+        "status": "alive",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+@app.get("/health/ready")
+@app.get("/api/health/ready")
+def health_ready(db: Session = Depends(get_db)):
+    """Readiness probe: verifies database connectivity and returns 503 if unavailable."""
+    try:
+        db.execute(text("SELECT 1"))
+        return {
+            "status": "ready",
+            "database": "connected",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Readiness check failed: {e}")
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unready",
+                "database": "disconnected",
+                "detail": "Database connection unavailable",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        )
+
 @app.get("/health")
 @app.get("/api/health")
 def health_check(db: Session = Depends(get_db)):
+    """Overview health endpoint."""
     db_status = "connected"
+    is_healthy = True
     try:
         db.execute(text("SELECT 1"))
     except Exception as e:
         db_status = f"unhealthy: {str(e)}"
+        is_healthy = False
         
-    return {
-        "status": "healthy" if db_status == "connected" else "degraded",
-        "database": db_status,
-        "version": settings.VERSION,
-        "environment": settings.ENVIRONMENT,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
+    status_code = 200 if is_healthy else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "healthy" if is_healthy else "degraded",
+            "database": db_status,
+            "version": settings.VERSION,
+            "environment": settings.ENVIRONMENT,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn

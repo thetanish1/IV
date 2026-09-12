@@ -48,6 +48,9 @@ def configure_cloudinary():
     return False
 
 
+MAX_RESUME_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
 @router.post("/applications/upload-resume")
 async def upload_resume(file: UploadFile = File(...)):
     """Upload a resume PDF/DOC file to Cloudinary Object Storage with local fallback."""
@@ -62,6 +65,14 @@ async def upload_resume(file: UploadFile = File(...)):
         )
 
     content = await file.read()
+    
+    # Enforce strict 10MB size limit
+    if len(content) > MAX_RESUME_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="Resume file size exceeds maximum allowed limit of 10MB."
+        )
+
     ext = os.path.splitext(file.filename or "resume")[-1] or ".pdf"
     unique_filename = f"{uuid.uuid4().hex}{ext}"
 
@@ -105,22 +116,43 @@ async def upload_resume(file: UploadFile = File(...)):
 @router.get("/applications/resume-proxy")
 def proxy_resume_stream(url: str):
     """
-    Proxies remote Cloudinary or S3 hosted resume PDF/DOC files
+    Proxies remote Cloudinary or S3 hosted resume PDF/DOC files with strict SSRF protection
     so that browser admin preview iframe and object embeds work without CORS or iframe blocking.
     """
     import urllib.request
+    import urllib.parse
+    import socket
+    import ipaddress
     from fastapi.responses import Response
 
     if not url or not (url.startswith("http://") or url.startswith("https://")):
         raise HTTPException(status_code=400, detail="Invalid resume file URL")
 
     try:
+        parsed = urllib.parse.urlparse(url)
+        hostname = parsed.hostname
+        if not hostname:
+            raise HTTPException(status_code=400, detail="Invalid URL hostname")
+
+        # Disallow loopback / local network hostnames
+        if hostname.lower() in ("localhost", "127.0.0.1", "::1", "0.0.0.0", "instance-data", "metadata.google.internal"):
+            raise HTTPException(status_code=403, detail="Access to internal hosts is forbidden")
+
+        # Resolve IP and disallow private, loopback, link-local, and reserved IP ranges (SSRF defense)
+        ip_addresses = socket.getaddrinfo(hostname, None)
+        for family, _, _, _, sockaddr in ip_addresses:
+            ip_str = sockaddr[0]
+            ip_obj = ipaddress.ip_address(ip_str)
+            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_reserved:
+                raise HTTPException(status_code=403, detail="Access to private or local network IP addresses is forbidden")
+
         req = urllib.request.Request(
             url,
             headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) InternVision/1.0"}
         )
         with urllib.request.urlopen(req, timeout=15) as response:
-            file_bytes = response.read()
+            # Limit maximum read bytes to 15MB
+            file_bytes = response.read(15 * 1024 * 1024)
             content_type = response.headers.get("Content-Type", "application/pdf")
 
             # Default to PDF if generic or octet-stream
@@ -136,9 +168,10 @@ def proxy_resume_stream(url: str):
                     "Access-Control-Allow-Origin": "*",
                 }
             )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to proxy resume from {url}: {e}")
-        # If proxy fetch fails, fallback redirect directly to url
         return RedirectResponse(url=url)
 
 

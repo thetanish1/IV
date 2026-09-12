@@ -17,7 +17,10 @@ export async function apiRequest<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  if (!headers.has("Cache-Control")) {
+  const isMutation = options.method && ["POST", "PUT", "PATCH", "DELETE"].includes(options.method.toUpperCase());
+  const isAuthRequired = Boolean(token);
+
+  if ((isMutation || isAuthRequired) && !headers.has("Cache-Control")) {
     headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
     headers.set("Pragma", "no-cache");
   }
@@ -29,6 +32,7 @@ export async function apiRequest<T>(
   }
 
   const url = `${API_BASE_URL}${cleanEndpoint}`;
+  const requestCache: RequestCache = options.cache || (isMutation || isAuthRequired ? "no-store" : "default");
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
@@ -36,7 +40,7 @@ export async function apiRequest<T>(
 
     try {
       const response = await fetch(url, {
-        cache: "no-store",
+        cache: requestCache,
         ...options,
         headers,
         signal: options.signal || controller.signal,

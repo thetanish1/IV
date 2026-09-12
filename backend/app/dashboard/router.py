@@ -124,8 +124,7 @@ def get_site_users(
 
         user_items = []
         for u in items:
-            raw_pwd = getattr(u, "raw_password", None)
-            has_pwd = bool(raw_pwd or getattr(u, "hashed_password", None))
+            has_pwd = bool(getattr(u, "hashed_password", None))
             prov = getattr(u, "provider", None) or ("google" if getattr(u, "google_sub", None) else ("email" if has_pwd else "google"))
             user_items.append({
                 "id": u.id,
@@ -138,8 +137,6 @@ def get_site_users(
                 "is_active": True,
                 "is_password_set": has_pwd,
                 "created_at": u.created_at.isoformat() if u.created_at else None,
-                "plain_password": raw_pwd,
-                "raw_password": raw_pwd,
                 "role": "student",
             })
 
@@ -166,7 +163,7 @@ def get_registrations(
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(require_permission("enrollments"))
 ):
-    """Admin endpoint to view Bootcamp course registration requests."""
+    """Admin endpoint to view Bootcamp course registration requests with batched course queries."""
     query = db.query(CourseRegistration)
     if q:
         query = query.filter(
@@ -183,9 +180,14 @@ def get_registrations(
                  .limit(limit)\
                  .all()
 
+    course_ids = list({reg.course_id for reg in items if reg.course_id})
+    course_map = {}
+    if course_ids:
+        courses = db.query(Course).filter(Course.id.in_(course_ids)).all()
+        course_map = {c.id: c.title for c in courses}
+
     items_with_course = []
     for reg in items:
-        course = db.query(Course).filter(Course.id == reg.course_id).first()
         items_with_course.append({
             "id": reg.id,
             "course_id": reg.course_id,
@@ -194,7 +196,7 @@ def get_registrations(
             "student_phone": reg.student_phone,
             "status": reg.status,
             "created_at": reg.created_at.isoformat() if reg.created_at else None,
-            "course_title": course.title if course else f"Course #{reg.course_id}",
+            "course_title": course_map.get(reg.course_id, f"Course #{reg.course_id}"),
         })
 
     return {

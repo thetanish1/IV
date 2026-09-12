@@ -1044,21 +1044,37 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
     weekly_tasks = []
     for t in domain_pack["weeks"]:
         w_num = t["week"]
+        m_num = t.get("month", math.ceil(w_num / 4))
+        t_key = t["key"]
         required_days = (w_num - 1) * 7
         
-        # Check if manually unlocked by admin or naturally unlocked by time
-        existing_sub = sub_map.get(t["key"])
+        # Match existing submission flexibly for backward compatibility
+        existing_sub = sub_map.get(t_key)
+        if not existing_sub:
+            existing_sub = sub_map.get(f"week{w_num}")
+        if not existing_sub and m_num == 2 and w_num in (5, 8):
+            existing_sub = sub_map.get("month2_project")
+        if not existing_sub and m_num == 3 and w_num in (9, 12):
+            existing_sub = sub_map.get("month3_portfolio")
+        if not existing_sub and m_num >= 4 and w_num in (13, 24):
+            existing_sub = sub_map.get("month4_6_capstone")
+
+        # Match existing unlock request flexibly
+        existing_unlock_req = unlock_map.get(t_key)
+        if not existing_unlock_req:
+            existing_unlock_req = unlock_map.get(f"week{w_num}")
+        if not existing_unlock_req and m_num == 2 and w_num in (5, 8):
+            existing_unlock_req = unlock_map.get("month2_project")
+        if not existing_unlock_req and m_num == 3 and w_num in (9, 12):
+            existing_unlock_req = unlock_map.get("month3_portfolio")
+        if not existing_unlock_req and m_num >= 4 and w_num in (13, 24):
+            existing_unlock_req = unlock_map.get("month4_6_capstone")
+
         is_manually_unlocked = bool(existing_sub and existing_sub.is_unlocked)
-        
-        existing_unlock_req = unlock_map.get(t["key"])
         if existing_unlock_req and existing_unlock_req.status == "approved":
             is_manually_unlocked = True
 
         is_unlocked = (days_elapsed >= required_days) or is_manually_unlocked or (w_num == 1)
-
-        task_status = "pending"
-        if existing_sub:
-            task_status = existing_sub.status
 
         weekly_tasks.append({
             **t,
@@ -1066,6 +1082,7 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             "is_unlocked": is_unlocked,
             "submission": {
                 "id": existing_sub.id,
+                "project_topic": existing_sub.project_topic,
                 "github_url": existing_sub.github_url,
                 "live_url": existing_sub.live_url,
                 "documentation_url": existing_sub.documentation_url,

@@ -159,6 +159,8 @@ export interface TaskSubmissionDetails {
 
 export interface WeeklyTaskItem {
   week: number;
+  month?: number;
+  month_title?: string;
   key: string;
   title: string;
   objective: string;

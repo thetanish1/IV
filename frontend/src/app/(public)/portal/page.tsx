@@ -49,6 +49,7 @@ export default function StudentPortalPage() {
   const [portalData, setPortalData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"allocation" | "submission" | "doubts">("allocation");
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<number | "all">("all");
 
   // Task Submission Modal / Form State
   const [submittingTask, setSubmittingTask] = useState<WeeklyTaskItem | MilestoneProjectItem | null>(null);
@@ -469,6 +470,15 @@ export default function StudentPortalPage() {
   const submittedCount = weeklyTasks.filter((t) => t?.submission).length;
   const progressPercent = Math.round((submittedCount / (weeklyTasks.length || 1)) * 100);
 
+  // Group unique months available
+  const availableMonths = Array.from(
+    new Set(weeklyTasks.map((t) => t.month || Math.ceil(t.week / 4)))
+  ).sort((a, b) => a - b);
+
+  const displayedMonths = selectedMonthFilter === "all"
+    ? availableMonths
+    : availableMonths.filter((m) => m === selectedMonthFilter);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* ─── Top Header Card ────────────────────────────────────────────── */}
@@ -501,7 +511,7 @@ export default function StudentPortalPage() {
             {/* Overall Progress Widget */}
             <div className="p-4 bg-ink-900/80 border border-ink-800 rounded-xl min-w-[240px] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-ink-400 font-medium">Submission Progress</span>
+                <span className="text-ink-400 font-medium">Sprint Submission Progress</span>
                 <span className="text-brand-400 font-bold">{progressPercent}%</span>
               </div>
               <div className="w-full bg-ink-950 h-2 rounded-full overflow-hidden border border-ink-800">
@@ -511,7 +521,7 @@ export default function StudentPortalPage() {
                 />
               </div>
               <p className="text-[10px] text-ink-500 text-right">
-                {submittedCount} of {weeklyTasks.length} Weekly Milestones Submitted
+                {submittedCount} of {weeklyTasks.length} Weekly Sprints Submitted ({completedCount} Approved)
               </p>
             </div>
           </div>
@@ -519,682 +529,390 @@ export default function StudentPortalPage() {
       </FadeIn>
 
       {/* ─── Navigation Tabs ────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 border-b border-ink-800 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("allocation")}
-          className={`px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
-            activeTab === "allocation"
-              ? "border-brand-500 text-brand-400 bg-brand-500/10"
-              : "border-transparent text-ink-400 hover:text-white"
-          }`}
-        >
-          <Layers className="w-4 h-4" /> 1. Task Allocation & Syllabus
-        </button>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-ink-800 pb-2 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab("allocation")}
+            className={`px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "allocation"
+                ? "border-brand-500 text-brand-400 bg-brand-500/10"
+                : "border-transparent text-ink-400 hover:text-white"
+            }`}
+          >
+            <Layers className="w-4 h-4" /> 1. Weekly Tasks & Curriculum ({weeklyTasks.length} Weeks)
+          </button>
 
-        <button
-          onClick={() => setActiveTab("submission")}
-          className={`px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
-            activeTab === "submission"
-              ? "border-brand-500 text-brand-400 bg-brand-500/10"
-              : "border-transparent text-ink-400 hover:text-white"
-          }`}
-        >
-          <Code2 className="w-4 h-4" /> 2. Task Submission & Unlock Desk
-        </button>
+          <button
+            onClick={() => setActiveTab("submission")}
+            className={`px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "submission"
+                ? "border-brand-500 text-brand-400 bg-brand-500/10"
+                : "border-transparent text-ink-400 hover:text-white"
+            }`}
+          >
+            <Code2 className="w-4 h-4" /> 2. Weekly Sprint Submission Desk ({submittedCount}/{weeklyTasks.length})
+          </button>
 
-        <button
-          onClick={() => setActiveTab("doubts")}
-          className={`px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
-            activeTab === "doubts"
-              ? "border-brand-500 text-brand-400 bg-brand-500/10"
-              : "border-transparent text-ink-400 hover:text-white"
-          }`}
-        >
-          <HelpCircle className="w-4 h-4" /> 3. Query & Doubts Desk ({portalData.doubts?.length || 0})
-        </button>
+          <button
+            onClick={() => setActiveTab("doubts")}
+            className={`px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 border-b-2 rounded-t-lg ${
+              activeTab === "doubts"
+                ? "border-brand-500 text-brand-400 bg-brand-500/10"
+                : "border-transparent text-ink-400 hover:text-white"
+            }`}
+          >
+            <HelpCircle className="w-4 h-4" /> 3. Mentor Doubts Desk ({portalData.doubts?.length || 0})
+          </button>
+        </div>
+
+        {/* ─── Month Filter Bar ────────────────────────────────────────── */}
+        {availableMonths.length > 1 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1">
+            <span className="text-xs text-ink-400 font-semibold flex items-center gap-1 shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-brand-400" /> Filter Month:
+            </span>
+            <button
+              onClick={() => setSelectedMonthFilter("all")}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition shrink-0 ${
+                selectedMonthFilter === "all"
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "bg-ink-900 text-ink-400 hover:text-white border border-ink-800"
+              }`}
+            >
+              All Months ({weeklyTasks.length} Weeks)
+            </button>
+            {availableMonths.map((m) => {
+              const mTasks = weeklyTasks.filter((t) => (t.month || Math.ceil(t.week / 4)) === m);
+              const mDone = mTasks.filter((t) => t.submission).length;
+              return (
+                <button
+                  key={m}
+                  onClick={() => setSelectedMonthFilter(m)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition shrink-0 flex items-center gap-1.5 ${
+                    selectedMonthFilter === m
+                      ? "bg-brand-600 text-white shadow-sm"
+                      : "bg-ink-900 text-ink-400 hover:text-white border border-ink-800"
+                  }`}
+                >
+                  <span>Month {m} (Weeks {((m - 1) * 4) + 1}–{m * 4})</span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                    selectedMonthFilter === m ? "bg-white/20 text-white" : "bg-ink-950 text-ink-400 border border-ink-800"
+                  }`}>
+                    {mDone}/{mTasks.length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* ─── TAB 1: TASK ALLOCATION & SYLLABUS ──────────────────────────── */}
       {activeTab === "allocation" && (
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
+        <div className="space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-white">Domain Task Allocation Roadmap</h2>
               <p className="text-xs text-ink-400">
-                Curated industry tasks tailored specifically for <span className="text-brand-400 font-semibold">{portalData.domain_title}</span>
+                Structured weekly curriculum and project milestones for <span className="text-brand-400 font-semibold">{portalData.domain_title}</span> ({portalData.duration})
               </p>
             </div>
             <button
               onClick={() => setActiveTab("submission")}
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
+              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition shrink-0"
             >
               Go to Submission Desk <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Month 1: 4 Weekly Tasks */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-2">
-              <Calendar className="w-4 h-4" /> Month 1: Core Foundation & Weekly Deliverables
-            </h3>
+          {displayedMonths.map((m) => {
+            const mTasks = weeklyTasks.filter((t) => (t.month || Math.ceil(t.week / 4)) === m);
+            const mTitle = mTasks[0]?.month_title || `Month ${m}: Weekly Engineering Deliverables`;
+            const mSubmitted = mTasks.filter((t) => t.submission).length;
+            const mProgress = Math.round((mSubmitted / (mTasks.length || 1)) * 100);
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {weeklyTasks.map((task) => (
-                <div
-                  key={task.key}
-                  className="glass-card p-6 border border-ink-800 rounded-xl space-y-4 relative overflow-hidden flex flex-col justify-between hover:border-ink-700 transition"
-                >
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
-                        WEEK {task.week}
+            return (
+              <div key={m} className="space-y-5 pt-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-ink-900/90 border border-ink-800 rounded-xl">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-brand-400 uppercase tracking-wider bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
+                        Month {m} Milestone
                       </span>
-                      {task.is_unlocked ? (
-                        <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
-                          <Unlock className="w-3.5 h-3.5" /> Unlocked
-                        </span>
-                      ) : (
-                        <span className="text-[11px] text-ink-500 flex items-center gap-1 font-mono">
-                          <Lock className="w-3.5 h-3.5" /> Day {task.required_days}+
-                        </span>
-                      )}
+                      <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-brand-400" /> {mTitle}
+                      </h3>
                     </div>
+                    <p className="text-xs text-ink-400">
+                      {m === 1 && "Foundational domain principles, core architectural setup, and essential modules."}
+                      {m === 2 && "Major Industry Project implementation: weekly sprint tracking of new features, APIs, and commits."}
+                      {m === 3 && "Advanced feature optimization, personal developer portfolio deployment, and final exit evaluation."}
+                      {m === 4 && "Enterprise microservices, asynchronous queues, distributed caching, and load testing."}
+                      {m === 5 && "Enterprise AI integration, automated E2E testing pipelines, and OWASP security hardening."}
+                      {m === 6 && "Cloud Kubernetes orchestration, zero-downtime rollouts, and Grand Capstone Defense."}
+                    </p>
+                  </div>
 
-                    <h4 className="text-base font-bold text-white leading-snug">{task.title}</h4>
-                    <p className="text-xs text-ink-300 leading-relaxed">{task.objective}</p>
+                  <div className="text-right sm:min-w-[140px] shrink-0">
+                    <div className="text-xs text-ink-400 font-medium">
+                      Month Progress: <strong className="text-brand-400">{mSubmitted}/{mTasks.length} Done</strong> ({mProgress}%)
+                    </div>
+                  </div>
+                </div>
 
-                    {task.tech_stack && task.tech_stack.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {task.tech_stack.map((t, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-mono bg-ink-900/90 border border-ink-800 text-brand-300">
-                            {t}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {mTasks.map((task) => (
+                    <div
+                      key={task.key}
+                      className="glass-card p-6 border border-ink-800 rounded-xl space-y-4 relative overflow-hidden flex flex-col justify-between hover:border-ink-700 transition"
+                    >
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
+                            WEEK {task.week} {task.month ? `• MONTH ${task.month}` : ""}
                           </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-3 pt-3 border-t border-ink-800/80">
-                    <p className="text-[11px] font-bold text-ink-400 uppercase tracking-wider">Required Deliverables:</p>
-                    <ul className="space-y-1.5">
-                      {task.deliverables.map((d, i) => (
-                        <li key={i} className="text-xs text-ink-300 flex items-start gap-2">
-                          <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                          <span>{d}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {task.evaluation_focus && (
-                      <div className="p-2.5 rounded-lg bg-ink-950 border border-ink-800/70 text-[11px] text-ink-400">
-                        <strong className="text-ink-200">Mentor Evaluation Focus:</strong> {task.evaluation_focus}
-                      </div>
-                    )}
-
-                    {task.submission ? (
-                      <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold flex items-center justify-between mt-2">
-                        <span>Submitted ({(task.submission.status || "submitted").toUpperCase()})</span>
-                        <button
-                          onClick={() => {
-                            setActiveTab("submission");
-                            handleOpenSubmitModal(task);
-                          }}
-                          className="underline hover:text-emerald-300"
-                        >
-                          View / Update
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setActiveTab("submission");
-                          if (task.is_unlocked) {
-                            handleOpenSubmitModal(task);
-                          }
-                        }}
-                        className={`w-full py-2.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 mt-2 ${
-                          task.is_unlocked
-                            ? "bg-brand-600 hover:bg-brand-500 text-white shadow-sm"
-                            : "bg-ink-950 text-ink-500 cursor-not-allowed border border-ink-800"
-                        }`}
-                      >
-                        {task.is_unlocked ? "Open Submission Form →" : `Locked until Day ${task.required_days}`}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Month 2: Milestone Project (for 3M / 6M) */}
-          {portalData.month2_project && (
-            <div className="space-y-4 pt-4 border-t border-ink-800">
-              <h3 className="text-sm font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-2">
-                <Briefcase className="w-4 h-4" /> Month 2: Full-Scale Industry Project
-              </h3>
-
-              <div className="glass-card p-6 sm:p-8 border border-brand-500/30 rounded-xl space-y-6 bg-brand-950/20">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded border border-emerald-500/30">
-                      MILESTONE PROJECT
-                    </span>
-                    <span className="text-xs text-ink-400 font-mono">Month 2 (Days 28–60)</span>
-                  </div>
-                  <h4 className="text-xl font-extrabold text-white">{portalData.month2_project.title}</h4>
-                  <p className="text-xs text-ink-300 leading-relaxed max-w-3xl">
-                    {portalData.month2_project.objective}
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <p className="text-xs font-bold text-white uppercase tracking-wider">
-                    Choose from Pre-Defined Real-World Project Blueprints or Propose Custom Topic:
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {(portalData.month2_project.curated_list || []).map((p) => (
-                      <div key={p.id} className="p-4 bg-ink-900/90 border border-ink-800 rounded-lg space-y-2">
-                        <h5 className="text-sm font-bold text-white text-brand-300">{p.title}</h5>
-                        <p className="text-[11px] text-ink-400 leading-relaxed">{p.description}</p>
-                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                          {p.tech_stack.map((t, idx) => (
-                            <span key={idx} className="text-[10px] bg-ink-950 text-ink-400 px-2 py-0.5 rounded border border-ink-800">
-                              {t}
+                          {task.is_unlocked ? (
+                            <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
+                              <Unlock className="w-3.5 h-3.5" /> Unlocked
                             </span>
-                          ))}
+                          ) : (
+                            <span className="text-[11px] text-ink-500 flex items-center gap-1 font-mono">
+                              <Lock className="w-3.5 h-3.5" /> Day {task.required_days}+
+                            </span>
+                          )}
                         </div>
+
+                        <h4 className="text-base font-bold text-white leading-snug">{task.title}</h4>
+                        <p className="text-xs text-ink-300 leading-relaxed">{task.objective}</p>
+
+                        {task.tech_stack && task.tech_stack.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {task.tech_stack.map((t, idx) => (
+                              <span key={idx} className="px-2 py-0.5 rounded text-[10px] font-mono bg-ink-900/90 border border-ink-800 text-brand-300">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs text-ink-400">
-                    Custom Topic Allowed: Enter your custom title & description in submission.
-                  </span>
-                  <button
-                    onClick={() => {
-                      setActiveTab("submission");
-                      if (portalData.month2_project?.is_unlocked) {
-                        handleOpenSubmitModal(portalData.month2_project);
-                      }
-                    }}
-                    className={`px-6 py-2.5 font-bold text-xs rounded-lg transition ${
-                      portalData.month2_project.is_unlocked
-                        ? "bg-brand-600 hover:bg-brand-500 text-white"
-                        : "bg-ink-900 text-ink-500 border border-ink-800"
-                    }`}
-                  >
-                    {portalData.month2_project.is_unlocked ? "Submit Month 2 Project →" : "Unlocks in Month 2 (Day 28)"}
-                  </button>
+                      <div className="space-y-3 pt-3 border-t border-ink-800/80">
+                        <p className="text-[11px] font-bold text-ink-400 uppercase tracking-wider">Required Sprint Deliverables:</p>
+                        <ul className="space-y-1.5">
+                          {task.deliverables.map((d, i) => (
+                            <li key={i} className="text-xs text-ink-300 flex items-start gap-2">
+                              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                              <span>{d}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        {task.evaluation_focus && (
+                          <div className="p-2.5 rounded-lg bg-ink-950 border border-ink-800/70 text-[11px] text-ink-400">
+                            <strong className="text-ink-200">Mentor Evaluation Focus:</strong> {task.evaluation_focus}
+                          </div>
+                        )}
+
+                        {task.submission ? (
+                          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs text-emerald-400 font-semibold flex items-center justify-between mt-2">
+                            <span>Submitted ({(task.submission.status || "submitted").toUpperCase()})</span>
+                            <button
+                              onClick={() => {
+                                setActiveTab("submission");
+                                handleOpenSubmitModal(task);
+                              }}
+                              className="underline hover:text-emerald-300"
+                            >
+                              View / Update
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setActiveTab("submission");
+                              if (task.is_unlocked) {
+                                handleOpenSubmitModal(task);
+                              }
+                            }}
+                            className={`w-full py-2.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 mt-2 ${
+                              task.is_unlocked
+                                ? "bg-brand-600 hover:bg-brand-500 text-white shadow-sm"
+                                : "bg-ink-950 text-ink-500 cursor-not-allowed border border-ink-800"
+                            }`}
+                          >
+                            {task.is_unlocked ? "Open Sprint Submission →" : `Locked until Day ${task.required_days}`}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Month 3: Personal Portfolio (for 3M / 6M) */}
-          {portalData.month3_portfolio && (
-            <div className="space-y-4 pt-4 border-t border-ink-800">
-              <h3 className="text-sm font-extrabold text-brand-400 uppercase tracking-wider flex items-center gap-2">
-                <Globe className="w-4 h-4" /> Month 3: Personal Developer Portfolio & Deployed Showcase
-              </h3>
-
-              <div className="glass-card p-6 border border-ink-800 rounded-xl space-y-4 bg-ink-900/60">
-                <div className="space-y-2">
-                  <h4 className="text-lg font-bold text-white">{portalData.month3_portfolio.title}</h4>
-                  <p className="text-xs text-ink-300 leading-relaxed">
-                    Build and deploy your modern personal portfolio showcasing your GitHub projects, live links, resume download, and skills learned throughout the internship.
-                  </p>
-                </div>
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs text-ink-400">Must include deployed live URL (e.g. Vercel/Netlify) and GitHub code link.</span>
-                  <button
-                    onClick={() => {
-                      setActiveTab("submission");
-                      if (portalData.month3_portfolio?.is_unlocked) {
-                        handleOpenSubmitModal(portalData.month3_portfolio);
-                      }
-                    }}
-                    className={`px-5 py-2 text-xs font-bold rounded-lg transition ${
-                      portalData.month3_portfolio.is_unlocked
-                        ? "bg-brand-600 hover:bg-brand-500 text-white"
-                        : "bg-ink-900 text-ink-500 border border-ink-800"
-                    }`}
-                  >
-                    {portalData.month3_portfolio.is_unlocked ? "Submit Portfolio Link →" : "Unlocks in Month 3"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Months 4-6: Real-Life Capstone (for 6M) */}
-          {portalData.month4_6_capstone && (
-            <div className="space-y-4 pt-4 border-t border-ink-800">
-              <h3 className="text-sm font-extrabold text-purple-400 uppercase tracking-wider flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> Months 4–6: Enterprise Real-Life Capstone Project
-              </h3>
-
-              <div className="glass-card p-6 sm:p-8 border border-purple-500/30 rounded-xl space-y-4 bg-purple-950/20">
-                <div className="space-y-2">
-                  <h4 className="text-xl font-extrabold text-white">{portalData.month4_6_capstone.title}</h4>
-                  <p className="text-xs text-ink-300 leading-relaxed max-w-3xl">
-                    {portalData.month4_6_capstone.objective}
-                  </p>
-                </div>
-                <div className="p-4 bg-ink-950 border border-purple-500/20 rounded-lg space-y-2 text-xs text-ink-300">
-                  <p className="font-bold text-purple-300">Capstone Deliverables:</p>
-                  <p>• Full stack architecture (Frontend, Backend APIs, Relational Database, AI services).</p>
-                  <p>• Bi-weekly progress updates logged with tools used and module summaries.</p>
-                  <p>• Dedicated 1:1 mentor code reviews & architecture consultation.</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setActiveTab("submission");
-                    if (portalData.month4_6_capstone?.is_unlocked) {
-                      handleOpenSubmitModal(portalData.month4_6_capstone);
-                    }
-                  }}
-                  className={`px-6 py-2.5 text-xs font-bold rounded-lg transition ${
-                    portalData.month4_6_capstone.is_unlocked
-                      ? "bg-purple-600 hover:bg-purple-500 text-white"
-                      : "bg-ink-900 text-ink-500 border border-ink-800"
-                  }`}
-                >
-                  {portalData.month4_6_capstone.is_unlocked ? "Submit Capstone Update →" : "Unlocks in Month 4 (Day 84)"}
-                </button>
-              </div>
-            </div>
-          )}
+            );
+          })}
         </div>
       )}
 
       {/* ─── TAB 2: TASK SUBMISSION DESK ────────────────────────────────── */}
       {activeTab === "submission" && (
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-xl font-bold text-white">Task Submission & Review Desk</h2>
-            <p className="text-xs text-ink-400">
-              Submit your GitHub repositories, live demo links, and documentation for mentor evaluation.
-            </p>
+        <div className="space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-white">Weekly Sprint Submission Desk</h2>
+              <p className="text-xs text-ink-400">
+                Submit and track your weekly sprint accomplishments, GitHub pull requests, and live deployments across each month.
+              </p>
+            </div>
+            <div className="text-xs text-ink-400 font-medium">
+              Overall Progress: <strong className="text-emerald-400">{submittedCount}/{weeklyTasks.length} Sprints Submitted</strong>
+            </div>
           </div>
 
-          <div className="space-y-4">
-            {weeklyTasks.map((task) => (
-              <div
-                key={task.key}
-                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
-                  task.submission
-                    ? "border-emerald-500/40 bg-emerald-950/10"
-                    : task.is_unlocked
-                    ? "border-brand-500/40 bg-brand-950/10"
-                    : "border-ink-800 opacity-80"
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
-                        WEEK {task.week}
-                      </span>
-                      {task.submission ? (
-                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(task.submission.status || "submitted").toUpperCase()}
-                        </span>
-                      ) : task.is_unlocked ? (
-                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
-                          Ready for Submission
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Locked (Opens Day {task.required_days})
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-base font-bold text-white">{task.title}</h3>
-                  </div>
+          {displayedMonths.map((m) => {
+            const mTasks = weeklyTasks.filter((t) => (t.month || Math.ceil(t.week / 4)) === m);
+            const mTitle = mTasks[0]?.month_title || `Month ${m}: Weekly Sprints`;
+            const mSubmitted = mTasks.filter((t) => t.submission).length;
 
-                  <div className="flex items-center gap-2">
-                    {task.is_unlocked ? (
-                      <button
-                        onClick={() => handleOpenSubmitModal(task)}
-                        className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
-                      >
-                        {task.submission ? "Update Submission" : "Submit Work Now →"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setUnlockTask(task);
-                          setUnlockSuccessMsg("");
-                          setUnlockErrorMsg("");
-                        }}
-                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
-                      >
-                        <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        {task.unlock_request?.status === "pending" ? "Unlock Requested (Pending)" : "Request Admin Unlock"}
-                      </button>
-                    )}
-                  </div>
+            return (
+              <div key={m} className="space-y-4 pt-2">
+                <div className="flex items-center justify-between p-3.5 bg-ink-900/90 border border-ink-800 rounded-xl">
+                  <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-brand-400" /> {mTitle}
+                  </h3>
+                  <span className="text-xs font-semibold text-ink-400">
+                    {mSubmitted} of {mTasks.length} Sprints Submitted
+                  </span>
                 </div>
 
-                {/* Existing Submission Details */}
-                {task.submission && (
-                  <div className="p-4 bg-ink-950 border border-ink-800 rounded-lg space-y-2 text-xs">
-                    <div className="flex flex-wrap gap-4 text-ink-300">
-                      {task.submission.github_url && (
-                        <a
-                          href={task.submission.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-brand-400 hover:underline"
-                        >
-                          <Code2 className="w-3.5 h-3.5" /> GitHub Repo <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                      {task.submission.live_url && (
-                        <a
-                          href={task.submission.live_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-emerald-400 hover:underline"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" /> Live Demo <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                      {task.submission.submitted_at && (
-                        <span className="text-ink-500">
-                          Submitted on {new Date(task.submission.submitted_at).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
+                <div className="space-y-4">
+                  {mTasks.map((task) => (
+                    <div
+                      key={task.key}
+                      className={`p-6 glass-card border rounded-xl space-y-4 transition ${
+                        task.submission
+                          ? "border-emerald-500/40 bg-emerald-950/10"
+                          : task.is_unlocked
+                          ? "border-brand-500/40 bg-brand-950/10"
+                          : "border-ink-800 opacity-80"
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
+                              WEEK {task.week} {task.month ? `• MONTH ${task.month}` : ""}
+                            </span>
+                            {task.submission ? (
+                              <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(task.submission.status || "submitted").toUpperCase()}
+                              </span>
+                            ) : task.is_unlocked ? (
+                              <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
+                                Ready for Sprint Submission
+                              </span>
+                            ) : (
+                              <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
+                                <Lock className="w-3 h-3" /> Locked (Opens Day {task.required_days})
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="text-base font-bold text-white">{task.title}</h4>
+                          <p className="text-xs text-ink-400">{task.objective}</p>
+                        </div>
 
-                    {task.submission.notes && (
-                      <p className="text-ink-400 italic">“{task.submission.notes}”</p>
-                    )}
-
-                    {task.submission.admin_feedback && (
-                      <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded mt-2 text-xs">
-                        <strong className="text-brand-400">Mentor Review Feedback:</strong>
-                        <p className="text-ink-200 mt-0.5">{task.submission.admin_feedback}</p>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {task.is_unlocked ? (
+                            <button
+                              onClick={() => handleOpenSubmitModal(task)}
+                              className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition shadow-sm"
+                            >
+                              {task.submission ? "Update Sprint Work" : "Submit Sprint Work →"}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setUnlockTask(task);
+                                setUnlockSuccessMsg("");
+                                setUnlockErrorMsg("");
+                              }}
+                              className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
+                            >
+                              <Lock className="w-3.5 h-3.5 text-amber-400" />
+                              {task.unlock_request?.status === "pending" ? "Unlock Requested (Pending)" : "Request Admin Unlock"}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
 
-            {/* ─── Month 2: Milestone Project Submission (3M & 6M) ─── */}
-            {portalData.month2_project && (
-              <div
-                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
-                  portalData.month2_project.submission
-                    ? "border-emerald-500/40 bg-emerald-950/10"
-                    : portalData.month2_project.is_unlocked
-                    ? "border-brand-500/40 bg-brand-950/15"
-                    : "border-ink-800 opacity-80"
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
-                        MONTH 2 MILESTONE PROJECT
-                      </span>
-                      {portalData.month2_project.submission ? (
-                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(portalData.month2_project.submission.status || "submitted").toUpperCase()}
-                        </span>
-                      ) : portalData.month2_project.is_unlocked ? (
-                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
-                          Ready for Submission
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Locked (Opens Day 28)
-                        </span>
+                      {/* Existing Submission Details */}
+                      {task.submission && (
+                        <div className="p-4 bg-ink-950 border border-ink-800 rounded-lg space-y-2 text-xs">
+                          {task.submission.project_topic && (
+                            <p className="text-xs font-bold text-brand-300">
+                              Feature / Focus Topic: {task.submission.project_topic}
+                            </p>
+                          )}
+
+                          <div className="flex flex-wrap gap-4 text-ink-300">
+                            {task.submission.github_url && (
+                              <a
+                                href={task.submission.github_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-brand-400 hover:underline"
+                              >
+                                <Code2 className="w-3.5 h-3.5" /> GitHub Code / PR <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                            {task.submission.live_url && (
+                              <a
+                                href={task.submission.live_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-emerald-400 hover:underline"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" /> Live Demo Link <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                            {task.submission.submitted_at && (
+                              <span className="text-ink-500">
+                                Submitted on {new Date(task.submission.submitted_at).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+
+                          {task.submission.tools_used && task.submission.tools_used.length > 0 && (
+                            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                              <span className="text-[10px] text-ink-400 font-semibold">Tools Used:</span>
+                              {task.submission.tools_used.map((t, idx) => (
+                                <span key={idx} className="text-[10px] bg-ink-900 text-brand-300 px-2 py-0.5 rounded border border-ink-800">
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {task.submission.notes && (
+                            <div className="pt-1">
+                              <span className="text-[10px] font-bold text-ink-400 uppercase tracking-wider">Weekly Accomplishments & Implemented Features:</span>
+                              <p className="text-ink-200 whitespace-pre-wrap mt-0.5 italic">“{task.submission.notes}”</p>
+                            </div>
+                          )}
+
+                          {task.submission.admin_feedback && (
+                            <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded mt-2 text-xs">
+                              <strong className="text-brand-400">Senior Mentor Review Feedback:</strong>
+                              <p className="text-ink-200 mt-0.5">{task.submission.admin_feedback}</p>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <h3 className="text-base font-bold text-white">{portalData.month2_project.title}</h3>
-                    <p className="text-xs text-ink-300">{portalData.month2_project.objective}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {portalData.month2_project.is_unlocked ? (
-                      <button
-                        onClick={() => handleOpenSubmitModal(portalData.month2_project!)}
-                        className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
-                      >
-                        {portalData.month2_project.submission ? "Update Project" : "Submit Month 2 Project →"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setUnlockTask(portalData.month2_project!);
-                          setUnlockSuccessMsg("");
-                          setUnlockErrorMsg("");
-                        }}
-                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
-                      >
-                        <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        {portalData.month2_project.unlock_request?.status === "pending" ? "Unlock Requested" : "Request Unlock"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {portalData.month2_project.submission && (
-                  <div className="p-4 bg-ink-950 border border-ink-800 rounded-lg space-y-2 text-xs">
-                    {portalData.month2_project.submission.project_topic && (
-                      <p className="text-xs font-bold text-brand-300">
-                        Project Topic: {portalData.month2_project.submission.project_topic}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-4 text-ink-300">
-                      {portalData.month2_project.submission.github_url && (
-                        <a
-                          href={portalData.month2_project.submission.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-brand-400 hover:underline"
-                        >
-                          <Code2 className="w-3.5 h-3.5" /> GitHub Repo <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                      {portalData.month2_project.submission.live_url && (
-                        <a
-                          href={portalData.month2_project.submission.live_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-emerald-400 hover:underline"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" /> Live Demo <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                      {portalData.month2_project.submission.submitted_at && (
-                        <span className="text-ink-500">
-                          Submitted on {new Date(portalData.month2_project.submission.submitted_at).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                    {portalData.month2_project.submission.notes && (
-                      <p className="text-ink-400 italic">“{portalData.month2_project.submission.notes}”</p>
-                    )}
-                    {portalData.month2_project.submission.admin_feedback && (
-                      <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded mt-2 text-xs">
-                        <strong className="text-brand-400">Mentor Review Feedback:</strong>
-                        <p className="text-ink-200 mt-0.5">{portalData.month2_project.submission.admin_feedback}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ─── Month 3: Portfolio Showcase Submission (3M & 6M) ─── */}
-            {portalData.month3_portfolio && (
-              <div
-                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
-                  portalData.month3_portfolio.submission
-                    ? "border-emerald-500/40 bg-emerald-950/10"
-                    : portalData.month3_portfolio.is_unlocked
-                    ? "border-brand-500/40 bg-brand-950/15"
-                    : "border-ink-800 opacity-80"
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
-                        MONTH 3 DEVELOPER PORTFOLIO
-                      </span>
-                      {portalData.month3_portfolio.submission ? (
-                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(portalData.month3_portfolio.submission.status || "submitted").toUpperCase()}
-                        </span>
-                      ) : portalData.month3_portfolio.is_unlocked ? (
-                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
-                          Ready for Submission
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Locked (Opens Day 56)
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-base font-bold text-white">{portalData.month3_portfolio.title}</h3>
-                    <p className="text-xs text-ink-300">{portalData.month3_portfolio.objective}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {portalData.month3_portfolio.is_unlocked ? (
-                      <button
-                        onClick={() => handleOpenSubmitModal(portalData.month3_portfolio!)}
-                        className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
-                      >
-                        {portalData.month3_portfolio.submission ? "Update Portfolio" : "Submit Portfolio →"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setUnlockTask(portalData.month3_portfolio!);
-                          setUnlockSuccessMsg("");
-                          setUnlockErrorMsg("");
-                        }}
-                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
-                      >
-                        <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        {portalData.month3_portfolio.unlock_request?.status === "pending" ? "Unlock Requested" : "Request Unlock"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {portalData.month3_portfolio.submission && (
-                  <div className="p-4 bg-ink-950 border border-ink-800 rounded-lg space-y-2 text-xs">
-                    <div className="flex flex-wrap gap-4 text-ink-300">
-                      {portalData.month3_portfolio.submission.live_url && (
-                        <a
-                          href={portalData.month3_portfolio.submission.live_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-emerald-400 hover:underline"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" /> Live Portfolio URL <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                      {portalData.month3_portfolio.submission.github_url && (
-                        <a
-                          href={portalData.month3_portfolio.submission.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-brand-400 hover:underline"
-                        >
-                          <Code2 className="w-3.5 h-3.5" /> Source Code Repo <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
-                      {portalData.month3_portfolio.submission.submitted_at && (
-                        <span className="text-ink-500">
-                          Submitted on {new Date(portalData.month3_portfolio.submission.submitted_at).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                    {portalData.month3_portfolio.submission.notes && (
-                      <p className="text-ink-400 italic">“{portalData.month3_portfolio.submission.notes}”</p>
-                    )}
-                    {portalData.month3_portfolio.submission.admin_feedback && (
-                      <div className="p-3 bg-brand-500/10 border border-brand-500/30 rounded mt-2 text-xs">
-                        <strong className="text-brand-400">Mentor Review Feedback:</strong>
-                        <p className="text-ink-200 mt-0.5">{portalData.month3_portfolio.submission.admin_feedback}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ─── Months 4–6: Enterprise Capstone Submission (6M only) ─── */}
-            {portalData.month4_6_capstone && (
-              <div
-                className={`p-6 glass-card border rounded-xl space-y-4 transition ${
-                  portalData.month4_6_capstone.submission
-                    ? "border-purple-500/40 bg-purple-950/10"
-                    : portalData.month4_6_capstone.is_unlocked
-                    ? "border-purple-500/40 bg-purple-950/15"
-                    : "border-ink-800 opacity-80"
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded border border-purple-500/20">
-                        MONTHS 4–6 CAPSTONE PROJECT
-                      </span>
-                      {portalData.month4_6_capstone.submission ? (
-                        <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Status: {(portalData.month4_6_capstone.submission.status || "submitted").toUpperCase()}
-                        </span>
-                      ) : portalData.month4_6_capstone.is_unlocked ? (
-                        <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
-                          Ready for Submission
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-bold text-ink-500 bg-ink-900 px-2.5 py-0.5 rounded border border-ink-800 flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Locked (Opens Day 84)
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-base font-bold text-white">{portalData.month4_6_capstone.title}</h3>
-                    <p className="text-xs text-ink-300">{portalData.month4_6_capstone.objective}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {portalData.month4_6_capstone.is_unlocked ? (
-                      <button
-                        onClick={() => handleOpenSubmitModal(portalData.month4_6_capstone!)}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition"
-                      >
-                        {portalData.month4_6_capstone.submission ? "Update Capstone" : "Submit Capstone →"}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setUnlockTask(portalData.month4_6_capstone!);
-                          setUnlockSuccessMsg("");
-                          setUnlockErrorMsg("");
-                        }}
-                        className="px-3.5 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-300 hover:text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition border border-ink-700"
-                      >
-                        <Lock className="w-3.5 h-3.5 text-amber-400" />
-                        {portalData.month4_6_capstone.unlock_request?.status === "pending" ? "Unlock Requested" : "Request Unlock"}
-                      </button>
-                    )}
-                  </div>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
+            );
+          })}
         </div>
       )}
 
@@ -1205,7 +923,7 @@ export default function StudentPortalPage() {
             <div>
               <h2 className="text-xl font-bold text-white">Interactive Query & Doubts Helpdesk</h2>
               <p className="text-xs text-ink-400">
-                Facing blockers or technical issues during your tasks? Ask our senior engineering mentors directly.
+                Facing blockers or technical issues during your weekly tasks? Ask our senior engineering mentors directly.
               </p>
             </div>
             <button
@@ -1331,7 +1049,7 @@ export default function StudentPortalPage() {
             <div className="flex items-center justify-between border-b border-ink-800 pb-3">
               <div>
                 <span className="text-[10px] font-bold text-brand-400 uppercase tracking-wider">
-                  Submission Desk
+                  Weekly Sprint Submission Desk
                 </span>
                 <h3 className="text-lg font-bold text-white">{submittingTask.title}</h3>
               </div>
@@ -1355,24 +1073,21 @@ export default function StudentPortalPage() {
             )}
 
             <form onSubmit={handleSubmitTask} className="space-y-4 text-xs">
-              {(submittingTask.key === "month2_project" || submittingTask.key === "month4_6_capstone") && (
-                <div className="space-y-1.5">
-                  <label className="text-ink-300 font-semibold">Project Title / Topic Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Enterprise Cloud SaaS Platform (or Custom Title)"
-                    value={subForm.project_topic}
-                    onChange={(e) => setSubForm({ ...subForm, project_topic: e.target.value })}
-                    className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none"
-                  />
-                </div>
-              )}
+              <div className="space-y-1.5">
+                <label className="text-ink-300 font-semibold">Feature / Project Focus Topic (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Month 2 Sprint: User Auth & Database Schema or Custom Feature"
+                  value={subForm.project_topic}
+                  onChange={(e) => setSubForm({ ...subForm, project_topic: e.target.value })}
+                  className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none"
+                />
+              </div>
 
               <div className="space-y-1.5">
                 <label className="text-ink-300 font-semibold flex items-center gap-1.5">
                   <Code2 className="w-3.5 h-3.5 text-brand-400" />
-                  {submittingTask.key === "month3_portfolio" ? "Portfolio GitHub Repository URL *" : "GitHub Repository URL *"}
+                  GitHub Repository / PR URL *
                 </label>
                 <input
                   type="url"
@@ -1387,14 +1102,11 @@ export default function StudentPortalPage() {
               <div className="space-y-1.5">
                 <label className="text-ink-300 font-semibold flex items-center gap-1.5">
                   <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-                  {submittingTask.key === "month3_portfolio"
-                    ? "Live Deployed Portfolio URL (Vercel / Netlify / Domain) *"
-                    : "Live Demo / Deployed Link (Optional / Recommended)"}
+                  Live Deployed Preview / Demo URL (Recommended / Optional)
                 </label>
                 <input
                   type="url"
-                  required={submittingTask.key === "month3_portfolio"}
-                  placeholder={submittingTask.key === "month3_portfolio" ? "https://yourportfolio.vercel.app" : "https://your-project.vercel.app"}
+                  placeholder="https://your-project.vercel.app"
                   value={subForm.live_url}
                   onChange={(e) => setSubForm({ ...subForm, live_url: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none"
@@ -1405,7 +1117,7 @@ export default function StudentPortalPage() {
                 <label className="text-ink-300 font-semibold">Tools / Technologies Used (comma-separated)</label>
                 <input
                   type="text"
-                  placeholder="e.g. Next.js 15, FastAPI, PostgreSQL, Docker"
+                  placeholder="e.g. Next.js 15, FastAPI, PostgreSQL, Docker, Redis"
                   value={subForm.tools_used}
                   onChange={(e) => setSubForm({ ...subForm, tools_used: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none"
@@ -1413,10 +1125,13 @@ export default function StudentPortalPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-ink-300 font-semibold">Implementation Notes & Key Learnings</label>
+                <label className="text-ink-300 font-semibold flex items-center justify-between">
+                  <span>Weekly Sprint Accomplishments & New Features Implemented *</span>
+                </label>
                 <textarea
-                  rows={3}
-                  placeholder="Brief summary of what you built, architecture decisions, and any challenges overcome..."
+                  rows={4}
+                  required
+                  placeholder="Detail what you worked on this week: What new features did you implement? What APIs did you build? What bugs were fixed? What challenges did you overcome?"
                   value={subForm.notes}
                   onChange={(e) => setSubForm({ ...subForm, notes: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2.5 text-white rounded-lg focus:border-brand-500 focus:outline-none resize-none"
@@ -1436,7 +1151,7 @@ export default function StudentPortalPage() {
                   disabled={submittingLoading}
                   className="w-1/2 py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {submittingLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Task →"}
+                  {submittingLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Sprint Work →"}
                 </button>
               </div>
             </form>

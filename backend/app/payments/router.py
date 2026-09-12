@@ -129,18 +129,21 @@ def verify_payment(req: VerifyPaymentRequest, db: Session = Depends(get_db)):
 @router.post("/webhook")
 async def cashfree_webhook(
     request: Request,
-    x_webhook_timestamp: str = Header(None),
-    x_webhook_signature: str = Header(None),
+    x_webhook_timestamp: Optional[str] = Header(None),
+    x_webhook_signature: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
     """
-    Cashfree Webhook Handler for automated payment confirmation.
+    Cashfree Webhook Handler for automated payment confirmation with mandatory signature verification.
     """
     raw_body = await request.body()
     body_str = raw_body.decode("utf-8")
 
-    # If signature headers are present, verify
-    if x_webhook_timestamp and x_webhook_signature:
+    # Enforce webhook signature validation
+    is_production = settings.CASHFREE_ENVIRONMENT.lower() == "production"
+    if is_production or (x_webhook_timestamp and x_webhook_signature):
+        if not x_webhook_timestamp or not x_webhook_signature:
+            raise BadRequestException("Missing required webhook signature headers")
         if not cashfree_gateway.verify_webhook(body_str, x_webhook_timestamp, x_webhook_signature):
             raise BadRequestException("Webhook signature verification failed")
 
@@ -160,6 +163,10 @@ async def cashfree_webhook(
     if order_id:
         payment = db.query(Payment).filter(Payment.order_id == order_id).first()
         if payment:
+            # Idempotent handling: If already captured, skip re-processing
+            if payment.status == "captured" and payment_status == "SUCCESS":
+                return {"status": "ok", "already_captured": True}
+
             if payment_status == "SUCCESS":
                 payment.status = "captured"
                 payment.cf_payment_id = str(cf_payment_id or "")
@@ -169,7 +176,8 @@ async def cashfree_webhook(
                     if reg:
                         reg.status = "confirmed"
             elif payment_status in ["FAILED", "USER_DROPPED", "CANCELLED"]:
-                payment.status = "failed"
+                if payment.status != "captured":
+                    payment.status = "failed"
             db.commit()
 
     return {"status": "ok", "received": True}

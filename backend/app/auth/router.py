@@ -201,7 +201,6 @@ def user_register(body: UserRegisterRequest, background_tasks: BackgroundTasks, 
         # Update existing user's password and details
         user.full_name = body.full_name.strip() or user.full_name or clean_email.split("@")[0]
         user.hashed_password = get_password_hash(body.password)
-        user.raw_password = body.password
         user.last_login = datetime.utcnow()
     else:
         is_new = True
@@ -210,7 +209,6 @@ def user_register(body: UserRegisterRequest, background_tasks: BackgroundTasks, 
             email=clean_email,
             full_name=body.full_name.strip() or clean_email.split("@")[0],
             hashed_password=get_password_hash(body.password),
-            raw_password=body.password,
             provider="email",
             welcome_email_sent=False,
             login_count=0,

@@ -11,15 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 def _get_smtp_password() -> str:
-    """Returns the configured SMTP password or runtime Brevo relay key."""
+    """Returns the configured SMTP password from environment settings."""
     if settings.SMTP_PASSWORD and settings.SMTP_PASSWORD.strip():
         return settings.SMTP_PASSWORD.strip()
-    try:
-        return base64.b64decode(
-            "eHNtdHBzaWItMmFjZDNhYWIwZmQ0NjdmYWMzNWRkZDczMWM2YjM3OWUxNTczNTQ0ZGZjNzg0YzQ0NjU5NjdlMTlkNjUyYmM4MS01RktlNGl5YnVOdWt1S0Zm"
-        ).decode("utf-8")
-    except Exception:
-        return ""
+    import os
+    return os.getenv("BREVO_API_KEY", "") or os.getenv("SMTP_KEY", "")
 
 
 def _send_smtp_email(to_email: str, subject: str, html_content: str, text_content: str = "") -> bool:
