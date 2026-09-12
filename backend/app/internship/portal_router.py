@@ -896,46 +896,279 @@ CURATED_PROJECT_LIST = [
 
 def get_tasks_for_domain(role_preference: Optional[str], duration: Optional[str] = "1 Month"):
     """
-    Returns domain tasks tailored for the specific domain and duration.
-    For 6-month tracks, returns all 8 foundation weeks; for 1-month and 3-month tracks, returns weeks 1-4.
+    Returns domain tasks tailored for the specific domain and duration:
+    - 1 Month: 4 Weeks (Month 1 Foundation)
+    - 3 Months: 12 Weeks (Month 1 Foundation + Month 2 Project Sprints + Month 3 Portfolio & Defense)
+    - 6 Months: 24 Weeks (Complete 6-Month Enterprise Engineering Lifecycle)
     """
-    selected_domain = DOMAIN_TASKS["full-stack"]
-    
+    selected_key = "full-stack"
     if role_preference:
         r = role_preference.lower()
         if "ai" in r or "machine" in r:
-            selected_domain = DOMAIN_TASKS["ai-ml"]
+            selected_key = "ai-ml"
         elif "data science" in r or "analytics" in r:
-            selected_domain = DOMAIN_TASKS["data-science"]
+            selected_key = "data-science"
         elif "python" in r:
-            selected_domain = DOMAIN_TASKS["python"]
+            selected_key = "python"
         elif "java" in r or "spring" in r:
-            selected_domain = DOMAIN_TASKS["java"]
+            selected_key = "java"
         elif "backend" in r:
-            selected_domain = DOMAIN_TASKS["backend"]
+            selected_key = "backend"
         elif "frontend" in r:
-            selected_domain = DOMAIN_TASKS["frontend"]
+            selected_key = "frontend"
         elif "android" in r or "app" in r or "kotlin" in r:
-            selected_domain = DOMAIN_TASKS["android"]
+            selected_key = "android"
         elif "devops" in r or "cloud" in r or "docker" in r or "kubernetes" in r:
-            selected_domain = DOMAIN_TASKS["devops"]
+            selected_key = "devops"
         elif "cyber" in r or "security" in r or "ethical" in r:
-            selected_domain = DOMAIN_TASKS["cyber-security"]
+            selected_key = "cyber-security"
         elif "design" in r or "ui" in r or "ux" in r:
-            selected_domain = DOMAIN_TASKS["ui-ux"]
+            selected_key = "ui-ux"
         else:
-            selected_domain = DOMAIN_TASKS["full-stack"]
+            selected_key = "full-stack"
 
-    # Filter weeks based on duration: 6 Months gets all weeks (up to 8), 1M & 3M get weeks 1-4
-    if duration == "6 Months":
-        weeks_list = selected_domain["weeks"]
+    selected_domain = DOMAIN_TASKS.get(selected_key, DOMAIN_TASKS["full-stack"])
+    domain_title = selected_domain["title"]
+    domain_desc = selected_domain.get("description", "")
+    base_weeks = selected_domain["weeks"][:4]  # First 4 foundational weeks
+
+    # Build full 24 weeks curriculum
+    full_weeks = []
+    # Month 1 (Weeks 1-4)
+    for idx, w in enumerate(base_weeks, 1):
+        full_weeks.append({
+            **w,
+            "week": idx,
+            "month": 1,
+            "month_title": "Month 1: Foundational Engineering Deliverables",
+            "key": f"month1_week{idx}"
+        })
+
+    # Month 2 (Weeks 5-8) - Full-Scale Industry Project Implementation Sprints
+    full_weeks.extend([
+        {
+            "week": 5,
+            "month": 2,
+            "month_title": "Month 2: Full-Scale Industry Project Implementation",
+            "key": "month2_week5",
+            "title": f"Week 5: {domain_title} Project Architecture & Entity Schema Design",
+            "objective": f"Kick off your full-scale industry project in {domain_title}. Design system architecture, entity relationships (ERD), API contracts, and repository scaffolding.",
+            "deliverables": [
+                "System architecture diagram and complete database entity-relationship schema",
+                "Monorepo / modular repository scaffolding with environment configuration",
+                "API contract specification (OpenAPI / Swagger or schema definitions)",
+                "Project sprint backlog & milestone breakdown documented in GitHub Projects"
+            ],
+            "tech_stack": base_weeks[0].get("tech_stack", []) + ["Git", "Architecture", "Docker"],
+            "evaluation_focus": "System design depth, relational schema normalization, and modular repository structure"
+        },
+        {
+            "week": 6,
+            "month": 2,
+            "month_title": "Month 2: Full-Scale Industry Project Implementation",
+            "key": "month2_week6",
+            "title": f"Week 6: {domain_title} Core Business Logic & Feature CRUD Implementation",
+            "objective": f"Implement the core workflows, database migrations, authentication guards, and business logic for your {domain_title} project.",
+            "deliverables": [
+                "Complete CRUD implementation for primary domain business entities",
+                "Secure authentication and session management integration",
+                "Database seed scripts and verified migration procedures",
+                "Weekly feature demo recording showing functional CRUD workflows"
+            ],
+            "tech_stack": base_weeks[1].get("tech_stack", []) + ["PostgreSQL", "JWT / Auth"],
+            "evaluation_focus": "Business logic integrity, error handling, and clean controller/service separation"
+        },
+        {
+            "week": 7,
+            "month": 2,
+            "month_title": "Month 2: Full-Scale Industry Project Implementation",
+            "key": "month2_week7",
+            "title": f"Week 7: {domain_title} Advanced Integrations, Security & Caching",
+            "objective": f"Integrate third-party APIs (payment gateway, cloud storage, AI/ML models or notifications), implement caching, and conduct security audits.",
+            "deliverables": [
+                "Third-party service integrations (Cloudinary/S3, Webhooks, or AI endpoints)",
+                "Redis / memory caching for high-frequency database read operations",
+                "Defensive input validation, rate limiting, and CORS security hardening",
+                "Integration test suite covering happy paths and failure scenarios"
+            ],
+            "tech_stack": ["Redis", "Cloud Storage", "Webhooks", "Security Auditing"],
+            "evaluation_focus": "Resilience of external integrations, caching efficiency, and security posture"
+        },
+        {
+            "week": 8,
+            "month": 2,
+            "month_title": "Month 2: Full-Scale Industry Project Implementation",
+            "key": "month2_week8",
+            "title": f"Week 8: {domain_title} Containerization, CI/CD & Production Cloud Deployment",
+            "objective": f"Containerize the complete application with Docker, configure automated GitHub Actions CI/CD pipelines, and deploy live to production cloud infrastructure.",
+            "deliverables": [
+                "Multi-stage Dockerfile and docker-compose orchestration",
+                "Automated GitHub Actions workflow running tests and build checks on push",
+                "Live production cloud deployment URL with SSL certificate configured",
+                "Comprehensive project README with setup instructions, architecture diagram, and API docs"
+            ],
+            "tech_stack": ["Docker", "GitHub Actions", "Cloud Hosting (Vercel/Render/AWS)", "Nginx"],
+            "evaluation_focus": "Deployment reliability, container image optimization, and live demo polish"
+        }
+    ])
+
+    # Month 3 (Weeks 9-12) - Optimization, Developer Portfolio & Exit Defense
+    full_weeks.extend([
+        {
+            "week": 9,
+            "month": 3,
+            "month_title": "Month 3: Performance Optimization & Developer Portfolio",
+            "key": "month3_week9",
+            "title": f"Week 9: {domain_title} Performance Benchmarking, Indexing & Query Profiling",
+            "objective": "Conduct load testing, database query analysis, optimize response times below 200ms, and benchmark system throughput under concurrent traffic.",
+            "deliverables": [
+                "Locust / k6 load testing script simulating concurrent user traffic",
+                "Query execution analysis (EXPLAIN ANALYZE) and optimized database indexes",
+                "Performance benchmark comparison report before and after optimizations",
+                "Application monitoring / logging setup with structured JSON outputs"
+            ],
+            "tech_stack": ["Locust / k6", "PostgreSQL Indexing", "Profiling", "Structured Logging"],
+            "evaluation_focus": "Latency reduction, throughput scalability, and systematic optimization analysis"
+        },
+        {
+            "week": 10,
+            "month": 3,
+            "month_title": "Month 3: Performance Optimization & Developer Portfolio",
+            "key": "month3_week10",
+            "title": "Week 10: Personal Developer Portfolio & Project Showcase Architecture",
+            "objective": "Design and architect a modern, responsive personal developer portfolio showcasing your internship engineering milestones, live demos, and technical skills.",
+            "deliverables": [
+                "Responsive portfolio repository with modern interactive UI components",
+                "Interactive project showcase cards featuring live demo links and GitHub links",
+                "Technical skills, certifications, and engineering journey narrative sections",
+                "Contact form integration with automated email notification dispatch"
+            ],
+            "tech_stack": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion"],
+            "evaluation_focus": "Visual design excellence, interactive animations, and responsive cross-device layout"
+        },
+        {
+            "week": 11,
+            "month": 3,
+            "month_title": "Month 3: Performance Optimization & Developer Portfolio",
+            "key": "month3_week11",
+            "title": "Week 11: Production Portfolio Cloud Deployment & SEO Optimization",
+            "objective": "Deploy your personal developer portfolio to production CDN/cloud with custom domain routing, OpenGraph meta tags, and Lighthouse performance scores > 90.",
+            "deliverables": [
+                "Live production portfolio URL deployed on Vercel / Cloudflare with custom domain",
+                "OpenGraph social preview metadata and semantic HTML SEO hierarchy",
+                "Lighthouse performance, accessibility, best practices, and SEO audit report (>90)",
+                "Interactive resume download and project walkthrough videos embedded"
+            ],
+            "tech_stack": ["Vercel / Cloudflare", "Lighthouse", "SEO Metadata", "Analytics"],
+            "evaluation_focus": "Production deployment health, Lighthouse optimization, and portfolio presentation"
+        },
+        {
+            "week": 12,
+            "month": 3,
+            "month_title": "Month 3: Performance Optimization & Developer Portfolio",
+            "key": "month3_week12",
+            "title": "Week 12: Final Evaluation, Exit Technical Defense & Capstone Submission",
+            "objective": "Consolidate all project codebases, live deployments, documentation, and deliver a comprehensive technical defense for internship graduation and certificate issuance.",
+            "deliverables": [
+                "Consolidated internship capstone repository with all 12 weeks of code and documentation",
+                "Comprehensive 5-minute video walkthrough explaining architecture, challenges, and live demos",
+                "Completed student exit evaluation and technical defense submission form",
+                "Verified links for all Month 1, Month 2, and Month 3 deliverables"
+            ],
+            "tech_stack": ["Full Engineering Stack", "Video Walkthrough", "Final Documentation"],
+            "evaluation_focus": "Overall engineering competency, clarity of technical defense, and deliverable completeness"
+        }
+    ])
+
+    # Months 4-6 (Weeks 13-24) - Enterprise Scalability & Cloud Orchestration (for 6M)
+    # Month 4 (Weeks 13-16)
+    for w_i, (t_title, t_obj) in enumerate([
+        ("Enterprise Microservice Architecture & Event Bus", "Decompose monolithic services into decoupled microservices communicating via message brokers (RabbitMQ/Kafka/Redis PubSub)."),
+        ("Asynchronous Background Workers & Distributed Queues", "Implement high-reliability background job processors with exponential retry policies and dead-letter queues."),
+        ("Database Sharding, Read-Replicas & Connection Pooling", "Set up database read replicas with PgBouncer connection pooling and high-availability failover."),
+        ("Zero-Trust API Gateway & OAuth2 Distributed Sessions", "Deploy an API Gateway with rate limiting, centralized token validation, and OAuth2 session management.")
+    ], 13):
+        full_weeks.append({
+            "week": w_i,
+            "month": 4,
+            "month_title": "Month 4: Enterprise Scalability & Microservices Architecture",
+            "key": f"month4_week{w_i}",
+            "title": f"Week {w_i}: {t_title}",
+            "objective": t_obj,
+            "deliverables": [
+                f"Production code and architectural blueprint for {t_title}",
+                "Integration test harness verifying distributed reliability",
+                "GitHub repository branch with documentation and setup commands",
+                "Live demo recording showcasing distributed execution"
+            ],
+            "tech_stack": ["RabbitMQ/Kafka", "Microservices", "PgBouncer", "API Gateway"],
+            "evaluation_focus": "Distributed systems reliability, data consistency, and architectural elegance"
+        })
+
+    # Month 5 (Weeks 17-20)
+    for w_i, (t_title, t_obj) in enumerate([
+        ("Enterprise AI Agent Integration & Multimodal RAG", "Build enterprise-grade AI copilots with vector search, hybrid retrieval, and streaming LLM responses."),
+        ("Automated E2E Testing Suites & CI Regression Gates", "Implement end-to-end testing with Playwright/Cypress integrated into automated GitHub Actions pull request gates."),
+        ("OWASP Top 10 Security Hardening & Vulnerability Remediation", "Conduct penetration testing, SAST/DAST static analysis, and harden application against SQLi, XSS, SSRF, and CSRF."),
+        ("Real-Time Telemetry, Distributed Tracing & APM Dashboards", "Integrate OpenTelemetry, Prometheus, Grafana, and Sentry for real-time alerting and distributed request tracing.")
+    ], 17):
+        full_weeks.append({
+            "week": w_i,
+            "month": 5,
+            "month_title": "Month 5: Enterprise AI, Automated QA & Security Audits",
+            "key": f"month5_week{w_i}",
+            "title": f"Week {w_i}: {t_title}",
+            "objective": t_obj,
+            "deliverables": [
+                f"Implementation deliverables for {t_title}",
+                "Automated test and security audit report with zero critical vulnerabilities",
+                "Observability dashboard screenshots and trace metrics",
+                "GitHub repository with configuration manifests"
+            ],
+            "tech_stack": ["OpenTelemetry", "Playwright", "OWASP Hardening", "Grafana", "LangChain"],
+            "evaluation_focus": "Defensive security posture, testing coverage, and automated observability"
+        })
+
+    # Month 6 (Weeks 21-24)
+    for w_i, (t_title, t_obj) in enumerate([
+        ("Kubernetes Cluster Orchestration & Helm Charts", "Package and deploy the enterprise application to a Kubernetes cluster using custom Helm charts with auto-scaling (HPA)."),
+        ("Infrastructure as Code (IaC) with Terraform & Cloud Provisioning", "Automate complete cloud infrastructure provisioning using Terraform scripts with modular state management."),
+        ("Zero-Downtime Blue/Green & Canary Rollouts", "Implement progressive traffic splitting and automated zero-downtime rolling deployments with rollback triggers."),
+        ("Grand Capstone Defense, Enterprise Audit & Fellowship Graduation", "Deliver the final 6-month enterprise capstone project defense before technical evaluation panel.")
+    ], 21):
+        full_weeks.append({
+            "week": w_i,
+            "month": 6,
+            "month_title": "Month 6: Cloud Orchestration, Zero-Downtime Rollout & Grand Defense",
+            "key": f"month6_week{w_i}",
+            "title": f"Week {w_i}: {t_title}",
+            "objective": t_obj,
+            "deliverables": [
+                f"Production deployment manifests and architecture for {t_title}",
+                "Live Kubernetes/Terraform infrastructure verification recording",
+                "Complete capstone technical documentation and executive summary",
+                "Final 6-month exit evaluation and defense submission"
+            ],
+            "tech_stack": ["Kubernetes", "Helm", "Terraform", "CI/CD", "Cloud Architecture"],
+            "evaluation_focus": "Cloud-native infrastructure mastery, high-availability architecture, and executive defense"
+        })
+
+    # Slice weeks based on duration:
+    # 6 Months -> 24 Weeks (Months 1 to 6)
+    # 3 Months -> 12 Weeks (Months 1, 2, 3)
+    # 1 Month -> 4 Weeks (Month 1)
+    dur_str = str(duration or "1 Month").strip().lower()
+    if "6" in dur_str or dur_str == "6 months":
+        target_weeks = full_weeks
+    elif "3" in dur_str or dur_str == "3 months":
+        target_weeks = full_weeks[:12]
     else:
-        weeks_list = [w for w in selected_domain["weeks"] if w["week"] <= 4]
+        target_weeks = full_weeks[:4]
 
     return {
-        "title": selected_domain["title"],
-        "description": selected_domain.get("description", ""),
-        "weeks": weeks_list
+        "title": domain_title,
+        "description": domain_desc,
+        "weeks": target_weeks
     }
 
 
