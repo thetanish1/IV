@@ -40,7 +40,7 @@ const APPLE_SLIDES: AppleSlide[] = [
     badge: "Internship Track",
     title: "Virtual Internship Portal.",
     lead: "1-Click fast onboarding.",
-    description: "Flexible 1, 3, or 6-month durations across 9 high-demand engineering tracks with weekly task milestones and mentor evaluations.",
+    description: "Flexible 1, 2, or 3-month durations across 9 high-demand engineering tracks with weekly task milestones and mentor evaluations.",
     image: "/preview-apply.png",
     link: "/apply",
   },

@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
 import ApplePreviewCarousel from "@/components/ApplePreviewCarousel";
+import AppleWhyChooseUs from "@/components/AppleWhyChooseUs";
 import { apiRequest } from "@/lib/api-client";
 
 interface DomainTrack {
@@ -383,59 +384,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── WHY CHOOSE US ───────────────────────────────────────────── */}
-      <motion.section
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        <div className="text-left space-y-4 mb-16 max-w-2xl border-l-4 border-white pl-6">
-          <h2 className="text-4xl font-black text-white uppercase tracking-tight">Why Choose InternVision Tech?</h2>
-          <p className="text-ink-400 text-lg">
-            We bridge the gap between academic theory and real-world software engineering standards. No fluff, just production code.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          <div className="md:col-span-5 bg-ink-950 border-2 border-ink-800 p-10 space-y-6 md:translate-y-8 rounded-xl">
-            <div className="w-14 h-14 bg-brand-500 text-white flex items-center justify-center shadow-[4px_4px_0px_#ffffff] rounded-lg">
-              <Code2 className="w-7 h-7" />
-            </div>
-            <h3 className="text-2xl font-black text-white uppercase">Production-Grade Stack</h3>
-            <p className="text-ink-400 text-base leading-relaxed">
-              Work with Next.js 15, FastAPI, Docker, and PostgreSQL with real GitHub workflows, code reviews, and live cloud deployment pipelines.
-            </p>
-          </div>
-
-          <div className="md:col-span-7 space-y-6">
-            <div className="bg-ink-950 border border-ink-800 p-8 flex gap-6 items-start hover:border-brand-500 transition-colors rounded-xl">
-              <div className="w-12 h-12 shrink-0 bg-ink-900 border border-ink-700 text-white flex items-center justify-center rounded-lg">
-                <Cpu className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white mb-2">1:1 Technical Mentorship</h3>
-                <p className="text-ink-400 text-sm leading-relaxed">
-                  Get direct code reviews, resume polishing, and mock technical interview sessions from senior engineers who actively work in the software industry.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-ink-950 border border-ink-800 p-8 flex gap-6 items-start hover:border-brand-500 transition-colors md:ml-8 rounded-xl">
-              <div className="w-12 h-12 shrink-0 bg-ink-900 border border-ink-700 text-white flex items-center justify-center rounded-lg">
-                <Trophy className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white mb-2">Verified Digital Credentials</h3>
-                <p className="text-ink-400 text-sm leading-relaxed">
-                  Earn an industry-verifiable digital certificate and performance evaluation report to share with hiring recruiters and on LinkedIn.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.section>
+      {/* ─── WHY CHOOSE US (APPLE MAC CARD CAROUSEL FORMAT) ─────────── */}
+      <AppleWhyChooseUs />
 
       {/* ─── OPTIONAL COURSES SECTION (Shown ONLY if enabled by Admin) ── */}
       {showCourses && (
@@ -540,23 +490,19 @@ export default function HomePage() {
 
               {/* What's Included */}
               <div className="space-y-3 pt-2">
-                <p className="text-xs font-bold text-ink-200 uppercase tracking-wider">Everything Included for Submission & Viva:</p>
+                <p className="text-xs font-bold text-ink-200 uppercase tracking-wider">Everything Included with Project Delivery:</p>
                 <ul className="space-y-2.5 text-xs text-ink-300">
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong className="text-white font-medium">100% Working Source Code:</strong> Modular clean architecture (Next.js, FastAPI, Python, React, PostgreSQL).</span>
+                    <span><strong className="text-white font-medium">100% Working Source Code:</strong> Modular clean architecture with full source code repository (Next.js, FastAPI, Python, React, PostgreSQL, etc.).</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong className="text-white font-medium">Complete Project Documentation:</strong> IEEE format synopsis, detailed project report, SRS, ER & UML diagrams.</span>
+                    <span><strong className="text-white font-medium">Project Documentation:</strong> Standard and comprehensive project documentation with architecture overview, installation, and setup guide.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong className="text-white font-medium">Viva Defense Preparation:</strong> Professional PPT slides + examiner Q&A preparation guide.</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span><strong className="text-white font-medium">Live Cloud Deployment:</strong> Live hosted URL (Vercel/AWS/Render) with examiner-ready demo.</span>
+                    <span><strong className="text-white font-medium">Live Cloud Deployment:</strong> Live hosted URL (Vercel/AWS/Render) with examiner-ready interactive demo.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
