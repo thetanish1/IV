@@ -22,8 +22,8 @@ export default function DurationFilterSelect({
     >
       <option value="all">All Durations</option>
       <option value="1 Month">1 Month Track</option>
+      <option value="2 Months">2 Months Track</option>
       <option value="3 Months">3 Months Track</option>
-      <option value="6 Months">6 Months Track</option>
     </select>
   );
 }

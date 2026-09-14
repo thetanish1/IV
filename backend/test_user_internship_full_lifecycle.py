@@ -30,7 +30,7 @@ async def run_student_full_lifecycle_test():
         admin_headers = {"Authorization": f"Bearer {admin_token}"}
         print(" -> Admin session active.", flush=True)
 
-        # Define 4 distinct student personas
+        # Define 3 distinct student personas for 1M, 2M, and 3M tracks
         students = [
             {
                 "email": f"student_1m_{int(time.time())}@internvision.tech",
@@ -41,6 +41,14 @@ async def run_student_full_lifecycle_test():
                 "track": "1 Month Full-Stack",
             },
             {
+                "email": f"student_2m_{int(time.time())}@internvision.tech",
+                "password": "Password2Month!",
+                "name": "Rohan Gupta (2M Track)",
+                "duration": "2 Months",
+                "role": "Full Stack Web Development",
+                "track": "2 Months Full-Stack",
+            },
+            {
                 "email": f"student_3m_{int(time.time())}@internvision.tech",
                 "password": "Password3Month!",
                 "name": "Priya Patel (3M Track)",
@@ -48,22 +56,6 @@ async def run_student_full_lifecycle_test():
                 "role": "AI & Machine Learning Engineering",
                 "track": "3 Months AI/ML",
             },
-            {
-                "email": f"student_6m_devops_{int(time.time())}@internvision.tech",
-                "password": "Password6MonthDevOps!",
-                "name": "Vikram Malhotra (6M Track)",
-                "duration": "6 Months",
-                "role": "DevOps & Cloud Engineering",
-                "track": "6 Months DevOps",
-            },
-            {
-                "email": f"student_6m_fs_{int(time.time())}@internvision.tech",
-                "password": "Password6MonthFS!",
-                "name": "Ananya Sen (6M Track)",
-                "duration": "6 Months",
-                "role": "Full Stack Web Development",
-                "track": "6 Months Full-Stack",
-            }
         ]
 
         created_student_data = []
@@ -176,8 +168,8 @@ async def run_student_full_lifecycle_test():
             assert res_w4.status_code in (200, 201), f"Week 4 failed: {res_w4.text}"
             print("  [✔] Week 4 Task Submitted (month1_week4)", flush=True)
 
-            # Month 2 Deliverable (for 3M and 6M students)
-            if s["duration"] in ("3 Months", "6 Months"):
+            # Month 2 Deliverable (for 2M and 3M students)
+            if s["duration"] in ("2 Months", "3 Months"):
                 m2_payload = {
                     "task_key": "month2_project",
                     "title": "Month 2: Comprehensive Industry Project Milestone",
@@ -189,8 +181,8 @@ async def run_student_full_lifecycle_test():
                 assert res_m2.status_code in (200, 201), f"Month 2 project failed: {res_m2.text}"
                 print("  [✔] Month 2 Project Submitted (month2_project)", flush=True)
 
-            # Month 3 Portfolio Deliverable (for 3M and 6M students)
-            if s["duration"] in ("3 Months", "6 Months"):
+            # Month 3 Portfolio Deliverable (for 3M students)
+            if s["duration"] == "3 Months":
                 m3_payload = {
                     "task_key": "month3_portfolio",
                     "title": "Month 3: Professional Engineering Portfolio & Case Studies",
@@ -201,19 +193,6 @@ async def run_student_full_lifecycle_test():
                 res_m3 = await client.post(f"/api/portal/tasks/submit?email={s['email']}", json=m3_payload)
                 assert res_m3.status_code in (200, 201), f"Month 3 portfolio failed: {res_m3.text}"
                 print("  [✔] Month 3 Portfolio Submitted (month3_portfolio)", flush=True)
-
-            # Month 4-6 Capstone Deliverable (for 6M students)
-            if s["duration"] == "6 Months":
-                m6_payload = {
-                    "task_key": "month4_6_capstone",
-                    "title": "Month 4-6: Enterprise Capstone Project & Production Architecture",
-                    "github_url": f"https://github.com/internvision/{s['email'].split('@')[0]}-enterprise-capstone",
-                    "live_url": f"https://enterprise-capstone-{s['email'].split('@')[0]}.vercel.app",
-                    "notes": "Built distributed microservices, Redis caching, CI/CD pipeline, and comprehensive docs."
-                }
-                res_m6 = await client.post(f"/api/portal/tasks/submit?email={s['email']}", json=m6_payload)
-                assert res_m6.status_code in (200, 201), f"Month 6 capstone failed: {res_m6.text}"
-                print("  [✔] Month 4-6 Capstone Project Submitted (month4_6_capstone)", flush=True)
 
         # Step 5: Submitting Doubt Queries
         print("\n[5] Submitting Technical Doubt Queries across Tracks...", flush=True)

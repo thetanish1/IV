@@ -21,7 +21,7 @@ export interface InternshipApplicationInput {
   degree: string;
   year_of_study: string;
   skills: string[];
-  duration: '1 Month' | '3 Months' | '6 Months';
+  duration: '1 Month' | '2 Months' | '3 Months';
   role_preference?: string;
   linkedin_url?: string;
   github_url?: string;
@@ -230,7 +230,6 @@ export interface PortalData {
   weekly_tasks?: WeeklyTaskItem[];
   month2_project?: MilestoneProjectItem | null;
   month3_portfolio?: MilestoneProjectItem | null;
-  month4_6_capstone?: MilestoneProjectItem | null;
   doubts?: StudentDoubtItem[];
 }
 

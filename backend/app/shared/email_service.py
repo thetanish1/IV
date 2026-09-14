@@ -237,7 +237,7 @@ def send_welcome_login_email(user_email: str, user_name: str) -> bool:
         </tr>
         <tr>
           <td style="width: 38%; padding: 3px 0; vertical-align: top; font-weight: 600;">Program Tracks:</td>
-          <td style="width: 62%; padding: 3px 0; vertical-align: top;">1 Month, 3 Months, 6 Months Tracks</td>
+          <td style="width: 62%; padding: 3px 0; vertical-align: top;">1 Month, 2 Months, 3 Months Tracks</td>
         </tr>
       </table>
     </div>
@@ -278,6 +278,11 @@ def send_internship_application_email(
         program_summary = """
         • <strong>Month 1 (Weeks 1-4):</strong> 4 weekly milestone deliverables, hands-on production code, GitHub PR workflows, and completion certification.
         """
+    elif duration == "2 Months":
+        program_summary = """
+        • <strong>Month 1 (Weeks 1-4):</strong> 4 weekly core technical foundation tasks with mentor code reviews.<br/>
+        • <strong>Month 2 (Weeks 5-8):</strong> Full-scale industry project implementation, sprint deliverables, and production cloud deployment.
+        """
     elif duration == "3 Months":
         program_summary = """
         • <strong>Month 1:</strong> 4 weekly core technical foundation tasks with mentor reviews.<br/>
@@ -286,10 +291,8 @@ def send_internship_application_email(
         """
     else:
         program_summary = """
-        • <strong>Month 1:</strong> 4 weekly core foundation deliverables and CI/CD pipelines.<br/>
-        • <strong>Month 2:</strong> Full-scale production software project build.<br/>
-        • <strong>Month 3:</strong> Developer personal portfolio deployment.<br/>
-        • <strong>Months 4 to 6:</strong> Assigned real-life production enterprise system and Pre-Placement Interview evaluation.
+        • <strong>Month 1 (Weeks 1-4):</strong> 4 weekly core technical foundation deliverables.<br/>
+        • <strong>Month 2 (Weeks 5-8):</strong> Full-scale industry project implementation and cloud deployment.
         """
 
     body_html = f"""
@@ -382,6 +385,19 @@ def send_internship_acceptance_email(
           </div>
         </div>
         """
+    elif duration == "2 Months":
+        roadmap_html = """
+        <div style="margin: 12px 0;">
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 12px 14px; border-radius: 6px; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 1 • Engineering Foundations (Weeks 1 to 4):</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Complete 4 foundational weekly engineering milestones with mentor code reviews.</div>
+          </div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 6px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 2 • Full-Scale Industry Project & Cloud Deployment (Weeks 5 to 8):</strong>
+            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Implement architecture, business CRUD, third-party integrations, containerization, and live production cloud deployment.</div>
+          </div>
+        </div>
+        """
     elif duration == "3 Months":
         roadmap_html = """
         <div style="margin: 12px 0;">
@@ -405,15 +421,8 @@ def send_internship_acceptance_email(
           <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
             <strong style="color: #0f172a; font-size: 13px;">Month 1 • Engineering Foundations:</strong> 4 weekly domain tasks with code reviews.
           </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #3b82f6; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
-            <strong style="color: #0f172a; font-size: 13px;">Month 2 • Industry Project Build:</strong> End-to-end full-stack software system implementation.
-          </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #8b5cf6; padding: 10px 14px; border-radius: 6px; margin-bottom: 8px;">
-            <strong style="color: #0f172a; font-size: 13px;">Month 3 • Personal Developer Portfolio:</strong> Live responsive portfolio deployed with badges.
-          </div>
-          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #f59e0b; padding: 12px 14px; border-radius: 6px;">
-            <strong style="color: #0f172a; font-size: 13px;">Months 4 to 6 • Real-Life Enterprise Production System:</strong>
-            <div style="font-size: 12px; color: #64748b; margin-top: 3px;">Commercial scalable project build, cloud microservices, and direct Pre-Placement Interview.</div>
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-left: 4px solid #f59e0b; padding: 10px 14px; border-radius: 6px;">
+            <strong style="color: #0f172a; font-size: 13px;">Month 2 • Full-Scale Industry Project:</strong> End-to-end software system implementation and live cloud deployment.
           </div>
         </div>
         """

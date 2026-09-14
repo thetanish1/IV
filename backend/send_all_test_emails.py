@@ -93,19 +93,19 @@ except Exception as e:
 
 time.sleep(1)
 
-# 5. Official Offer Letter & Roadmap (6 Months Enterprise Pre-Placement Track)
-print("\n5. Sending Official Selection & Offer Letter (6 Months Enterprise Track)...")
+# 5. Official Offer Letter & Roadmap (2 Months Project Track)
+print("\n5. Sending Official Selection & Offer Letter (2 Months Project Track)...")
 try:
     res5 = send_internship_acceptance_email(
         student_email=TARGET_EMAIL,
         student_name=TARGET_NAME,
-        duration="6 Months",
+        duration="2 Months",
         role_preference="Cloud DevOps & Kubernetes Mastery"
     )
-    results["5. Offer Letter (6 Months Track)"] = "SUCCESS" if res5 else "FAILED"
-    print(f"   -> Result: {results['5. Offer Letter (6 Months Track)']}")
+    results["5. Offer Letter (2 Months Track)"] = "SUCCESS" if res5 else "FAILED"
+    print(f"   -> Result: {results['5. Offer Letter (2 Months Track)']}")
 except Exception as e:
-    results["5. Offer Letter (6 Months Track)"] = f"ERROR: {e}"
+    results["5. Offer Letter (2 Months Track)"] = f"ERROR: {e}"
     print(f"   -> Error: {e}")
 
 time.sleep(1)

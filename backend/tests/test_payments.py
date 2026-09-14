@@ -8,15 +8,19 @@ os.environ["DATABASE_URL"] = "sqlite:///./test_payments.db"
 
 from app.main import app
 from app.shared.database import Base, get_db
-from app.courses.models import Course
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_payments.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from app.auth.models import Admin
+from app.mailer.models import SentEmail
+from app.auth.user_models import SiteUser
+from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
+from app.courses.models import Course, CourseRegistration
+from app.certificates.models import Certificate
+from app.payments.models import Payment
+from app.shared.contact_models import ContactQuery
+from app.shared.database import Base, get_db, engine as shared_engine, SessionLocal
 
 def override_get_db():
+    db = SessionLocal()
     try:
-        db = TestingSessionLocal()
         yield db
     finally:
         db.close()
@@ -25,8 +29,8 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture(autouse=True)
 def setup_db():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
+    Base.metadata.create_all(bind=shared_engine)
+    db = SessionLocal()
     # Create test course
     course = Course(
         id=1,
@@ -42,7 +46,7 @@ def setup_db():
     db.commit()
     db.close()
     yield
-    Base.metadata.drop_all(bind=engine)
+    Base.metadata.drop_all(bind=shared_engine)
 
 client = TestClient(app)
 

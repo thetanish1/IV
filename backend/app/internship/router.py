@@ -214,7 +214,7 @@ def submit_internship_application(app_in: ApplicationCreate, background_tasks: B
     All applications enter 'pending' status for initial admin review.
     """
     duration_normalized = app_in.duration.strip()
-    valid_durations = ["1 Month", "3 Months", "6 Months"]
+    valid_durations = ["1 Month", "2 Months", "3 Months"]
     
     # Standardize capitalization if slightly different
     for vd in valid_durations:
@@ -231,7 +231,7 @@ def submit_internship_application(app_in: ApplicationCreate, background_tasks: B
     db.commit()
     db.refresh(application)
 
-    # Send confirmation receipt email tailored to duration (1 Month, 3 Months, 6 Months)
+    # Send confirmation receipt email tailored to duration (1 Month, 2 Months, 3 Months)
     recipient_email = application.email or application.google_email
     if recipient_email:
         background_tasks.add_task(

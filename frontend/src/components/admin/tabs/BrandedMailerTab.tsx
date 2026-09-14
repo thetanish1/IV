@@ -128,11 +128,11 @@ const TEMPLATE_PRESETS = [
     accentColor: "#2563eb",
   },
   {
-    name: "🎉 6 Months Offer & Real-Life SaaS Roadmap",
-    subject: "Official Selection: 6-Month Virtual Internship | InternVision Tech",
-    heading: "6-Month Virtual Internship Selection & Production Roadmap",
+    name: "🎉 2 Months Offer & Project Roadmap",
+    subject: "Official Selection: 2-Month Virtual Internship | InternVision Tech",
+    heading: "2-Month Virtual Internship Selection & Project Roadmap",
     message:
-      "Congratulations! You have been selected for our comprehensive 6-Month Virtual Internship Program!\n\n**Program Overview:**\n• **Month 1:** Foundational Architecture & Weekly Tasks\n• **Month 2:** End-to-End Industry Project Build\n• **Month 3:** Personal Developer Portfolio Launch\n• **Months 4-6:** Real-Life Enterprise Production Project (Full-Stack + AI System) & Pre-Placement Interview\n\nStart your journey today at your [Student Portal](https://iv-theta.vercel.app/portal).",
+      "Congratulations! You have been selected for our comprehensive 2-Month Virtual Pre-Hire Internship Program!\n\n**Program Overview:**\n• **Month 1 (Weeks 1-4):** 4 Foundational Domain Engineering Deliverables & Code Reviews\n• **Month 2 (Weeks 5-8):** Full-Scale Industry Project Implementation & Production Cloud Deployment\n\nAccess your task allocations and submit weekly sprint milestones directly at your [Student Portal](https://iv-theta.vercel.app/portal).",
     ctaText: "Open My Student Portal",
     ctaUrl: "https://iv-theta.vercel.app/portal",
     accentColor: "#f59e0b",
@@ -167,7 +167,7 @@ export default function BrandedMailerTab() {
   const [applicants, setApplicants] = useState<ApplicantRecipientItem[]>([]);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
   const [applicantFilter, setApplicantFilter] = useState<
-    "all" | "internship" | "course" | "accepted" | "1 Month" | "3 Months" | "6 Months"
+    "all" | "internship" | "course" | "accepted" | "1 Month" | "2 Months" | "3 Months"
   >("all");
   const [applicantSearch, setApplicantSearch] = useState("");
   const [selectedApplicants, setSelectedApplicants] = useState<Set<string>>(new Set());
@@ -320,8 +320,8 @@ export default function BrandedMailerTab() {
     if (applicantFilter === "course" && a.type !== "course") return false;
     if (applicantFilter === "accepted" && (a.status || "").toLowerCase() !== "accepted") return false;
     if (applicantFilter === "1 Month" && a.duration !== "1 Month") return false;
+    if (applicantFilter === "2 Months" && a.duration !== "2 Months") return false;
     if (applicantFilter === "3 Months" && a.duration !== "3 Months") return false;
-    if (applicantFilter === "6 Months" && a.duration !== "6 Months") return false;
     if (applicantSearch) {
       const q = applicantSearch.toLowerCase();
       return (
@@ -982,7 +982,7 @@ export default function BrandedMailerTab() {
               </div>
 
               <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
-                {(["all", "accepted", "internship", "course", "1 Month", "3 Months", "6 Months"] as const).map((f) => (
+                {(["all", "accepted", "internship", "course", "1 Month", "2 Months", "3 Months"] as const).map((f) => (
                   <button
                     key={f}
                     type="button"

@@ -22,6 +22,15 @@ import {
   Layers,
   Sparkles,
   Check,
+  GraduationCap,
+  Briefcase,
+  FileCode2,
+  Laptop,
+  MessageSquare,
+  PhoneCall,
+  Building2,
+  Zap,
+  FileText,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
 import ApplePreviewCarousel from "@/components/ApplePreviewCarousel";
@@ -246,7 +255,7 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <p className="text-xs text-ink-300 mt-2.5 font-medium flex items-center gap-1.5 drop-shadow-sm">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Virtual • Flexible Durations (1M / 3M / 6M)
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Virtual • Flexible Durations (1M / 2M / 3M)
               </p>
             </div>
 
@@ -357,7 +366,7 @@ export default function HomePage() {
 
                 <div className="pt-4 border-t border-ink-800/80 space-y-3">
                   <div className="flex items-center justify-between text-[11px] text-ink-400 font-medium">
-                    <span>Durations: 1M / 3M / 6M</span>
+                    <span>Durations: 1M / 2M / 3M</span>
                     <span className="text-emerald-400 font-semibold">100% Virtual</span>
                   </div>
 
@@ -473,6 +482,239 @@ export default function HomePage() {
         </motion.section>
       )}
 
+      {/* ─── FINAL YEAR & CUSTOM BUSINESS PROJECTS SECTION ───────────── */}
+      <motion.section
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-10"
+      >
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-l-4 border-amber-500 pl-6">
+          <div className="max-w-3xl space-y-2">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" /> Academic & Commercial Engineering Solutions
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight">
+              Final Year Projects & Custom Business Software
+            </h2>
+            <p className="text-ink-400 text-base sm:text-lg leading-relaxed">
+              Our engineering team designs and delivers complete, production-ready software solutions — from high-scoring College Capstone Projects to scalable SaaS & enterprise business systems.
+            </p>
+          </div>
+
+          <Link
+            href="/contact"
+            className="px-6 py-3.5 font-bold bg-amber-500 hover:bg-amber-400 text-black text-xs uppercase tracking-wider rounded-lg transition shadow-lg shrink-0 flex items-center gap-2 hover:-translate-y-0.5"
+          >
+            <MessageSquare className="w-4 h-4" /> Contact Us for Projects
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Card 1: Final Year Academic Projects */}
+          <motion.div
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+            className="glass-card p-8 sm:p-10 border border-ink-800 hover:border-amber-500/60 rounded-2xl flex flex-col justify-between space-y-8 relative overflow-hidden group shadow-2xl"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/20 transition-colors" />
+
+            <div className="space-y-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <GraduationCap className="w-7 h-7" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300 bg-amber-500/15 px-3 py-1 border border-amber-500/30 rounded-full flex items-center gap-1">
+                  🎓 College & University
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-extrabold text-white group-hover:text-amber-300 transition-colors">
+                  College Final Year & Capstone Projects
+                </h3>
+                <p className="text-sm text-ink-300 leading-relaxed">
+                  Tailored for <strong className="text-white font-semibold">B.Tech, BCA, MCA, M.Tech, and BS/MS</strong> students. We provide end-to-end original projects guaranteed to impress university examiners and secure maximum viva scores.
+                </p>
+              </div>
+
+              {/* What's Included */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-ink-200 uppercase tracking-wider">Everything Included for Submission & Viva:</p>
+                <ul className="space-y-2.5 text-xs text-ink-300">
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">100% Working Source Code:</strong> Modular clean architecture (Next.js, FastAPI, Python, React, PostgreSQL).</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">Complete Project Documentation:</strong> IEEE format synopsis, detailed project report, SRS, ER & UML diagrams.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">Viva Defense Preparation:</strong> Professional PPT slides + examiner Q&A preparation guide.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">Live Cloud Deployment:</strong> Live hosted URL (Vercel/AWS/Render) with examiner-ready demo.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">1:1 Live Explanation:</strong> Video call walkthrough with senior engineer to understand every line of code.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Domain Pills */}
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {["AI / Machine Learning", "Full-Stack Web & SaaS", "Deep Learning & LLM RAG", "Cyber Security & Pentesting", "Cloud & DevOps", "Android & IoT"].map((tag) => (
+                  <span key={tag} className="text-[10px] font-medium bg-ink-900/90 text-amber-300 px-2.5 py-1 rounded-md border border-amber-500/20">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-ink-800/80 relative z-10 flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/contact?service=final-year-project"
+                className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-md"
+              >
+                <GraduationCap className="w-4 h-4" /> Book Final Year Project <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href="/contact?service=final-year-project&subject=Urgent+Final+Year+Project+Inquiry"
+                className="w-full sm:w-auto px-4 py-3 bg-ink-900 hover:bg-ink-800 text-ink-300 hover:text-white text-xs font-semibold rounded-lg border border-ink-700 transition flex items-center justify-center gap-1.5 shrink-0"
+              >
+                Inquire via Email
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Card 2: Custom Business & Enterprise Solutions */}
+          <motion.div
+            whileHover={{ y: -6, transition: { duration: 0.2 } }}
+            className="glass-card p-8 sm:p-10 border border-ink-800 hover:border-brand-500/60 rounded-2xl flex flex-col justify-between space-y-8 relative overflow-hidden group shadow-2xl"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-brand-500/20 transition-colors" />
+
+            <div className="space-y-6 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Building2 className="w-7 h-7" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-300 bg-brand-500/15 px-3 py-1 border border-brand-500/30 rounded-full flex items-center gap-1">
+                  💼 Business & Startups
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-extrabold text-white group-hover:text-brand-300 transition-colors">
+                  Custom Business & Enterprise Projects
+                </h3>
+                <p className="text-sm text-ink-300 leading-relaxed">
+                  Tailored for <strong className="text-white font-semibold">Startups, MSMEs, Businesses, and Founders</strong>. We architect scalable, secure web apps, SaaS products, and workflow automations to grow your revenue.
+                </p>
+              </div>
+
+              {/* What's Included */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-ink-200 uppercase tracking-wider">Enterprise-Grade Deliverables:</p>
+                <ul className="space-y-2.5 text-xs text-ink-300">
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">Bespoke SaaS & Web Portals:</strong> Multi-tenant systems with role-based access control (RBAC) and modern UI/UX.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">CRM, ERP & Business Automation:</strong> Custom inventory, billing, analytics dashboards, and automated email/SMS alerts.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">AI Agents & Intelligent Chatbots:</strong> Automated customer support, document search, and conversational workflows.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">Payment & Third-Party APIs:</strong> Razorpay, Stripe, WhatsApp API, and cloud storage integrations.</span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span><strong className="text-white font-medium">100% Code Ownership & Support:</strong> Complete intellectual property transfer, NDA agreement, and ongoing maintenance.</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Domain Pills */}
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {["Custom SaaS Platforms", "ERP & CRM Systems", "E-Commerce Portals", "AI Workflow Automation", "Cloud Microservices", "High-Throughput APIs"].map((tag) => (
+                  <span key={tag} className="text-[10px] font-medium bg-ink-900/90 text-brand-300 px-2.5 py-1 rounded-md border border-brand-500/20">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-ink-800/80 relative z-10 flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/contact?service=business-project"
+                className="w-full py-3 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-md"
+              >
+                <Briefcase className="w-4 h-4" /> Discuss Business Project <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href="/contact?service=business-project&subject=Commercial+Project+Consultation"
+                className="w-full sm:w-auto px-4 py-3 bg-ink-900 hover:bg-ink-800 text-ink-300 hover:text-white text-xs font-semibold rounded-lg border border-ink-700 transition flex items-center justify-center gap-1.5 shrink-0"
+              >
+                Request Quotation
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Project Assurance Trust Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-ink-950/80 border border-ink-800 rounded-xl text-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-white">Fast 3–7 Day Delivery</div>
+              <div className="text-[11px] text-ink-400">Rapid turnaround for urgent deadlines</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-white">100% Original & Tested</div>
+              <div className="text-[11px] text-ink-400">Zero plagiarism & bug-free builds</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+              <Laptop className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-white">Live Cloud Demo</div>
+              <div className="text-[11px] text-ink-400">Hosted and verifiable 24/7 online</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+              <PhoneCall className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-white">Free Consultation</div>
+              <div className="text-[11px] text-ink-400">Direct technical project scoping</div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
       {/* ─── PLATFORM FEATURE PREVIEWS (APPLE-STYLE CAROUSEL) ────── */}
       <motion.section
         initial={{ opacity: 0, y: 35 }}
@@ -510,7 +752,7 @@ export default function HomePage() {
               Ready to Step Into Tech?
             </h2>
             <p className="text-brand-100 text-base md:text-lg leading-relaxed">
-              Apply today for our upcoming batch. Flexible 1, 3, or 6-month internship durations tailored to your college academic schedule.
+              Apply today for our upcoming batch. Flexible 1, 2, or 3-month internship durations tailored to your college academic schedule.
             </p>
             <div className="pt-2">
               <Link

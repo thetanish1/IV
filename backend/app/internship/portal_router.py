@@ -118,7 +118,7 @@ DOMAIN_TASKS = {
             {
                 "week": 5,
                 "key": "month2_week5",
-                "title": "Week 5: State Stores, Caching & Real-Time WebSockets (6M Track)",
+                "title": "Week 5: State Stores, Caching & Real-Time WebSockets",
                 "objective": "Integrate global state management (Zustand / Redux Toolkit), Redis caching for frequent API queries, and real-time bidirectional WebSocket event streams.",
                 "deliverables": [
                     "Global state store implementation with persistent middleware",
@@ -132,7 +132,7 @@ DOMAIN_TASKS = {
             {
                 "week": 6,
                 "key": "month2_week6",
-                "title": "Week 6: Automated Testing Suites (Unit, Integration & E2E) (6M Track)",
+                "title": "Week 6: Automated Testing Suites (Unit, Integration & E2E)",
                 "objective": "Write comprehensive automated test suites using Pytest for backend APIs and Jest / React Testing Library / Playwright for frontend UI interactions.",
                 "deliverables": [
                     "Pytest suite covering all API endpoints and edge cases (> 80% code coverage)",
@@ -146,7 +146,7 @@ DOMAIN_TASKS = {
             {
                 "week": 7,
                 "key": "month2_week7",
-                "title": "Week 7: Microservices Architecture & Asynchronous Task Queues (6M Track)",
+                "title": "Week 7: Microservices Architecture & Asynchronous Task Queues",
                 "objective": "Refactor monolithic components into decoupled microservices, implementing background job processing with Celery / BullMQ and message brokers (RabbitMQ/Redis).",
                 "deliverables": [
                     "Decoupled microservice communicating over REST or gRPC",
@@ -160,7 +160,7 @@ DOMAIN_TASKS = {
             {
                 "week": 8,
                 "key": "month2_week8",
-                "title": "Week 8: Performance Profiling, Security Hardening & Monitoring (6M Track)",
+                "title": "Week 8: Performance Profiling, Security Hardening & Monitoring",
                 "objective": "Conduct load testing with Locust, audit security against OWASP vulnerabilities, configure structured logging and Prometheus / Grafana observability.",
                 "deliverables": [
                     "Locust load test report handling 100+ concurrent users without error",
@@ -236,7 +236,7 @@ DOMAIN_TASKS = {
             {
                 "week": 5,
                 "key": "month2_week5",
-                "title": "Week 5: MLOps Pipelines, Experiment Tracking & Model Registry (6M Track)",
+                "title": "Week 5: MLOps Pipelines, Experiment Tracking & Model Registry",
                 "objective": "Implement automated MLOps pipelines using MLflow / Weights & Biases for experiment tracking, model versioning, artifact logging, and automated model registration.",
                 "deliverables": [
                     "MLflow / W&B experiment tracking dashboard logging hyperparameter runs and metrics",
@@ -250,7 +250,7 @@ DOMAIN_TASKS = {
             {
                 "week": 6,
                 "key": "month2_week6",
-                "title": "Week 6: Model Optimization, Quantization & TensorRT / ONNX Serving (6M Track)",
+                "title": "Week 6: Model Optimization, Quantization & TensorRT / ONNX Serving",
                 "objective": "Optimize neural networks for low-latency edge and cloud deployment using model quantization (INT8/FP16), pruning, and ONNX Runtime / TensorRT acceleration.",
                 "deliverables": [
                     "ONNX model export and inference benchmark script",
@@ -264,7 +264,7 @@ DOMAIN_TASKS = {
             {
                 "week": 7,
                 "key": "month2_week7",
-                "title": "Week 7: Advanced Multi-Agent Orchestration & Tool Calling (6M Track)",
+                "title": "Week 7: Advanced Multi-Agent Orchestration & Tool Calling",
                 "objective": "Architect autonomous multi-agent systems with LangGraph / CrewAI, integrating tool calling, web search capabilities, SQL querying, and memory state graphs.",
                 "deliverables": [
                     "Multi-agent workflow with specialized role agents (Researcher, Writer, Reviewer)",
@@ -278,7 +278,7 @@ DOMAIN_TASKS = {
             {
                 "week": 8,
                 "key": "month2_week8",
-                "title": "Week 8: Model Drift Monitoring & Production Continuous Retraining (6M Track)",
+                "title": "Week 8: Model Drift Monitoring & Production Continuous Retraining",
                 "objective": "Build continuous monitoring pipelines detecting data drift, concept drift, and model degradation using Evidently AI, with automated alerts and retraining triggers.",
                 "deliverables": [
                     "Evidently AI dashboard detecting statistical distribution drift on live data",
@@ -898,8 +898,8 @@ def get_tasks_for_domain(role_preference: Optional[str], duration: Optional[str]
     """
     Returns domain tasks tailored for the specific domain and duration:
     - 1 Month: 4 Weeks (Month 1 Foundation)
+    - 2 Months: 8 Weeks (Month 1 Foundation + Month 2 Project Sprints)
     - 3 Months: 12 Weeks (Month 1 Foundation + Month 2 Project Sprints + Month 3 Portfolio & Defense)
-    - 6 Months: 24 Weeks (Complete 6-Month Enterprise Engineering Lifecycle)
     """
     selected_key = "full-stack"
     if role_preference:
@@ -1080,86 +1080,13 @@ def get_tasks_for_domain(role_preference: Optional[str], duration: Optional[str]
         }
     ])
 
-    # Months 4-6 (Weeks 13-24) - Enterprise Scalability & Cloud Orchestration (for 6M)
-    # Month 4 (Weeks 13-16)
-    for w_i, (t_title, t_obj) in enumerate([
-        ("Enterprise Microservice Architecture & Event Bus", "Decompose monolithic services into decoupled microservices communicating via message brokers (RabbitMQ/Kafka/Redis PubSub)."),
-        ("Asynchronous Background Workers & Distributed Queues", "Implement high-reliability background job processors with exponential retry policies and dead-letter queues."),
-        ("Database Sharding, Read-Replicas & Connection Pooling", "Set up database read replicas with PgBouncer connection pooling and high-availability failover."),
-        ("Zero-Trust API Gateway & OAuth2 Distributed Sessions", "Deploy an API Gateway with rate limiting, centralized token validation, and OAuth2 session management.")
-    ], 13):
-        full_weeks.append({
-            "week": w_i,
-            "month": 4,
-            "month_title": "Month 4: Enterprise Scalability & Microservices Architecture",
-            "key": f"month4_week{w_i}",
-            "title": f"Week {w_i}: {t_title}",
-            "objective": t_obj,
-            "deliverables": [
-                f"Production code and architectural blueprint for {t_title}",
-                "Integration test harness verifying distributed reliability",
-                "GitHub repository branch with documentation and setup commands",
-                "Live demo recording showcasing distributed execution"
-            ],
-            "tech_stack": ["RabbitMQ/Kafka", "Microservices", "PgBouncer", "API Gateway"],
-            "evaluation_focus": "Distributed systems reliability, data consistency, and architectural elegance"
-        })
-
-    # Month 5 (Weeks 17-20)
-    for w_i, (t_title, t_obj) in enumerate([
-        ("Enterprise AI Agent Integration & Multimodal RAG", "Build enterprise-grade AI copilots with vector search, hybrid retrieval, and streaming LLM responses."),
-        ("Automated E2E Testing Suites & CI Regression Gates", "Implement end-to-end testing with Playwright/Cypress integrated into automated GitHub Actions pull request gates."),
-        ("OWASP Top 10 Security Hardening & Vulnerability Remediation", "Conduct penetration testing, SAST/DAST static analysis, and harden application against SQLi, XSS, SSRF, and CSRF."),
-        ("Real-Time Telemetry, Distributed Tracing & APM Dashboards", "Integrate OpenTelemetry, Prometheus, Grafana, and Sentry for real-time alerting and distributed request tracing.")
-    ], 17):
-        full_weeks.append({
-            "week": w_i,
-            "month": 5,
-            "month_title": "Month 5: Enterprise AI, Automated QA & Security Audits",
-            "key": f"month5_week{w_i}",
-            "title": f"Week {w_i}: {t_title}",
-            "objective": t_obj,
-            "deliverables": [
-                f"Implementation deliverables for {t_title}",
-                "Automated test and security audit report with zero critical vulnerabilities",
-                "Observability dashboard screenshots and trace metrics",
-                "GitHub repository with configuration manifests"
-            ],
-            "tech_stack": ["OpenTelemetry", "Playwright", "OWASP Hardening", "Grafana", "LangChain"],
-            "evaluation_focus": "Defensive security posture, testing coverage, and automated observability"
-        })
-
-    # Month 6 (Weeks 21-24)
-    for w_i, (t_title, t_obj) in enumerate([
-        ("Kubernetes Cluster Orchestration & Helm Charts", "Package and deploy the enterprise application to a Kubernetes cluster using custom Helm charts with auto-scaling (HPA)."),
-        ("Infrastructure as Code (IaC) with Terraform & Cloud Provisioning", "Automate complete cloud infrastructure provisioning using Terraform scripts with modular state management."),
-        ("Zero-Downtime Blue/Green & Canary Rollouts", "Implement progressive traffic splitting and automated zero-downtime rolling deployments with rollback triggers."),
-        ("Grand Capstone Defense, Enterprise Audit & Fellowship Graduation", "Deliver the final 6-month enterprise capstone project defense before technical evaluation panel.")
-    ], 21):
-        full_weeks.append({
-            "week": w_i,
-            "month": 6,
-            "month_title": "Month 6: Cloud Orchestration, Zero-Downtime Rollout & Grand Defense",
-            "key": f"month6_week{w_i}",
-            "title": f"Week {w_i}: {t_title}",
-            "objective": t_obj,
-            "deliverables": [
-                f"Production deployment manifests and architecture for {t_title}",
-                "Live Kubernetes/Terraform infrastructure verification recording",
-                "Complete capstone technical documentation and executive summary",
-                "Final 6-month exit evaluation and defense submission"
-            ],
-            "tech_stack": ["Kubernetes", "Helm", "Terraform", "CI/CD", "Cloud Architecture"],
-            "evaluation_focus": "Cloud-native infrastructure mastery, high-availability architecture, and executive defense"
-        })
-
     # Slice weeks based on duration:
-    # 6 Months -> 24 Weeks (Months 1 to 6)
-    # 3 Months -> 12 Weeks (Months 1, 2, 3)
     # 1 Month -> 4 Weeks (Month 1)
+    # 2 Months -> 8 Weeks (Months 1 & 2)
+    # 3 Months -> 12 Weeks (Months 1, 2, 3)
     dur_str = str(duration or "1 Month").strip().lower()
-    if "6" in dur_str or dur_str == "6 months":
-        target_weeks = full_weeks
+    if "2" in dur_str or dur_str == "2 months":
+        target_weeks = full_weeks[:8]
     elif "3" in dur_str or dur_str == "3 months":
         target_weeks = full_weeks[:12]
     else:
@@ -1289,8 +1216,6 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             existing_sub = sub_map.get("month2_project")
         if not existing_sub and m_num == 3 and w_num in (9, 12):
             existing_sub = sub_map.get("month3_portfolio")
-        if not existing_sub and m_num >= 4 and w_num in (13, 24):
-            existing_sub = sub_map.get("month4_6_capstone")
 
         # Match existing unlock request flexibly
         existing_unlock_req = unlock_map.get(t_key)
@@ -1300,8 +1225,6 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             existing_unlock_req = unlock_map.get("month2_project")
         if not existing_unlock_req and m_num == 3 and w_num in (9, 12):
             existing_unlock_req = unlock_map.get("month3_portfolio")
-        if not existing_unlock_req and m_num >= 4 and w_num in (13, 24):
-            existing_unlock_req = unlock_map.get("month4_6_capstone")
 
         is_manually_unlocked = bool(existing_sub and existing_sub.is_unlocked)
         if existing_unlock_req and existing_unlock_req.status == "approved":
@@ -1331,9 +1254,9 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             } if existing_unlock_req else None
         })
 
-    # Milestone Project for 3 Month and 6 Month internships
+    # Milestone Project for 2 Month and 3 Month internships
     month2_project = None
-    if duration_str in ("3 Months", "6 Months"):
+    if duration_str in ("2 Months", "3 Months"):
         m2_key = "month2_project"
         m2_sub = sub_map.get(m2_key)
         m2_unlock_req = unlock_map.get(m2_key)
@@ -1363,9 +1286,9 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
             } if m2_unlock_req else None
         }
 
-    # Month 3 Portfolio Website for 3 Month and 6 Month internships
+    # Month 3 Portfolio Website for 3 Month internships
     month3_portfolio = None
-    if duration_str in ("3 Months", "6 Months"):
+    if duration_str == "3 Months":
         m3_key = "month3_portfolio"
         m3_sub = sub_map.get(m3_key)
         m3_unlock_req = unlock_map.get(m3_key)
@@ -1390,37 +1313,6 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
                 "status": m3_unlock_req.status,
                 "reason": m3_unlock_req.reason,
             } if m3_unlock_req else None
-        }
-
-    # Months 4-6 Real-life Capstone for 6 Month Internships
-    month4_6_capstone = None
-    if duration_str == "6 Months":
-        m4_key = "month4_6_capstone"
-        m4_sub = sub_map.get(m4_key)
-        m4_unlock_req = unlock_map.get(m4_key)
-        m4_unlocked = (days_elapsed >= 84) or (m4_sub and m4_sub.is_unlocked) or (m4_unlock_req and m4_unlock_req.status == "approved")
-
-        month4_6_capstone = {
-            "key": m4_key,
-            "title": "Months 4–6: Enterprise Real-Life Capstone Engineering Project",
-            "objective": "End-to-end production architecture: Frontend, Backend, Relational Database, AI Integration, Cloud Deployment, and sprint updates with mentor guidance.",
-            "is_unlocked": m4_unlocked,
-            "submission": {
-                "id": m4_sub.id,
-                "project_topic": m4_sub.project_topic,
-                "github_url": m4_sub.github_url,
-                "live_url": m4_sub.live_url,
-                "documentation_url": m4_sub.documentation_url,
-                "notes": m4_sub.notes,
-                "tools_used": m4_sub.tools_used or [],
-                "status": m4_sub.status,
-                "admin_feedback": m4_sub.admin_feedback,
-                "submitted_at": m4_sub.submitted_at.isoformat() if m4_sub.submitted_at else None,
-            } if m4_sub else None,
-            "unlock_request": {
-                "status": m4_unlock_req.status,
-                "reason": m4_unlock_req.reason,
-            } if m4_unlock_req else None
         }
 
     # Fetch doubts
@@ -1468,7 +1360,6 @@ def get_my_internship(email: str = Query(...), db: Session = Depends(get_db)):
         "weekly_tasks": weekly_tasks,
         "month2_project": month2_project,
         "month3_portfolio": month3_portfolio,
-        "month4_6_capstone": month4_6_capstone,
         "doubts": doubts_list,
     }
 

@@ -92,7 +92,7 @@ def seed_db():
                     degree="B.E. Information Technology",
                     year_of_study="4th Year",
                     skills=["FastAPI", "PostgreSQL", "Docker"],
-                    duration="6 Months",
+                    duration="2 Months",
                     status="accepted"
                 ),
                 InternshipApplication(

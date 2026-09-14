@@ -576,15 +576,12 @@ def dispatch_submission_due_reminders(
         elif "week4" not in submitted_keys:
             task_key = "week4"
             task_title = "Week 4: Production Cloud Deployment & CI/CD Pipeline"
-        elif duration in ("3 Months", "6 Months") and "month2_project" not in submitted_keys:
+        elif duration in ("2 Months", "3 Months") and "month2_project" not in submitted_keys:
             task_key = "month2_project"
-            task_title = "Month 2: Full-Scale Industry Capstone Project Deliverable"
-        elif duration in ("3 Months", "6 Months") and "month3_portfolio" not in submitted_keys:
+            task_title = "Month 2: Full-Scale Industry Project Deliverable"
+        elif duration == "3 Months" and "month3_portfolio" not in submitted_keys:
             task_key = "month3_portfolio"
             task_title = "Month 3: Personal Developer Portfolio Deployment"
-        elif duration == "6 Months" and "month4_6_project" not in submitted_keys:
-            task_key = "month4_6_project"
-            task_title = "Months 4-6: Production Enterprise Full-Stack & AI System"
         else:
             task_key = "final_review"
             task_title = "Final Program Evaluation & Exit Portfolio"

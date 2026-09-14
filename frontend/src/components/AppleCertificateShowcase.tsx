@@ -70,7 +70,7 @@ const CARDS: AppleCardItem[] = [
     bulletPoints: [
       "Unique SHA-256 identifier generated per candidate and completion cohort",
       "Permanent immutable ledger that cannot be overwritten, modified, or forged",
-      "Direct verification of internship tenure (1 Month, 3 Months, 6 Months)",
+      "Direct verification of internship tenure (1 Month, 2 Months, 3 Months)",
       "Protects candidates from identity theft and unauthorized credential duplication",
     ],
     ctaLabel: "View Registry Standards",

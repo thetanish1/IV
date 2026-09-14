@@ -126,8 +126,8 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Programs</h4>
             <ul className="space-y-2 text-xs">
               <li><Link href="/apply" className="hover:text-white transition">1 Month Foundation</Link></li>
+              <li><Link href="/apply" className="hover:text-white transition">2 Months Project Track</Link></li>
               <li><Link href="/apply" className="hover:text-white transition">3 Months Advanced Track</Link></li>
-              <li><Link href="/apply" className="hover:text-white transition">6 Months Industrial Co-Op</Link></li>
               <li><Link href="/portal" className="hover:text-white transition text-brand-400 font-medium">Student Portal</Link></li>
             </ul>
           </div>

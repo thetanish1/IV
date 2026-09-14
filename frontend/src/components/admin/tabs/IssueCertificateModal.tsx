@@ -159,8 +159,8 @@ export default function IssueCertificateModal({
                 className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-sm"
               >
                 <option value="1 Month">1 Month</option>
+                <option value="2 Months">2 Months</option>
                 <option value="3 Months">3 Months</option>
-                <option value="6 Months">6 Months</option>
                 <option value="8 Weeks">8 Weeks</option>
                 <option value="10 Weeks">10 Weeks</option>
               </select>

@@ -57,7 +57,7 @@ const jobs = [
     badge: "Virtual Internship",
     badgeStyle: "bg-purple-600 text-white",
     title: "AI / ML Engineering Intern",
-    type: "Paid · 3 / 6 Months",
+    type: "Paid · 2 / 3 Months",
     location: "Virtual Internship (Remote)",
     posted: "Open Now",
     summary:

@@ -8,15 +8,20 @@ os.environ["DATABASE_URL"] = "sqlite:///./test_app.db"
 
 from app.main import app
 from app.shared.database import Base, get_db
+from app.auth.models import Admin
+from app.mailer.models import SentEmail
 from app.auth.user_models import SiteUser
+from app.internship.models import InternshipApplication, InternshipSubmission, TaskUnlockRequest, StudentDoubt
+from app.courses.models import Course, CourseRegistration
+from app.certificates.models import Certificate
+from app.payments.models import Payment
+from app.shared.contact_models import ContactQuery
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test_app.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from app.shared.database import Base, get_db, engine as shared_engine, SessionLocal
 
 def override_get_db():
+    db = SessionLocal()
     try:
-        db = TestingSessionLocal()
         yield db
     finally:
         db.close()
@@ -25,11 +30,11 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture(autouse=True)
 def setup_db():
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=shared_engine)
     from app.seed import seed_db
     seed_db()
     yield
-    Base.metadata.drop_all(bind=engine)
+    Base.metadata.drop_all(bind=shared_engine)
 
 client = TestClient(app)
 
@@ -72,13 +77,13 @@ def test_submit_application():
         "degree": "B.Tech CSE",
         "year_of_study": "3rd Year",
         "skills": ["Python", "FastAPI"],
-        "duration": "3 Months"
+        "duration": "2 Months"
     }
     response = client.post("/api/applications", json=payload)
     assert response.status_code == 201
     data = response.json()
     assert data["full_name"] == "Test Applicant"
-    assert data["duration"] == "3 Months"
+    assert data["duration"] == "2 Months"
 
 def test_admin_stats_protected():
     login_res = client.post(
@@ -119,7 +124,7 @@ def test_user_register_does_not_store_plaintext_password():
     )
     assert response.status_code == 200
 
-    user = TestingSessionLocal().query(SiteUser).filter(SiteUser.email == "newuser@example.com").first()
+    user = SessionLocal().query(SiteUser).filter(SiteUser.email == "newuser@example.com").first()
     assert user is not None
     assert getattr(user, "raw_password", None) is None
     assert user.hashed_password != "Str0ngPass!123"

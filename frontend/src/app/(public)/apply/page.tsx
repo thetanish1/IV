@@ -80,7 +80,7 @@ export default function InternshipApplyPage() {
     experience_description: "",
     cover_letter: "",
     role_preference: "",
-    duration: "3 Months",
+    duration: "2 Months",
     resume_filename: "",
     resume_original_name: "",
   });
@@ -1290,7 +1290,7 @@ export default function InternshipApplyPage() {
               <div className="space-y-2">
                 <label className="text-xs text-ink-300 font-medium">Program Duration *</label>
                 <div className="grid grid-cols-3 gap-3">
-                  {["1 Month", "3 Months", "6 Months"].map((dur) => (
+                  {["1 Month", "2 Months", "3 Months"].map((dur) => (
                     <button
                       key={dur}
                       type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, MapPin, Send, CheckCircle2, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
 
@@ -9,6 +9,32 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const service = params.get("service");
+      const subj = params.get("subject");
+      if (service === "final-year-project") {
+        setFormData((prev) => ({
+          ...prev,
+          subject: "Final Year Academic Project Development Inquiry",
+          message: "Hi InternVision Team,\n\nI am looking for assistance with my Final Year Project:\n- Degree / Branch:\n- Preferred Tech Stack / Domain:\n- Submission Deadline:\n\nPlease share details on source code, synopsis/report, and live demo walkthrough.",
+        }));
+      } else if (service === "business-project") {
+        setFormData((prev) => ({
+          ...prev,
+          subject: "Custom Business / Enterprise Software Development Inquiry",
+          message: "Hi InternVision Team,\n\nWe would like to discuss building a custom software project for our business:\n- Project Type (SaaS / Web App / AI / Automation):\n- Core Features Needed:\n- Expected Timeline:\n\nPlease connect with us for a consultation.",
+        }));
+      } else if (subj) {
+        setFormData((prev) => ({
+          ...prev,
+          subject: subj,
+        }));
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

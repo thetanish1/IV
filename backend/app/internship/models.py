@@ -30,7 +30,7 @@ class InternshipApplication(Base):
     cover_letter = Column(Text, nullable=True)             # Why you want this internship
 
     # Program preference
-    duration = Column(String(50), nullable=False)          # '1 Month', '3 Months', '6 Months'
+    duration = Column(String(50), nullable=False)          # '1 Month', '2 Months', '3 Months'
     role_preference = Column(String(100), nullable=True)   # Which role they're applying for
 
     # Resume
