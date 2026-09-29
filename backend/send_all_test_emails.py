@@ -21,7 +21,7 @@ from app.shared.email_service import (
 )
 
 TARGET_EMAIL = "pathadesuraj75@gmail.com"
-TARGET_NAME = "Suraj Pathade"
+TARGET_NAME = "InternVision Candidate"
 
 print(f"===========================================================")
 print(f"INTERNVISION TECH - SENDING ALL TEST EMAILS TO: {TARGET_EMAIL}")

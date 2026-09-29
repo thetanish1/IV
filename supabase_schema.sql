@@ -29,7 +29,7 @@ INSERT INTO admins (email, hashed_password, full_name, is_active, role, permissi
 VALUES (
     'tanishdewase222@gmail.com',
     '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
-    'Tanish Dewase (Admin)',
+    'InternVision Admin',
     TRUE,
     'super_admin',
     '["overview", "applications", "submissions", "unlocks", "doubts", "users", "enrollments", "payments", "certificates", "contacts", "mailer", "settings"]'::jsonb
@@ -239,15 +239,15 @@ INSERT INTO certificates (certificate_id, student_name, student_email, program_t
 VALUES
 (
     'IVT/JUN26/2026/0201',
-    'Tanish Dewase',
-    'tanishdewase222@gmail.com',
+    'Aarav Sharma',
+    'aarav.sharma@example.com',
     'Java Developer',
     'Virtual Internship',
     '1 Month',
     '30 June 2026',
     'Distinction (Grade A+)',
     '["Java", "SQL", "GitHub", "Git", "Docker"]'::jsonb,
-    'Suraj Kumar, HR & Manager',
+    'InternVision Certification Authority',
     TRUE
 ),
 (
@@ -260,7 +260,7 @@ VALUES
     '30 June 2026',
     'Distinction (Grade A+)',
     '["Basic HTML", "CSS", "JavaScript", "Git"]'::jsonb,
-    'Suraj Kumar, HR & Manager',
+    'InternVision Certification Authority',
     TRUE
 ),
 (
@@ -273,7 +273,7 @@ VALUES
     '30 June 2026',
     'Distinction (Grade A+)',
     '["Java", "SQL", "GitHub", "Git", "Docker"]'::jsonb,
-    'Suraj Kumar, HR & Manager',
+    'InternVision Certification Authority',
     TRUE
 ),
 (
@@ -286,7 +286,7 @@ VALUES
     '30 June 2026',
     'Distinction (Grade A+)',
     '["Java", "SQL", "GitHub", "Git", "Docker"]'::jsonb,
-    'Suraj Kumar, HR & Manager',
+    'InternVision Certification Authority',
     TRUE
 )
 ON CONFLICT (certificate_id) DO NOTHING;

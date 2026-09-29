@@ -744,7 +744,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                       Clone the official course boilerplate, starter branches, and solution guides.
                     </p>
                     <a
-                      href="https://github.com/thetanish1"
+                      href="https://github.com"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-400 hover:text-brand-300 hover:underline pt-1"

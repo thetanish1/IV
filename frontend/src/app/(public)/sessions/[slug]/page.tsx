@@ -456,7 +456,7 @@ export default function SingleSessionSharablePage({
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Suraj Kumar"
+                      placeholder="e.g. Rahul Sharma"
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-ink-950 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 font-medium"

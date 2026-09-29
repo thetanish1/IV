@@ -68,7 +68,7 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     price_inr: 0,
     thumbnail_url:
       "https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=1000&auto=format&fit=crop",
-    instructor_name: "Suraj Kumar",
+    instructor_name: "InternVision Lead Mentors",
     instructor_role: "Senior Engineering Lead & Mentor",
     meeting_platform: "Google Meet",
     max_seats: 200,
@@ -96,7 +96,7 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     price_inr: 0,
     thumbnail_url:
       "https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=1000&auto=format&fit=crop",
-    instructor_name: "Tanish Dewase",
+    instructor_name: "Senior Cloud Architect",
     instructor_role: "Cloud DevOps Architect",
     meeting_platform: "Google Meet",
     max_seats: 150,
@@ -640,7 +640,7 @@ export default function SessionsPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Suraj Kumar"
+                        placeholder="e.g. Rahul Sharma"
                         value={studentName}
                         onChange={(e) => setStudentName(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-ink-900 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 font-medium"

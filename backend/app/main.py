@@ -70,9 +70,9 @@ async def lifespan(app: FastAPI):
         ]
 
         admins_to_seed = [
-            ("pathadesuraj75@gmail.com", "Suraj Pathade (Super Admin)"),
+            ("pathadesuraj75@gmail.com", "Operations Lead (Super Admin)"),
             ("admin@internvisiontech.me", "InternVision Super Admin"),
-            ("tanishdewase222@gmail.com", "Tanish Dewase (Super Admin)"),
+            ("tanishdewase222@gmail.com", "Tech Lead (Super Admin)"),
             ("admin@internvision.tech", "InternVision Super Admin"),
             ("internvisiontechhr@gmail.com", "InternVision HR & Super Admin"),
             ("hr@internvisiontech.me", "InternVision HR & Super Admin"),
@@ -202,15 +202,15 @@ async def lifespan(app: FastAPI):
             sample_certs = [
                 Certificate(
                     certificate_id="IVT/JUN26/2026/0201",
-                    student_name="Tanish Dewase",
-                    student_email="tanishdewase222@gmail.com",
+                    student_name="Aarav Sharma",
+                    student_email="aarav.sharma@example.com",
                     program_title="Java Developer",
                     track_type="Virtual Internship",
                     duration="1 Month",
                     issue_date="30 June 2026",
                     grade="Distinction (Grade A+)",
                     skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
-                    instructor_name="Suraj Kumar, HR & Manager",
+                    instructor_name="InternVision Certification Authority",
                     is_valid=True
                 ),
                 Certificate(
@@ -223,7 +223,7 @@ async def lifespan(app: FastAPI):
                     issue_date="30 June 2026",
                     grade="Distinction (Grade A+)",
                     skills_acquired=["Basic HTML", "CSS", "JavaScript", "Git"],
-                    instructor_name="Suraj Kumar, HR & Manager",
+                    instructor_name="InternVision Certification Authority",
                     is_valid=True
                 ),
                 Certificate(
@@ -236,7 +236,7 @@ async def lifespan(app: FastAPI):
                     issue_date="30 June 2026",
                     grade="Distinction (Grade A+)",
                     skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
-                    instructor_name="Suraj Kumar, HR & Manager",
+                    instructor_name="InternVision Certification Authority",
                     is_valid=True
                 ),
                 Certificate(
@@ -249,7 +249,7 @@ async def lifespan(app: FastAPI):
                     issue_date="30 June 2026",
                     grade="Distinction (Grade A+)",
                     skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
-                    instructor_name="Suraj Kumar, HR & Manager",
+                    instructor_name="InternVision Certification Authority",
                     is_valid=True
                 ),
             ]
@@ -274,7 +274,7 @@ async def lifespan(app: FastAPI):
                     is_free=True,
                     price_inr=0,
                     thumbnail_url="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=1000&auto=format&fit=crop",
-                    instructor_name="Suraj Kumar",
+                    instructor_name="InternVision Lead Mentors",
                     instructor_role="Senior Engineering Lead & Mentor",
                     meeting_platform="Google Meet",
                     meeting_link="https://meet.google.com/ivt-git-live",
@@ -299,7 +299,7 @@ async def lifespan(app: FastAPI):
                     is_free=True,
                     price_inr=0,
                     thumbnail_url="https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=1000&auto=format&fit=crop",
-                    instructor_name="Tanish Dewase",
+                    instructor_name="Senior Cloud Architect",
                     instructor_role="Cloud DevOps Architect",
                     meeting_platform="Google Meet",
                     meeting_link="https://meet.google.com/ivt-dock-live",
@@ -340,8 +340,8 @@ async def lifespan(app: FastAPI):
         if db.query(BestIntern).count() == 0:
             sample_best_interns = [
                 BestIntern(
-                    student_name="Tanish Dewase",
-                    student_email="tanishdewase222@gmail.com",
+                    student_name="Aarav Sharma",
+                    student_email="aarav.sharma@example.com",
                     course="Full Stack Web Development",
                     month_year="September 2026",
                     award_title="⭐ Star Intern of the Month",
@@ -349,9 +349,9 @@ async def lifespan(app: FastAPI):
                     college="Government College of Engineering",
                     duration="3 Months",
                     project_name="AI-Powered Cloud Task Orchestration Platform",
-                    project_url="https://github.com/thetanish1/IV",
-                    github_url="https://github.com/thetanish1",
-                    linkedin_url="https://linkedin.com/in/tanish-dewase",
+                    project_url="https://github.com",
+                    github_url="https://github.com",
+                    linkedin_url="https://linkedin.com",
                     achievement_summary="Engineered end-to-end full stack architecture with Next.js 15, FastAPI asynchronous APIs, and real-time WebSocket state synchronizations. Delivered all milestones 2 weeks ahead of deadline with zero regression.",
                     testimonial="The virtual internship at InternVision Tech bridged the exact gap between college theory and enterprise-level production code. The mentor reviews were incredibly detailed!",
                     grade="Outstanding Distinction (Grade A+)",

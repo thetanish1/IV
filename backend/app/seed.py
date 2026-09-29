@@ -10,7 +10,7 @@ def seed_db():
     db = SessionLocal()
     try:
         admins_to_seed = [
-            ("tanishdewase222@gmail.com", "Tanish Dewase (Admin)"),
+            ("tanishdewase222@gmail.com", "InternVision Tech Admin"),
             ("admin@internvision.tech", "InternVision Admin")
         ]
         for admin_email, name in admins_to_seed:

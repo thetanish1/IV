@@ -558,7 +558,7 @@ export default function HomePage() {
           {(featuredInterns.length > 0 ? featuredInterns : [
             {
               id: 1,
-              student_name: "Tanish Dewase",
+              student_name: "Aarav Sharma",
               course: "Full Stack Web Development",
               month_year: "September 2026",
               award_title: "⭐ Star Intern of the Month",

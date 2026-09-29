@@ -505,7 +505,7 @@ export default function Navbar() {
               </Link>
 
               <div className="grid grid-cols-1 gap-3 pt-1">
-                {/* Only show admin portal on mobile if logged in as tanishdewase222@gmail.com */}
+                {/* Admin dashboard link on mobile for authenticated administrators */}
                 {isAdmin && (
                   <Link
                     href="/admin/dashboard"

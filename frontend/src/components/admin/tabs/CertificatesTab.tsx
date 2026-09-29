@@ -26,7 +26,7 @@ export default function CertificatesTab() {
     issue_date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
     grade: "Distinction (Grade A+)",
     skills_acquired: "Next.js 15, React 19, TypeScript, FastAPI, PostgreSQL",
-    instructor_name: "Suraj Kumar, HR & Manager",
+    instructor_name: "InternVision Certification Authority",
   };
   const [newCertForm, setNewCertForm] = useState(initialCertForm);
 
@@ -79,7 +79,7 @@ export default function CertificatesTab() {
         issue_date: newCertForm.issue_date.trim() || new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
         grade: newCertForm.grade.trim() || "Distinction (Grade A+)",
         skills_acquired: newCertForm.skills_acquired.split(",").map((s) => s.trim()).filter(Boolean),
-        instructor_name: newCertForm.instructor_name.trim() || "Suraj Kumar, HR & Manager",
+        instructor_name: newCertForm.instructor_name.trim() || "InternVision Certification Authority",
       };
 
       await apiRequest<CertificateItem>("/certificates", {
@@ -120,7 +120,7 @@ export default function CertificatesTab() {
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               Issue and manage official digital certificates signed by{" "}
-              <strong className="text-gray-800 dark:text-gray-200">Suraj Kumar, HR & Manager</strong>.
+              <strong className="text-gray-800 dark:text-gray-200">InternVision Certification Authority</strong>.
             </p>
           </div>
 

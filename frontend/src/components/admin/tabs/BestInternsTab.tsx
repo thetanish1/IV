@@ -736,7 +736,7 @@ export default function BestInternsTab() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Tanish Dewase"
+                    placeholder="e.g. Aarav Sharma"
                     value={formData.student_name || ""}
                     onChange={(e) => setFormData({ ...formData, student_name: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-ink-700 bg-gray-50 dark:bg-ink-900 text-gray-900 dark:text-white focus:outline-none focus:border-brand-500"
@@ -749,7 +749,7 @@ export default function BestInternsTab() {
                   </label>
                   <input
                     type="email"
-                    placeholder="e.g. tanish@example.com"
+                    placeholder="e.g. aarav@example.com"
                     value={formData.student_email || ""}
                     onChange={(e) => setFormData({ ...formData, student_email: e.target.value })}
                     className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 dark:border-ink-700 bg-gray-50 dark:bg-ink-900 text-gray-900 dark:text-white focus:outline-none focus:border-brand-500"

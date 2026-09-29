@@ -50,15 +50,15 @@ interface VerifiedCertificate {
 const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
   "IVT/JUN26/2026/0201": {
     certificate_id: "IVT/JUN26/2026/0201",
-    student_name: "Tanish Dewase",
-    student_email: "tanishdewase222@gmail.com",
+    student_name: "Aarav Sharma",
+    student_email: "aarav.sharma@example.com",
     program_title: "Java Developer",
     track_type: "Virtual Internship",
     duration: "1 Month",
     issue_date: "30 June 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Java", "SQL", "GitHub", "Git", "Docker"],
-    instructor_name: "Suraj Kumar, HR & Manager",
+    instructor_name: "InternVision Certification Authority",
     is_valid: true,
   },
   "IVT/JUN26/2026/0202": {
@@ -71,7 +71,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "30 June 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Basic HTML", "CSS", "JavaScript", "Git"],
-    instructor_name: "Suraj Kumar, HR & Manager",
+    instructor_name: "InternVision Certification Authority",
     is_valid: true,
   },
   "IVT/JUN26/2026/0203": {
@@ -84,7 +84,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "30 June 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Java", "SQL", "GitHub", "Git", "Docker"],
-    instructor_name: "Suraj Kumar, HR & Manager",
+    instructor_name: "InternVision Certification Authority",
     is_valid: true,
   },
   "IVT/JUN26/2026/0204": {
@@ -97,7 +97,7 @@ const FALLBACK_CERTIFICATES: Record<string, VerifiedCertificate> = {
     issue_date: "30 June 2026",
     grade: "Distinction (Grade A+)",
     skills_acquired: ["Java", "SQL", "GitHub", "Git", "Docker"],
-    instructor_name: "Suraj Kumar, HR & Manager",
+    instructor_name: "InternVision Certification Authority",
     is_valid: true,
   },
 };

@@ -90,7 +90,7 @@ def issue_certificate(
         issue_date=cert_in.issue_date.strip(),
         grade=cert_in.grade.strip(),
         skills_acquired=cert_in.skills_acquired,
-        instructor_name=cert_in.instructor_name or "Suraj Kumar, HR & Manager",
+        instructor_name=cert_in.instructor_name or "InternVision Certification Authority",
         is_valid=True
     )
     db.add(new_cert)

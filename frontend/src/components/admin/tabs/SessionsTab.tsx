@@ -104,7 +104,7 @@ export default function SessionsTab() {
   const [formIsFree, setFormIsFree] = useState(true);
   const [formPrice, setFormPrice] = useState(0);
   const [formThumbnail, setFormThumbnail] = useState("");
-  const [formInstructorName, setFormInstructorName] = useState("Suraj Kumar");
+  const [formInstructorName, setFormInstructorName] = useState("InternVision Lead Mentors");
   const [formInstructorRole, setFormInstructorRole] = useState("Senior Technical Mentor");
   const [formMeetingPlatform, setFormMeetingPlatform] = useState("Google Meet");
   const [formMeetingLink, setFormMeetingLink] = useState("");
@@ -145,7 +145,7 @@ export default function SessionsTab() {
     setFormIsFree(true);
     setFormPrice(0);
     setFormThumbnail("https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=1000&auto=format&fit=crop");
-    setFormInstructorName("Suraj Kumar");
+    setFormInstructorName("InternVision Lead Mentors");
     setFormInstructorRole("Senior Technical Mentor");
     setFormMeetingPlatform("Google Meet");
     setFormMeetingLink("https://meet.google.com/ivt-live");
@@ -924,7 +924,7 @@ export default function SessionsTab() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Suraj Kumar"
+                    placeholder="e.g. Lead Technical Mentor"
                     value={formInstructorName}
                     onChange={(e) => setFormInstructorName(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg text-xs bg-gray-50 dark:bg-ink-900 border border-gray-300 dark:border-ink-800 text-gray-900 dark:text-white focus:outline-none focus:border-brand-500"

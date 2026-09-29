@@ -80,7 +80,7 @@ def test_sessions_suite():
             "is_free": False,
             "price_inr": 199,
             "thumbnail_url": "https://images.unsplash.com/photo-1605745341112-85968b19335b",
-            "instructor_name": "Tanish Dewase",
+            "instructor_name": "Senior Cloud Architect",
             "instructor_role": "DevOps Architect",
             "meeting_platform": "Google Meet",
             "meeting_link": "https://meet.google.com/test-k8s",
