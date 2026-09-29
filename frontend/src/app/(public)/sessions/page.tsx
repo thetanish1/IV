@@ -435,7 +435,7 @@ export default function SessionsPage() {
         {filteredSessions.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-ink-900/40 border border-ink-800 space-y-4">
             <Video className="w-12 h-12 text-ink-500 mx-auto" />
-            <h3 className="text-lg font-bold text-white">No Live Sessions Found</h3>
+            <h3 className="text-lg font-bold text-white">No Sessions Found</h3>
             <p className="text-xs sm:text-sm text-ink-400 max-w-md mx-auto">
               We couldn&apos;t find any sessions matching &quot;{searchQuery}&quot;. Try adjusting your search query or
               filters.
@@ -586,12 +586,12 @@ export default function SessionsPage() {
       {/* BOOKING MODAL */}
       <AnimatePresence>
         {selectedSession && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-lg bg-ink-950 border border-ink-800 rounded-3xl shadow-2xl p-6 sm:p-8 my-8 overflow-hidden"
+              className="relative w-full max-w-2xl bg-ink-950 border border-ink-800 rounded-3xl shadow-2xl p-7 sm:p-10 my-8 overflow-hidden"
             >
               {/* Close button */}
               <button
@@ -599,7 +599,7 @@ export default function SessionsPage() {
                   setSelectedSession(null);
                   setConfirmedBooking(null);
                 }}
-                className="absolute top-4 right-4 p-2 rounded-full bg-ink-900 hover:bg-ink-800 text-ink-400 hover:text-white transition"
+                className="absolute top-5 right-5 p-2.5 rounded-full bg-ink-900 hover:bg-ink-800 text-ink-400 hover:text-white transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -607,23 +607,23 @@ export default function SessionsPage() {
               {!confirmedBooking ? (
                 // Booking Form View
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-brand-400 uppercase tracking-wider mb-2">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-brand-400 uppercase tracking-wider mb-2">
                     <Sparkles className="w-4 h-4" />
                     <span>Instant Seat Registration</span>
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 leading-tight">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">
                     {selectedSession.title}
                   </h3>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-ink-300 mb-6 bg-ink-900/70 p-3 rounded-xl border border-ink-800">
-                    <span className="flex items-center gap-1 text-white font-semibold">
-                      <Calendar className="w-3.5 h-3.5 text-brand-400" />
+                  <div className="flex flex-wrap items-center gap-3.5 text-xs sm:text-sm text-ink-300 mb-6 bg-ink-900/80 p-3.5 rounded-2xl border border-ink-800">
+                    <span className="flex items-center gap-1.5 text-white font-semibold">
+                      <Calendar className="w-4 h-4 text-brand-400" />
                       {selectedSession.session_date}
                     </span>
                     <span>&bull;</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-brand-400" />
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-brand-400" />
                       {selectedSession.session_time} ({selectedSession.duration})
                     </span>
                     <span>&bull;</span>
@@ -632,60 +632,60 @@ export default function SessionsPage() {
                     </span>
                   </div>
 
-                  <form onSubmit={handleBookingSubmit} className="space-y-4">
+                  <form onSubmit={handleBookingSubmit} className="space-y-5">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                      <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                         Full Name *
                       </label>
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Rahul Sharma"
+                        placeholder="e.g. Bob Smith"
                         value={studentName}
                         onChange={(e) => setStudentName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-ink-900 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 font-medium"
+                        className="w-full px-4 py-3.5 rounded-xl bg-ink-900 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                      <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                         Email Address (For ticket pass & meeting link) *
                       </label>
                       <input
                         type="email"
                         required
-                        placeholder="e.g. you@example.com"
+                        placeholder="e.g. bob@example.com"
                         value={studentEmail}
                         onChange={(e) => setStudentEmail(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-ink-900 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 font-medium"
+                        className="w-full px-4 py-3.5 rounded-xl bg-ink-900 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                        <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                           WhatsApp / Phone *
                         </label>
                         <input
                           type="tel"
                           required
-                          placeholder="+91 9876543210"
+                          placeholder="e.g. +91 9876543210"
                           value={studentPhone}
                           onChange={(e) => setStudentPhone(e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-ink-900 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500"
+                          className="w-full px-4 py-3.5 rounded-xl bg-ink-900 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                        <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                           College / Company
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g. IIT Bombay"
+                          placeholder="e.g. Indian Institute of Technology"
                           value={studentCollege}
                           onChange={(e) => setStudentCollege(e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-ink-900 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500"
+                          className="w-full px-4 py-3.5 rounded-xl bg-ink-900 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                         />
                       </div>
                     </div>
@@ -693,16 +693,16 @@ export default function SessionsPage() {
                     <button
                       type="submit"
                       disabled={bookingLoading}
-                      className="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-brand-600 hover:bg-brand-500 text-white transition shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 mt-4"
+                      className="w-full py-4 px-6 rounded-xl font-extrabold text-base bg-brand-600 hover:bg-brand-500 text-white transition shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 mt-6 cursor-pointer"
                     >
                       {bookingLoading ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                           <span>Reserving Seat...</span>
                         </>
                       ) : (
                         <>
-                          <CheckCircle2 className="w-4 h-4" />
+                          <CheckCircle2 className="w-5 h-5 text-white" />
                           <span>Confirm & Get Ticket Pass</span>
                         </>
                       )}

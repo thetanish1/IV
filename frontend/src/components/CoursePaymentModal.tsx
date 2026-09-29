@@ -461,7 +461,7 @@ export function CoursePaymentModal({
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Rahul Sharma"
+                    placeholder="e.g. Bob Smith"
                     value={formData.student_name}
                     onChange={(e) => setFormData({ ...formData, student_name: e.target.value })}
                     className="w-full bg-ink-900 border border-ink-700 px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-xs"
@@ -472,7 +472,7 @@ export function CoursePaymentModal({
                   <input
                     type="email"
                     required
-                    placeholder="e.g. rahul@gmail.com"
+                    placeholder="e.g. bob@example.com"
                     value={formData.student_email}
                     onChange={(e) => setFormData({ ...formData, student_email: e.target.value })}
                     className="w-full bg-ink-900 border border-ink-700 px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-xs"

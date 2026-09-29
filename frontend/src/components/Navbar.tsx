@@ -238,7 +238,7 @@ export default function Navbar() {
               }`}
             >
               <Video className="w-4 h-4 text-emerald-400" />
-              <span>Live Sessions</span>
+              <span>Sessions</span>
               <span className="px-1.5 py-0.2 text-[9px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full animate-pulse">
                 LIVE
               </span>
@@ -415,7 +415,7 @@ export default function Navbar() {
               >
                 <div className="flex items-center gap-2">
                   <Video className="w-4 h-4 text-emerald-400" />
-                  <span>Live Sessions</span>
+                  <span>Sessions</span>
                 </div>
                 <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full">
                   LIVE

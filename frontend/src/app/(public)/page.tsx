@@ -532,10 +532,10 @@ export default function HomePage() {
         transition={{ duration: 0.65 }}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"
       >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-l-4 border-amber-500 pl-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-l-4 border-blue-500 pl-6">
           <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-amber-400" /> Student Hall of Fame
+            <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5 text-blue-400" /> Student Hall of Fame
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight">
               Best Intern of the Month
@@ -547,7 +547,7 @@ export default function HomePage() {
 
           <Link
             href="/hall-of-fame"
-            className="px-6 py-3 font-bold bg-amber-500 hover:bg-amber-400 text-black text-xs uppercase tracking-wider rounded-lg transition shrink-0 flex items-center gap-2 shadow-lg hover:-translate-y-0.5"
+            className="px-6 py-3 font-bold bg-blue-600 hover:bg-blue-500 text-white text-xs uppercase tracking-wider rounded-lg transition shrink-0 flex items-center gap-2 shadow-lg shadow-blue-600/25 border border-blue-400/30 hover:-translate-y-0.5"
           >
             <Trophy className="w-4 h-4" /> View Full Hall of Fame <ArrowRight className="w-4 h-4" />
           </Link>
@@ -601,12 +601,12 @@ export default function HomePage() {
               <motion.div
                 key={intern.id}
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="glass-card p-7 rounded-2xl border border-ink-800 hover:border-amber-500/60 transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group shadow-xl"
+                className="glass-card p-7 rounded-2xl border border-blue-500/20 hover:border-blue-400 transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group shadow-xl"
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3.5">
-                      <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-ink-900 border-2 border-amber-400/60 shrink-0 shadow-md">
+                      <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-ink-900 border-2 border-blue-400 shrink-0 shadow-md">
                         {displayImg ? (
                           <Image
                             src={displayImg}
@@ -615,42 +615,42 @@ export default function HomePage() {
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-amber-400 text-xl bg-gradient-to-br from-amber-500/20 to-brand-500/20">
+                          <div className="w-full h-full flex items-center justify-center font-bold text-blue-300 text-xl bg-blue-600/20">
                             {intern.student_name.charAt(0)}
                           </div>
                         )}
                       </div>
 
                       <div className="min-w-0">
-                        <h3 className="font-bold text-base text-white group-hover:text-amber-300 transition-colors truncate">
+                        <h3 className="font-bold text-base text-white group-hover:text-blue-300 transition-colors truncate">
                           {intern.student_name}
                         </h3>
-                        <p className="text-xs text-brand-400 font-medium truncate">
+                        <p className="text-xs text-blue-400 font-medium truncate">
                           {intern.course}
                         </p>
                         <p className="text-[11px] text-ink-400 truncate flex items-center gap-1 mt-0.5">
-                          <GraduationCap className="w-3 h-3 shrink-0" />
+                          <GraduationCap className="w-3 h-3 shrink-0 text-blue-300" />
                           <span className="truncate">{intern.college || "College / University"}</span>
                         </p>
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 shrink-0">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">
                       {intern.month_year}
                     </span>
                   </div>
 
-                  <div className="px-3 py-1.5 rounded-lg bg-ink-900/90 border border-ink-800 text-xs font-semibold text-ink-200 flex items-center justify-between">
+                  <div className="px-3 py-1.5 rounded-lg bg-ink-900/90 border border-blue-500/20 text-xs font-semibold text-ink-200 flex items-center justify-between">
                     <span className="truncate">{intern.award_title || "Star Intern of the Month"}</span>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded border border-blue-400/20">
                       {intern.grade || "Grade A+"}
                     </span>
                   </div>
 
                   {intern.project_name && (
                     <div className="space-y-1">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-ink-500">
-                        Capstone Project
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
+                        Flagship Project
                       </div>
                       <p className="text-xs font-semibold text-white line-clamp-2">
                         {intern.project_name}
@@ -665,13 +665,13 @@ export default function HomePage() {
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-ink-800/80 flex items-center justify-between">
+                <div className="pt-4 border-t border-blue-500/20 flex items-center justify-between">
                   <span className="text-[11px] text-ink-400 font-medium">
                     Duration: {intern.duration || "1-3 Months"}
                   </span>
                   <Link
                     href="/hall-of-fame"
-                    className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 transition"
+                    className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition"
                   >
                     View Story <ArrowRight className="w-3.5 h-3.5" />
                   </Link>

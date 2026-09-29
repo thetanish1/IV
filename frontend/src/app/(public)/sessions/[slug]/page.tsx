@@ -211,7 +211,7 @@ export default function SingleSessionSharablePage({
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            Explore All Live Sessions
+            Explore All Sessions
           </Link>
         </div>
       </div>
@@ -448,82 +448,82 @@ export default function SingleSessionSharablePage({
 
               {!confirmedBooking ? (
                 // Booking Form
-                <form onSubmit={handleBookingSubmit} className="space-y-4 pt-2">
+                <form onSubmit={handleBookingSubmit} className="space-y-5 pt-2">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                       Full Name *
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Rahul Sharma"
+                      placeholder="e.g. Bob Smith"
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-ink-950 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 font-medium"
+                      className="w-full px-4 py-3.5 rounded-xl bg-ink-950 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                       Email Address *
                     </label>
                     <input
                       type="email"
                       required
-                      placeholder="you@example.com"
+                      placeholder="e.g. bob@example.com"
                       value={studentEmail}
                       onChange={(e) => setStudentEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-ink-950 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 font-medium"
+                      className="w-full px-4 py-3.5 rounded-xl bg-ink-950 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                       WhatsApp / Phone *
                     </label>
                     <input
                       type="tel"
                       required
-                      placeholder="+91 9876543210"
+                      placeholder="e.g. +91 9876543210"
                       value={studentPhone}
                       onChange={(e) => setStudentPhone(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-ink-950 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500"
+                      className="w-full px-4 py-3.5 rounded-xl bg-ink-950 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-ink-200 mb-1.5">
                       College / Company (Optional)
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. IIT Bombay"
+                      placeholder="e.g. Indian Institute of Technology"
                       value={studentCollege}
                       onChange={(e) => setStudentCollege(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-ink-950 border border-ink-800 text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500"
+                      className="w-full px-4 py-3.5 rounded-xl bg-ink-950 border border-ink-700 text-sm sm:text-base text-white focus:outline-none focus:border-brand-500 font-medium placeholder-ink-400 shadow-inner"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={bookingLoading}
-                    className="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-brand-600 hover:bg-brand-500 text-white transition shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 mt-4"
+                    className="w-full py-4 px-6 rounded-xl font-extrabold text-base bg-brand-600 hover:bg-brand-500 text-white transition shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 mt-6 cursor-pointer"
                   >
                     {bookingLoading ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         <span>Confirming Seat...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="w-4 h-4" />
+                        <CheckCircle2 className="w-5 h-5" />
                         <span>{session.is_free ? "Register Free Seat" : `Pay ₹${session.price_inr} & Book`}</span>
                       </>
                     )}
                   </button>
 
-                  <p className="text-[10px] text-center text-ink-400">
-                    Instant confirmation ticket will be generated & dispatched to your email.
+                  <p className="text-xs text-center text-ink-400 pt-1">
+                    Instant confirmation ticket will be generated &amp; dispatched to your email.
                   </p>
                 </form>
               ) : (
