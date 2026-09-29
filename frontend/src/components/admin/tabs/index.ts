@@ -10,3 +10,5 @@ export { CourseEnrollmentsTab } from "./CourseEnrollmentsTab";
 export { PaymentsAuditTab } from "./PaymentsAuditTab";
 export { default as BrandedMailerTab } from "./BrandedMailerTab";
 export { SettingsIAMTab } from "./SettingsIAMTab";
+export { default as SessionsTab } from "./SessionsTab";
+export { default as BestInternsTab } from "./BestInternsTab";

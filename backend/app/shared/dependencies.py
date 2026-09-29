@@ -12,12 +12,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 ROLE_PERMISSIONS_MAP = {
     "super_admin": [
-        "overview", "applications", "submissions", "unlocks", "doubts",
+        "overview", "sessions", "best_interns", "applications", "submissions", "unlocks", "doubts",
         "users", "enrollments", "payments", "certificates", "contacts",
         "mailer", "settings"
     ],
     "full_sub_admin": [
-        "overview", "applications", "submissions", "unlocks", "doubts",
+        "overview", "sessions", "best_interns", "applications", "submissions", "unlocks", "doubts",
         "users", "enrollments", "payments", "certificates", "contacts", "mailer"
     ],
     "finance_manager": [

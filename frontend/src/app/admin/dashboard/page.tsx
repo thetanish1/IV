@@ -16,6 +16,8 @@ import {
   LayoutDashboard,
   Mail,
   MessageSquare,
+  Video,
+  Trophy,
 } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
 import { trackAdminAction } from "@/lib/admin-telemetry";
@@ -107,6 +109,14 @@ const SettingsIAMTab = dynamic(
   () => import("@/components/admin/tabs/SettingsIAMTab").then((m) => m.SettingsIAMTab),
   { loading: TabLoadingSkeleton }
 );
+const SessionsTab = dynamic(
+  () => import("@/components/admin/tabs/SessionsTab"),
+  { loading: TabLoadingSkeleton }
+);
+const BestInternsTab = dynamic(
+  () => import("@/components/admin/tabs/BestInternsTab"),
+  { loading: TabLoadingSkeleton }
+);
 
 const apiBase = (
   process.env.NEXT_PUBLIC_API_URL ||
@@ -122,6 +132,8 @@ const getResumeUrl = (filename?: string | null) => {
 
 export type TabKey =
   | "overview"
+  | "sessions"
+  | "best_interns"
   | "applicants"
   | "submissions"
   | "unlocks"
@@ -581,6 +593,8 @@ function AdminDashboardContent() {
 
   const TAB_PERMISSION_MAP: Record<TabKey, string> = {
     overview: "overview",
+    sessions: "overview",
+    best_interns: "overview",
     applicants: "applications",
     submissions: "submissions",
     unlocks: "unlocks",
@@ -611,6 +625,13 @@ function AdminDashboardContent() {
       {
         groupTitle: "Internships & Portal",
         items: [
+          {
+            key: "best_interns",
+            label: "Best Interns (Hall of Fame)",
+            icon: <Trophy className="w-4 h-4 text-amber-500" />,
+            badge: "Star",
+            perm: "overview",
+          },
           {
             key: "applicants",
             label: "Applications",
@@ -645,6 +666,13 @@ function AdminDashboardContent() {
       {
         groupTitle: "Academics & Operations",
         items: [
+          {
+            key: "sessions",
+            label: "Live Sessions",
+            icon: <Video className="w-4 h-4" />,
+            badge: "Live",
+            perm: "overview",
+          },
           {
             key: "enrollments",
             label: "Course Enrollments",
@@ -692,6 +720,16 @@ function AdminDashboardContent() {
       title: "Overview",
       subtitle: "Platform KPI telemetry, analytics summaries, and live system status.",
       icon: <LayoutDashboard className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
+    },
+    sessions: {
+      title: "Live Sessions & Workshops",
+      subtitle: "Add, edit, and schedule live workshops, configure pricing & thumbnail banner, and manage participant registrations.",
+      icon: <Video className="w-5 h-5 text-brand-600 dark:text-brand-400" />,
+    },
+    best_interns: {
+      title: "Best Intern of the Month (Hall of Fame)",
+      subtitle: "Manage star performer recognitions, capstone showcase projects, photo uploads, and homepage spotlight.",
+      icon: <Trophy className="w-5 h-5 text-amber-500" />,
     },
     applicants: {
       title: "Applications",
@@ -823,6 +861,9 @@ function AdminDashboardContent() {
                       hasPermission={hasPermission}
                     />
                   )}
+
+                  {activeTab === "sessions" && <SessionsTab />}
+                  {activeTab === "best_interns" && <BestInternsTab />}
 
                   {activeTab === "applicants" && (
                     <ApplicantsTab
