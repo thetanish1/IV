@@ -558,43 +558,30 @@ export default function HomePage() {
           {(featuredInterns.length > 0 ? featuredInterns : [
             {
               id: 1,
-              student_name: "Aarav Sharma",
+              student_name: "Alice",
               course: "Full Stack Web Development",
               month_year: "September 2026",
               award_title: "⭐ Star Intern of the Month",
               image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-              college: "Government College of Engineering",
+              college: "Institute of Engineering",
               duration: "3 Months",
               project_name: "AI-Powered Task Orchestration System",
-              achievement_summary: "Engineered full stack architecture with Next.js 15 and FastAPI asynchronous services. Delivered milestones 2 weeks ahead of schedule.",
+              achievement_summary: "Engineered full stack architecture with Next.js 15 and FastAPI asynchronous services. Delivered milestones ahead of schedule.",
               grade: "Distinction (Grade A+)",
             },
             {
               id: 2,
-              student_name: "Neha Mahule",
+              student_name: "Bob",
               course: "AI & Machine Learning Engineering",
               month_year: "September 2026",
               award_title: "🏆 Best Technical Contributor",
               image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop",
-              college: "Savitribai Phule Pune University",
+              college: "University of Technology",
               duration: "2 Months",
               project_name: "Multimodal Medical Diagnostic AI Agent",
               achievement_summary: "Fine-tuned open-source LLMs using PyTorch and built high-throughput inference microservices with LangChain vector embeddings.",
               grade: "Distinction (Grade A+)",
             },
-            {
-              id: 3,
-              student_name: "Jay Doble",
-              course: "Java & Enterprise Spring Boot",
-              month_year: "August 2026",
-              award_title: "🎖️ High Performance Engineering Award",
-              image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
-              college: "MIT World Peace University",
-              duration: "2 Months",
-              project_name: "Distributed Fintech Payment Gateway",
-              achievement_summary: "Constructed multi-threaded Java 21 Spring Boot microservices with Redis caching and automated JUnit test pipelines.",
-              grade: "Distinction (Grade A+)",
-            }
           ]).slice(0, 3).map((intern, idx) => {
             const displayImg = intern.image_url ? getImageUrl(intern.image_url) : null;
             return (

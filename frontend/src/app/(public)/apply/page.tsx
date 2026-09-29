@@ -786,7 +786,7 @@ export default function InternshipApplyPage() {
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g. Aarav Sharma"
+                          placeholder="e.g. Alice"
                           value={fallbackGoogleName}
                           onChange={(e) => setFallbackGoogleName(e.target.value)}
                           className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 text-sm"
@@ -838,7 +838,7 @@ export default function InternshipApplyPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Aarav Sharma"
+                        placeholder="e.g. Alice"
                         value={authFullName}
                         onChange={(e) => setAuthFullName(e.target.value)}
                         className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500"
@@ -956,7 +956,7 @@ export default function InternshipApplyPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Aarav Sharma"
+                  placeholder="e.g. Alice"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
@@ -970,7 +970,7 @@ export default function InternshipApplyPage() {
                 <input
                   type="email"
                   required
-                  placeholder="aarav.sharma@example.com"
+                  placeholder="alice@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"

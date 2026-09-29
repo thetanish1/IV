@@ -27,7 +27,7 @@ ALTER TABLE admins ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
 -- Seed Default Superadmin (Password: Admin@123456)
 INSERT INTO admins (email, hashed_password, full_name, is_active, role, permissions)
 VALUES (
-    'tanishdewase222@gmail.com',
+    'admin@internvision.tech',
     '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
     'InternVision Admin',
     TRUE,
@@ -239,8 +239,8 @@ INSERT INTO certificates (certificate_id, student_name, student_email, program_t
 VALUES
 (
     'IVT/JUN26/2026/0201',
-    'Aarav Sharma',
-    'aarav.sharma@example.com',
+    'Alice',
+    'alice@example.com',
     'Java Developer',
     'Virtual Internship',
     '1 Month',
@@ -252,40 +252,14 @@ VALUES
 ),
 (
     'IVT/JUN26/2026/0202',
-    'Neha Mahule',
-    'nehamahule28@gmail.com',
+    'Bob',
+    'bob@example.com',
     'Web Developer',
     'Virtual Internship',
     '1 Month',
     '30 June 2026',
     'Distinction (Grade A+)',
     '["Basic HTML", "CSS", "JavaScript", "Git"]'::jsonb,
-    'InternVision Certification Authority',
-    TRUE
-),
-(
-    'IVT/JUN26/2026/0203',
-    'Jay Doble',
-    'jaydoble56@gmail.com',
-    'Java Developer',
-    'Virtual Internship',
-    '1 Month',
-    '30 June 2026',
-    'Distinction (Grade A+)',
-    '["Java", "SQL", "GitHub", "Git", "Docker"]'::jsonb,
-    'InternVision Certification Authority',
-    TRUE
-),
-(
-    'IVT/JUN26/2026/0204',
-    'Paridhi Kshirsagar',
-    'paridhikshirsagar16@gmail.com',
-    'Java Developer',
-    'Virtual Internship',
-    '1 Month',
-    '30 June 2026',
-    'Distinction (Grade A+)',
-    '["Java", "SQL", "GitHub", "Git", "Docker"]'::jsonb,
     'InternVision Certification Authority',
     TRUE
 )

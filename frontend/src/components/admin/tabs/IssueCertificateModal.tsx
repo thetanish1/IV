@@ -118,7 +118,7 @@ export default function IssueCertificateModal({
               <input
                 type="text"
                 required
-                placeholder="e.g. Aarav Sharma"
+                placeholder="e.g. Alice"
                 value={form.student_name}
                 onChange={(e) => setForm({ ...form, student_name: e.target.value })}
                 className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
@@ -130,7 +130,7 @@ export default function IssueCertificateModal({
               <input
                 type="email"
                 required
-                placeholder="e.g. aarav.sharma@example.com"
+                placeholder="e.g. alice@example.com"
                 value={form.student_email}
                 onChange={(e) => setForm({ ...form, student_email: e.target.value })}
                 className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"

@@ -9,11 +9,11 @@ def test_system():
     print("RUNNING END-TO-END VERIFICATION")
     print("=" * 60)
 
-    # 1. Admin Login with tanishdewase222@gmail.com
-    print("\n[TEST 1] Admin Authentication with tanishdewase222@gmail.com")
+    # 1. Admin Login with admin@internvision.tech
+    print("\n[TEST 1] Admin Authentication with admin@internvision.tech")
     admin_login_res = requests.post(
         f"{BASE_URL}/auth/login",
-        data={"username": "tanishdewase222@gmail.com", "password": "Admin@123456"},
+        data={"username": "admin@internvision.tech", "password": "Admin@123456"},
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
     assert admin_login_res.status_code == 200, f"Admin login failed: {admin_login_res.text}"
@@ -30,7 +30,7 @@ def test_system():
             "credential": "mock_token",
             "email": user_email,
             "password": user_password,
-            "full_name": "Rohan Sharma"
+            "full_name": "Alice"
         }
     )
     assert user_auth_res.status_code == 200, f"Google+password auth failed: {user_auth_res.text}"
@@ -39,10 +39,10 @@ def test_system():
 
     # 3. Resume File Upload
     print("\n[TEST 3] Resume File Upload")
-    dummy_pdf_content = b"%PDF-1.4 dummy resume content for Rohan Sharma\n%%EOF"
+    dummy_pdf_content = b"%PDF-1.4 dummy resume content for Alice\n%%EOF"
     upload_res = requests.post(
         f"{BASE_URL}/applications/upload-resume",
-        files={"file": ("rohan_sharma_resume.pdf", dummy_pdf_content, "application/pdf")}
+        files={"file": ("alice_resume.pdf", dummy_pdf_content, "application/pdf")}
     )
     assert upload_res.status_code == 200, f"Resume upload failed: {upload_res.text}"
     resume_data = upload_res.json()
@@ -60,18 +60,18 @@ def test_system():
     print("\n[TEST 5] Internship Application Submission with Professional Description")
     app_payload = {
         "google_email": user_email,
-        "full_name": "Rohan Sharma",
+        "full_name": "Alice",
         "email": user_email,
-        "phone": "+91 9876543210",
-        "college": "Pune Institute of Computer Technology",
-        "degree": "B.E. Computer Engineering",
+        "phone": "+1 555-019-2834",
+        "college": "Institute of Technology",
+        "degree": "B.S. Computer Engineering",
         "year_of_study": "3rd Year",
         "skills": ["React", "Next.js", "Python", "FastAPI", "PostgreSQL"],
         "duration": "3 Months",
         "role_preference": "Full Stack Web Development",
-        "linkedin_url": "https://linkedin.com/in/rohansharma",
-        "github_url": "https://github.com/rohansharma",
-        "portfolio_url": "https://rohansharma.dev",
+        "linkedin_url": "https://linkedin.com/in/alice-dev",
+        "github_url": "https://github.com/alice-dev",
+        "portfolio_url": "https://alice.dev",
         "experience_description": "Built full-stack applications with Next.js 15 and FastAPI. Designed relational schemas and REST APIs.",
         "cover_letter": "Passionate about full-stack engineering and building high-performance production products.",
         "resume_filename": resume_filename

@@ -12,7 +12,7 @@ def run_tests():
     print("\n[TEST 1] Admin Authentication")
     res = client.post(
         "/api/auth/login",
-        data={"username": "tanishdewase222@gmail.com", "password": "Admin@123456"}
+        data={"username": "admin@internvision.tech", "password": "Admin@123456"}
     )
     assert res.status_code == 200, f"Admin login failed: {res.text}"
     admin_token = res.json()["access_token"]
@@ -22,7 +22,7 @@ def run_tests():
     print("\n[TEST 2] Student Google Sign-in with Password Setup")
     user_email = "applicant.candidate@gmail.com"
     user_password = "SecurePassword2026!"
-    user_name = "Candidate Verma"
+    user_name = "Alice"
 
     user_res = client.post(
         "/api/auth/user/google-with-password",

@@ -4,15 +4,19 @@ from app.auth.models import Admin
 from app.courses.models import Course, CourseRegistration
 from app.internship.models import InternshipApplication
 from app.payments.models import Payment
+from app.core.config import settings
 
 def seed_db():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         admins_to_seed = [
-            ("tanishdewase222@gmail.com", "InternVision Tech Admin"),
-            ("admin@internvision.tech", "InternVision Admin")
+            ("admin@internvision.tech", "InternVision Super Admin"),
+            ("admin@internvisiontech.me", "InternVision Super Admin"),
         ]
+        if settings.ADMIN_EMAIL:
+            admins_to_seed.append((settings.ADMIN_EMAIL, "InternVision Super Admin"))
+
         for admin_email, name in admins_to_seed:
             existing_admin = db.query(Admin).filter(Admin.email == admin_email).first()
             if not existing_admin:
@@ -20,7 +24,8 @@ def seed_db():
                     email=admin_email,
                     hashed_password=get_password_hash("Admin@123456"),
                     full_name=name,
-                    is_active=True
+                    is_active=True,
+                    role="super_admin"
                 )
                 db.add(admin)
                 print(f"[SEED] Created Admin: {admin_email} / Admin@123456")
@@ -74,10 +79,10 @@ def seed_db():
         if db.query(InternshipApplication).count() == 0:
             sample_apps = [
                 InternshipApplication(
-                    full_name="Aarav Sharma",
-                    email="aarav.sharma@example.com",
+                    full_name="Alice",
+                    email="alice@example.com",
                     phone="+91 9876543210",
-                    college="IIT Bombay",
+                    college="Institute of Technology",
                     degree="B.Tech Computer Science",
                     year_of_study="3rd Year",
                     skills=["React", "Node.js", "Python"],
@@ -85,27 +90,16 @@ def seed_db():
                     status="pending"
                 ),
                 InternshipApplication(
-                    full_name="Priya Patel",
-                    email="priya.patel@example.com",
+                    full_name="Bob",
+                    email="bob@example.com",
                     phone="+91 9812345678",
-                    college="BITS Pilani",
+                    college="University of Engineering",
                     degree="B.E. Information Technology",
                     year_of_study="4th Year",
                     skills=["FastAPI", "PostgreSQL", "Docker"],
                     duration="2 Months",
                     status="accepted"
                 ),
-                InternshipApplication(
-                    full_name="Rohan Verma",
-                    email="rohan.verma@example.com",
-                    phone="+91 9765432109",
-                    college="NIT Trichy",
-                    degree="B.Tech Mechanical Engineering",
-                    year_of_study="2nd Year",
-                    skills=["Python", "HTML/CSS", "Git"],
-                    duration="1 Month",
-                    status="pending"
-                )
             ]
             db.add_all(sample_apps)
             print(f"[SEED] Seeded {len(sample_apps)} sample internship applications")

@@ -60,7 +60,7 @@ Under **Environment Variables**, add:
 | `SECRET_KEY` | *(Generate a random 64-character string)* | JWT Signing key |
 | `ALGORITHM` | `HS256` | JWT Algorithm |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `10080` | Token expiration (7 days) |
-| `ADMIN_EMAIL` | `tanishdewase222@gmail.com` | Superadmin Email |
+| `ADMIN_EMAIL` | `admin@internvision.tech` | Superadmin Email |
 | `ADMIN_PASSWORD` | `Admin@123456` | Superadmin Initial Password |
 | `BACKEND_CORS_ORIGINS` | `https://yourdomain.online,https://www.yourdomain.online,https://your-app.vercel.app` | Allowed CORS origins |
 | `DATABASE_URL` | `sqlite:///./sql_app.db` *(or PostgreSQL connection string)* | Database URI |

@@ -20,8 +20,8 @@ from app.shared.email_service import (
     _build_base_email_template,
 )
 
-TARGET_EMAIL = "pathadesuraj75@gmail.com"
-TARGET_NAME = "InternVision Candidate"
+TARGET_EMAIL = "bob@example.com"
+TARGET_NAME = "Bob"
 
 print(f"===========================================================")
 print(f"INTERNVISION TECH - SENDING ALL TEST EMAILS TO: {TARGET_EMAIL}")

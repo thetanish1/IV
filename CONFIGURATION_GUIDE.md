@@ -113,7 +113,7 @@ InternVision Tech integrates **Cashfree Payment Gateway** ([merchant.cashfree.co
 ## 5. Superadmin Access
 
 - **Admin Login Route**: `/admin/login`
-- **Superadmin Email**: `tanishdewase222@gmail.com`
+- **Superadmin Email**: `admin@internvision.tech`
 - **Default Password**: `Admin@123456`
 - Once logged in, the **Admin Portal** button unlocks on the Navbar with full access to:
   - Total applicants and applications management.

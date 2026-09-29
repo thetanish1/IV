@@ -41,10 +41,8 @@ def get_admin_for_export(
     if not admin:
         # Fallback for known super admin emails if needed
         KNOWN_SUPER_ADMIN_EMAILS = [
-            "pathadesuraj75@gmail.com",
             "admin@internvisiontech.me",
             "admin@internvision.tech",
-            "tanishdewase222@gmail.com",
             "internvisiontechhr@gmail.com",
             "hr@internvisiontech.me",
             "support@internvisiontech.me",

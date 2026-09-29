@@ -35,7 +35,7 @@ async def run_student_full_lifecycle_test():
             {
                 "email": f"student_1m_{int(time.time())}@internvision.tech",
                 "password": "Password1Month!",
-                "name": "Aarav Sharma (1M Track)",
+                "name": "Alice (1M Track)",
                 "duration": "1 Month",
                 "role": "Full Stack Web Development",
                 "track": "1 Month Full-Stack",
@@ -43,7 +43,7 @@ async def run_student_full_lifecycle_test():
             {
                 "email": f"student_2m_{int(time.time())}@internvision.tech",
                 "password": "Password2Month!",
-                "name": "Rohan Gupta (2M Track)",
+                "name": "Bob (2M Track)",
                 "duration": "2 Months",
                 "role": "Full Stack Web Development",
                 "track": "2 Months Full-Stack",
@@ -51,7 +51,7 @@ async def run_student_full_lifecycle_test():
             {
                 "email": f"student_3m_{int(time.time())}@internvision.tech",
                 "password": "Password3Month!",
-                "name": "Priya Patel (3M Track)",
+                "name": "Charlie (3M Track)",
                 "duration": "3 Months",
                 "role": "AI & Machine Learning Engineering",
                 "track": "3 Months AI/ML",

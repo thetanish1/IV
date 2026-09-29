@@ -688,7 +688,7 @@ export default function BrandedMailerTab() {
                   type="text"
                   value={greetingName}
                   onChange={(e) => setGreetingName(e.target.value)}
-                  placeholder="e.g. Aarav Sharma (Dear {name},)"
+                  placeholder="e.g. Alice (Dear {name},)"
                   className="w-full bg-white dark:bg-[#1F1F23] border border-gray-300 dark:border-[#2E2E33] focus:border-blue-500 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
                 />
               </div>

@@ -21,10 +21,8 @@ from sqlalchemy import func
 # ─── Admin Login ─────────────────────────────────────────────────────────────
 
 KNOWN_SUPER_ADMINS = {
-    "pathadesuraj75@gmail.com": "Operations Lead (Super Admin)",
     "admin@internvisiontech.me": "InternVision Super Admin",
     "admin@internvision.tech": "InternVision Super Admin",
-    "tanishdewase222@gmail.com": "Tech Lead (Super Admin)",
     "internvisiontechhr@gmail.com": "InternVision HR & Super Admin",
     "hr@internvisiontech.me": "InternVision HR & Super Admin",
     "support@internvisiontech.me": "InternVision Support & Super Admin",

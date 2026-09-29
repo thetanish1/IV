@@ -70,9 +70,7 @@ async def lifespan(app: FastAPI):
         ]
 
         admins_to_seed = [
-            ("pathadesuraj75@gmail.com", "Operations Lead (Super Admin)"),
             ("admin@internvisiontech.me", "InternVision Super Admin"),
-            ("tanishdewase222@gmail.com", "Tech Lead (Super Admin)"),
             ("admin@internvision.tech", "InternVision Super Admin"),
             ("internvisiontechhr@gmail.com", "InternVision HR & Super Admin"),
             ("hr@internvisiontech.me", "InternVision HR & Super Admin"),
@@ -81,6 +79,9 @@ async def lifespan(app: FastAPI):
             ("billing@internvisiontech.me", "InternVision Billing & Super Admin"),
             ("contact@internvisiontech.me", "InternVision Contact & Super Admin"),
         ]
+        if settings.ADMIN_EMAIL:
+            admins_to_seed.append((settings.ADMIN_EMAIL, "InternVision Super Admin"))
+
         from sqlalchemy import func
         for email, name in admins_to_seed:
             email_clean = email.strip().lower()
@@ -196,211 +197,6 @@ async def lifespan(app: FastAPI):
                 db.add(course_item)
             else:
                 existing.price_inr = 1
-
-        # Seed sample verified certificates if none exist
-        if db.query(Certificate).count() == 0:
-            sample_certs = [
-                Certificate(
-                    certificate_id="IVT/JUN26/2026/0201",
-                    student_name="Aarav Sharma",
-                    student_email="aarav.sharma@example.com",
-                    program_title="Java Developer",
-                    track_type="Virtual Internship",
-                    duration="1 Month",
-                    issue_date="30 June 2026",
-                    grade="Distinction (Grade A+)",
-                    skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
-                    instructor_name="InternVision Certification Authority",
-                    is_valid=True
-                ),
-                Certificate(
-                    certificate_id="IVT/JUN26/2026/0202",
-                    student_name="Neha Mahule",
-                    student_email="nehamahule28@gmail.com",
-                    program_title="Web Developer",
-                    track_type="Virtual Internship",
-                    duration="1 Month",
-                    issue_date="30 June 2026",
-                    grade="Distinction (Grade A+)",
-                    skills_acquired=["Basic HTML", "CSS", "JavaScript", "Git"],
-                    instructor_name="InternVision Certification Authority",
-                    is_valid=True
-                ),
-                Certificate(
-                    certificate_id="IVT/JUN26/2026/0203",
-                    student_name="Jay Doble",
-                    student_email="jaydoble56@gmail.com",
-                    program_title="Java Developer",
-                    track_type="Virtual Internship",
-                    duration="1 Month",
-                    issue_date="30 June 2026",
-                    grade="Distinction (Grade A+)",
-                    skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
-                    instructor_name="InternVision Certification Authority",
-                    is_valid=True
-                ),
-                Certificate(
-                    certificate_id="IVT/JUN26/2026/0204",
-                    student_name="Paridhi Kshirsagar",
-                    student_email="paridhikshirsagar16@gmail.com",
-                    program_title="Java Developer",
-                    track_type="Virtual Internship",
-                    duration="1 Month",
-                    issue_date="30 June 2026",
-                    grade="Distinction (Grade A+)",
-                    skills_acquired=["Java", "SQL", "GitHub", "Git", "Docker"],
-                    instructor_name="InternVision Certification Authority",
-                    is_valid=True
-                ),
-            ]
-            db.add_all(sample_certs)
-
-        # Seed sample live sessions if none exist
-        if db.query(LiveSession).count() == 0:
-            sample_sessions = [
-                LiveSession(
-                    title="GitHub Mastery & Open Source Engineering",
-                    slug="github-mastery-open-source-engineering",
-                    description="Master enterprise Git workflows, GitHub Actions CI/CD automation, pull request reviews, and building impactful open-source contributions to jumpstart your engineering career.",
-                    key_takeaways=[
-                        "Advanced Git branching, rebasing, stash management, and resolving complex merge conflicts",
-                        "Building automated CI/CD workflows with GitHub Actions & automated test runners",
-                        "Crafting high-impact GitHub portfolios and open source repositories",
-                        "Best practices for production Pull Request reviews and team collaboration"
-                    ],
-                    session_date="Saturday, 25 Oct 2026",
-                    session_time="06:00 PM IST",
-                    duration="90 Mins",
-                    is_free=True,
-                    price_inr=0,
-                    thumbnail_url="https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=1000&auto=format&fit=crop",
-                    instructor_name="InternVision Lead Mentors",
-                    instructor_role="Senior Engineering Lead & Mentor",
-                    meeting_platform="Google Meet",
-                    meeting_link="https://meet.google.com/ivt-git-live",
-                    max_seats=200,
-                    category="Git & Open Source",
-                    tags=["GitHub", "Git", "Open Source", "CI/CD", "DevOps"],
-                    is_published=True
-                ),
-                LiveSession(
-                    title="Docker & Kubernetes Containerization Deep Dive",
-                    slug="docker-kubernetes-containerization-deep-dive",
-                    description="From zero to production microservices deployment: Learn multi-stage Docker builds, container orchestration, Kubernetes pods, deployments, and cloud scalability.",
-                    key_takeaways=[
-                        "Writing ultra-lightweight multi-stage Dockerfiles for Node.js and Python applications",
-                        "Multi-container orchestration with Docker Compose & networking",
-                        "Core Kubernetes primitives: Pods, Services, Deployments, ConfigMaps, and Ingress",
-                        "Zero-downtime rolling updates and microservices scaling"
-                    ],
-                    session_date="Sunday, 26 Oct 2026",
-                    session_time="05:30 PM IST",
-                    duration="2 Hours",
-                    is_free=True,
-                    price_inr=0,
-                    thumbnail_url="https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=1000&auto=format&fit=crop",
-                    instructor_name="Senior Cloud Architect",
-                    instructor_role="Cloud DevOps Architect",
-                    meeting_platform="Google Meet",
-                    meeting_link="https://meet.google.com/ivt-dock-live",
-                    max_seats=150,
-                    category="Cloud & DevOps",
-                    tags=["Docker", "Kubernetes", "DevOps", "Microservices", "Containers"],
-                    is_published=True
-                ),
-                LiveSession(
-                    title="Full Stack Architecture with Next.js 15 & FastAPI",
-                    slug="fullstack-nextjs15-fastapi-architecture",
-                    description="Build enterprise-ready web applications using React Server Components, Next.js 15 App Router, high-throughput asynchronous Python FastAPI, and PostgreSQL.",
-                    key_takeaways=[
-                        "Architecting scalable Next.js 15 App Router with SSR, SSG, and Streaming",
-                        "High-speed Async REST API design and Pydantic V2 validation in FastAPI",
-                        "PostgreSQL connection pooling, database migrations, and caching strategies",
-                        "Securing applications with JWT, RBAC, and rate limiting"
-                    ],
-                    session_date="Saturday, 01 Nov 2026",
-                    session_time="07:00 PM IST",
-                    duration="2.5 Hours",
-                    is_free=False,
-                    price_inr=99,
-                    thumbnail_url="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop",
-                    instructor_name="InternVision Tech Mentorship Team",
-                    instructor_role="Principal Full Stack Architect",
-                    meeting_platform="Google Meet",
-                    meeting_link="https://meet.google.com/ivt-fullstack-live",
-                    max_seats=100,
-                    category="Web Development",
-                    tags=["Next.js 15", "FastAPI", "React", "TypeScript", "PostgreSQL"],
-                    is_published=True
-                ),
-            ]
-            db.add_all(sample_sessions)
-
-        # Seed sample best interns of the month if none exist
-        if db.query(BestIntern).count() == 0:
-            sample_best_interns = [
-                BestIntern(
-                    student_name="Aarav Sharma",
-                    student_email="aarav.sharma@example.com",
-                    course="Full Stack Web Development",
-                    month_year="September 2026",
-                    award_title="⭐ Star Intern of the Month",
-                    image_url="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-                    college="Government College of Engineering",
-                    duration="3 Months",
-                    project_name="AI-Powered Cloud Task Orchestration Platform",
-                    project_url="https://github.com",
-                    github_url="https://github.com",
-                    linkedin_url="https://linkedin.com",
-                    achievement_summary="Engineered end-to-end full stack architecture with Next.js 15, FastAPI asynchronous APIs, and real-time WebSocket state synchronizations. Delivered all milestones 2 weeks ahead of deadline with zero regression.",
-                    testimonial="The virtual internship at InternVision Tech bridged the exact gap between college theory and enterprise-level production code. The mentor reviews were incredibly detailed!",
-                    grade="Outstanding Distinction (Grade A+)",
-                    rating=5.0,
-                    is_featured=True,
-                    is_published=True
-                ),
-                BestIntern(
-                    student_name="Neha Mahule",
-                    student_email="nehamahule28@gmail.com",
-                    course="AI & Machine Learning Engineering",
-                    month_year="September 2026",
-                    award_title="🏆 Best Technical Contributor",
-                    image_url="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop",
-                    college="Savitribai Phule Pune University",
-                    duration="2 Months",
-                    project_name="Multimodal Medical Diagnostic AI Agent",
-                    project_url="https://github.com",
-                    github_url="https://github.com",
-                    linkedin_url="https://linkedin.com",
-                    achievement_summary="Fine-tuned open-source LLMs using PyTorch and LoRA adapters. Built high-throughput FastAPI inference microservices with LangChain vector embeddings.",
-                    testimonial="InternVision provided real production-grade problem statements. Having a verified digital certificate recognized by MSME and Digital India made my resume stand out in placements!",
-                    grade="Distinction (Grade A+)",
-                    rating=5.0,
-                    is_featured=True,
-                    is_published=True
-                ),
-                BestIntern(
-                    student_name="Jay Doble",
-                    student_email="jaydoble56@gmail.com",
-                    course="Java & Enterprise Spring Boot",
-                    month_year="August 2026",
-                    award_title="🎖️ High Performance Engineering Award",
-                    image_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=800&auto=format&fit=crop",
-                    college="MIT World Peace University",
-                    duration="2 Months",
-                    project_name="Distributed Fintech Payment Gateway Simulator",
-                    project_url="https://github.com",
-                    github_url="https://github.com",
-                    linkedin_url="https://linkedin.com",
-                    achievement_summary="Constructed multi-threaded Java 21 Spring Boot microservices with Redis caching, PostgreSQL transactions, and automated JUnit test pipelines.",
-                    testimonial="The hands-on tasks prepared me for real technical rounds. The 1:1 mentor doubt-clearing sessions were pure gold.",
-                    grade="Distinction (Grade A+)",
-                    rating=5.0,
-                    is_featured=False,
-                    is_published=True
-                ),
-            ]
-            db.add_all(sample_best_interns)
 
         db.commit()
     finally:

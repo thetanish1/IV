@@ -387,7 +387,7 @@ export default function UserAuthModal({
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Aarav Sharma"
+                      placeholder="e.g. Alice"
                       value={fallbackGoogleName}
                       onChange={(e) => setFallbackGoogleName(e.target.value)}
                       className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-xs"
@@ -488,7 +488,7 @@ export default function UserAuthModal({
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Aarav Sharma"
+                    placeholder="e.g. Alice"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-ink-900 border border-ink-700 px-3.5 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"

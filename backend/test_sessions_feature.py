@@ -58,7 +58,7 @@ def test_sessions_suite():
         print(f"[OK] Duplicate registration handled gracefully: {dup_data['message']}")
 
         # 5. Admin Token Generation
-        admin = db.query(Admin).filter(Admin.email == "tanishdewase222@gmail.com").first()
+        admin = db.query(Admin).filter(Admin.email == "admin@internvision.tech").first()
         if not admin:
             admin = db.query(Admin).first()
         admin_token = create_access_token({"sub": admin.email, "role": "super_admin"})
