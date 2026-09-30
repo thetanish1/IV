@@ -37,7 +37,6 @@ import {
 import { Float } from "@/components/animations/Float";
 import ApplePreviewCarousel from "@/components/ApplePreviewCarousel";
 import AppleWhyChooseUs from "@/components/AppleWhyChooseUs";
-import AppleMissionRecognition from "@/components/AppleMissionRecognition";
 import { apiRequest, getImageUrl } from "@/lib/api-client";
 
 interface BestIntern {
@@ -336,8 +335,195 @@ export default function HomePage() {
         </div>
       </motion.div>
 
-      {/* ─── APPLE STORE STYLE INSTITUTIONAL RECOGNITION & MISSION CAROUSEL ─── */}
-      <AppleMissionRecognition />
+      {/* ─── GOVERNMENT & INSTITUTIONAL RECOGNITIONS ───────────────────── */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
+        <div className="relative rounded-3xl overflow-hidden border border-ink-800 bg-gradient-to-b from-ink-950 via-[#0a0f1d] to-ink-950 p-8 sm:p-10 shadow-2xl space-y-8">
+          <div className="text-center max-w-3xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-brand-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Nationally Accredited &amp; Recognized
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">
+              Approved &amp; Recognized Frameworks
+            </h2>
+            <p className="text-xs sm:text-sm text-ink-300 leading-relaxed">
+              InternVision Tech is officially recognized under Government of India skilling initiatives and aligned with standard technical education benchmarks.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Logo Card 1: Digital India */}
+            <div className="p-6 rounded-2xl bg-ink-900/90 border border-ink-800 hover:border-brand-500/60 transition-all flex flex-col justify-between space-y-4 group shadow-lg hover:shadow-brand-500/10">
+              <div className="h-20 flex items-center justify-center bg-white rounded-xl p-3 border border-ink-700/50 shadow-inner">
+                <Image
+                  src="/logos/digital-india.png"
+                  alt="Digital India - Power To Empower"
+                  width={240}
+                  height={70}
+                  className="h-14 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="space-y-1.5 text-center sm:text-left">
+                <h3 className="text-sm font-bold text-white group-hover:text-brand-400 transition-colors flex items-center justify-center sm:justify-start gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Digital India Initiative
+                </h3>
+                <p className="text-xs text-ink-400 leading-relaxed">
+                  Aligned with national digital transformation goals, empowering engineering students with remote digital training and software development workflows.
+                </p>
+              </div>
+            </div>
+
+            {/* Logo Card 2: MSME */}
+            <div className="p-6 rounded-2xl bg-ink-900/90 border border-ink-800 hover:border-amber-500/60 transition-all flex flex-col justify-between space-y-4 group shadow-lg hover:shadow-amber-500/10">
+              <div className="h-20 flex items-center justify-center bg-white rounded-xl p-3 border border-ink-700/50 shadow-inner">
+                <Image
+                  src="/logos/msme.png"
+                  alt="MSME - Ministry of Micro, Small & Medium Enterprises"
+                  width={240}
+                  height={70}
+                  className="h-14 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="space-y-1.5 text-center sm:text-left">
+                <h3 className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors flex items-center justify-center sm:justify-start gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> MSME Recognized
+                </h3>
+                <p className="text-xs text-ink-400 leading-relaxed">
+                  Registered under the Ministry of Micro, Small &amp; Medium Enterprises, Govt. of India. Verifiable credentials accepted across Indian technology startups.
+                </p>
+              </div>
+            </div>
+
+            {/* Logo Card 3: AICTE */}
+            <div className="p-6 rounded-2xl bg-ink-900/90 border border-ink-800 hover:border-blue-500/60 transition-all flex flex-col justify-between space-y-4 group shadow-lg hover:shadow-blue-500/10">
+              <div className="h-20 flex items-center justify-center bg-white rounded-xl p-3 border border-ink-700/50 shadow-inner">
+                <Image
+                  src="/logos/aicte.png"
+                  alt="AICTE - All India Council for Technical Education"
+                  width={240}
+                  height={70}
+                  className="h-14 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="space-y-1.5 text-center sm:text-left">
+                <h3 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors flex items-center justify-center sm:justify-start gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> AICTE Aligned Curriculum
+                </h3>
+                <p className="text-xs text-ink-400 leading-relaxed">
+                  Curriculum structured according to AICTE internship activity points and academic capstone guidelines for B.Tech, BCA, MCA &amp; BS degree requirements.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ─── OUR MISSION: EMPOWERING FRESHERS ───────────────────────── */}
+      <motion.section
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.65 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
+        <div className="relative rounded-3xl overflow-hidden border border-brand-500/30 bg-gradient-to-br from-ink-950 via-[#070e22] to-ink-950 p-8 sm:p-14 shadow-2xl">
+          {/* Ambient Glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            {/* Mission Statement (Left - 7 Cols) */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/15 border border-brand-500/30 text-brand-300 text-xs font-bold uppercase tracking-wider">
+                <Rocket className="w-3.5 h-3.5" />
+                Our Core Mission
+              </div>
+
+              <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-tight">
+                Solving The Freshers'<br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-blue-300 to-amber-300">
+                  "No Experience" Dilemma
+                </span>
+              </h2>
+
+              <div className="space-y-4 text-ink-300 text-sm sm:text-base leading-relaxed">
+                <p>
+                  Most college graduates and freshers face the exact same frustrating hurdle: <strong className="text-white font-semibold">companies demand prior internship experience, but nobody hires without existing proof-of-work on their resume.</strong>
+                </p>
+                <p>
+                  At <strong className="text-white font-semibold">InternVision Tech</strong>, our mission is to eliminate this barrier completely. We provide structured <strong className="text-amber-400 font-bold">1, 2, and 3-month virtual internships</strong> tailored for students and freshers. You work on production-grade repositories, submit weekly tasks, receive 1:1 mentor code reviews, and build real portfolio items to show recruiters.
+                </p>
+                <p className="text-xs sm:text-sm text-ink-400 pt-1 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  Proudly recognized by <strong className="text-ink-200">MSME</strong>, <strong className="text-ink-200">Digital India</strong>, and aligned with <strong className="text-ink-200">AICTE</strong> curriculum frameworks.
+                </p>
+              </div>
+
+              <div className="pt-2 flex flex-wrap gap-4">
+                <Link
+                  href="/apply"
+                  className="px-7 py-3.5 font-bold bg-white text-black hover:bg-ink-100 rounded-xl transition shadow-xl hover:-translate-y-0.5 flex items-center gap-2 text-xs uppercase tracking-wider"
+                >
+                  Start 1-3 Month Internship <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/sessions"
+                  className="px-6 py-3.5 font-bold bg-ink-900/90 hover:bg-ink-800 text-ink-200 hover:text-white rounded-xl border border-ink-700 transition flex items-center gap-2 text-xs"
+                >
+                  <Video className="w-4 h-4 text-emerald-400" /> Book a Masterclass Session
+                </Link>
+              </div>
+            </div>
+
+            {/* 3 Pillars Highlight (Right - 5 Cols) */}
+            <div className="lg:col-span-5 space-y-4">
+              {/* Pillar 1 */}
+              <div className="p-5 rounded-2xl bg-ink-900/80 border border-ink-800 hover:border-brand-500/50 transition flex items-start gap-4 group">
+                <div className="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <GraduationCap className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-white">1, 2 &amp; 3-Month Durations</h3>
+                  <p className="text-xs text-ink-400 leading-relaxed">
+                    Flexible internship tracks designed to fit your college semesters, exam breaks, or immediate pre-placement prep.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 2 */}
+              <div className="p-5 rounded-2xl bg-ink-900/80 border border-ink-800 hover:border-amber-500/50 transition flex items-start gap-4 group">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Code2 className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-white">Real Projects for Your Resume</h3>
+                  <p className="text-xs text-ink-400 leading-relaxed">
+                    Build end-to-end applications that you can proudly demo during technical interviews and showcase on GitHub.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pillar 3 */}
+              <div className="p-5 rounded-2xl bg-ink-900/80 border border-ink-800 hover:border-emerald-500/50 transition flex items-start gap-4 group">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Award className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-white">Recognized Verified Credentials</h3>
+                  <p className="text-xs text-ink-400 leading-relaxed">
+                    Every certificate includes a tamper-proof QR code and unique ID verifiable 24/7 on our public registry.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
 
       {/* ─── BEST INTERN OF THE MONTH SPOTLIGHT SECTION (SHOWN ONLY WHEN ADMIN ADDS DATA) ─── */}
       {featuredInterns && featuredInterns.length > 0 && (
