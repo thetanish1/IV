@@ -163,24 +163,24 @@ export default function AppleMissionRecognition() {
         {CARDS.map((card) => (
           <div
             key={card.id}
-            className="w-[310px] sm:w-[370px] min-h-[480px] bg-white text-zinc-900 rounded-[28px] p-7 sm:p-8 flex flex-col justify-between shrink-0 snap-start shadow-[0_20px_50px_rgba(0,0,0,0.35)] border border-zinc-200/90 hover:shadow-[0_25px_60px_rgba(37,99,235,0.2)] hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden"
+            className="w-[310px] sm:w-[370px] min-h-[480px] bg-ink-900/90 text-white rounded-[28px] p-7 sm:p-8 flex flex-col justify-between shrink-0 snap-start shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-ink-800 hover:border-brand-500/50 hover:shadow-[0_25px_60px_rgba(37,99,235,0.25)] hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden"
           >
             {/* Top Text Content */}
             <div className="space-y-3 z-10">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">
+                <span className="text-[11px] font-black uppercase tracking-wider text-ink-400">
                   {card.category}
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-100 text-zinc-700 border border-zinc-200">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-ink-800 text-ink-200 border border-ink-700">
                   {card.badge}
                 </span>
               </div>
 
-              <h3 className="text-2xl sm:text-[26px] font-extrabold text-zinc-950 tracking-tight leading-snug group-hover:text-blue-600 transition-colors">
+              <h3 className="text-2xl sm:text-[26px] font-extrabold text-white tracking-tight leading-snug group-hover:text-brand-400 transition-colors">
                 {card.title}
               </h3>
 
-              <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
+              <p className="text-ink-300 text-xs sm:text-sm leading-relaxed">
                 {card.description}
               </p>
             </div>
@@ -188,7 +188,7 @@ export default function AppleMissionRecognition() {
             {/* Middle Artwork / Logo Area (Apple Style) */}
             <div className="my-6 flex items-center justify-center min-h-[160px] relative">
               {card.type === "logo" && card.imageSrc && (
-                <div className="w-full h-36 flex items-center justify-center p-3 rounded-2xl bg-zinc-50 border border-zinc-200/80 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-36 flex items-center justify-center p-3 rounded-2xl bg-white border border-ink-700/60 shadow-inner group-hover:scale-105 transition-transform duration-300">
                   <Image
                     src={card.imageSrc}
                     alt={card.imageAlt || card.title}
@@ -200,34 +200,34 @@ export default function AppleMissionRecognition() {
               )}
 
               {card.type === "mission" && (
-                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-blue-950 p-4 border border-zinc-800 flex flex-col justify-center space-y-2 text-white shadow-inner group-hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-36 rounded-2xl bg-gradient-to-br from-ink-950 via-zinc-950 to-brand-950/70 p-4 border border-ink-800 flex flex-col justify-center space-y-2 text-white shadow-inner group-hover:scale-105 transition-transform duration-300">
                   <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
                     <Terminal className="w-4 h-4 text-brand-400" />
                     <span>git commit -m &quot;feat: real production project&quot;</span>
                   </div>
-                  <div className="text-[11px] text-zinc-400 space-y-1">
-                    <div className="flex items-center gap-1.5 text-zinc-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" /> 1:1 Senior Engineering Code Reviews
+                  <div className="text-[11px] text-ink-300 space-y-1">
+                    <div className="flex items-center gap-1.5 text-ink-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-400" /> 1:1 Senior Engineering Code Reviews
                     </div>
-                    <div className="flex items-center gap-1.5 text-zinc-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" /> Production Repository &amp; Live Deployment
+                    <div className="flex items-center gap-1.5 text-ink-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-400" /> Production Repository &amp; Live Deployment
                     </div>
                   </div>
                 </div>
               )}
 
               {card.type === "verification" && (
-                <div className="w-full h-36 rounded-2xl bg-blue-50/80 border border-blue-100 p-4 flex items-center justify-between gap-3 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-36 rounded-2xl bg-ink-950 border border-ink-800 p-4 flex items-center justify-between gap-3 shadow-inner group-hover:scale-105 transition-transform duration-300">
                   <div className="space-y-1 text-left">
-                    <div className="text-xs font-black uppercase text-blue-900 tracking-wider flex items-center gap-1">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" /> Official Registry
+                    <div className="text-xs font-black uppercase text-brand-400 tracking-wider flex items-center gap-1">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" /> Official Registry
                     </div>
-                    <div className="text-[11px] text-zinc-600 font-mono">ID: IVT/2026/VERIFIED</div>
-                    <div className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded inline-block">
+                    <div className="text-[11px] text-ink-300 font-mono">ID: IVT/2026/VERIFIED</div>
+                    <div className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded inline-block">
                       Grade A+ Distinction
                     </div>
                   </div>
-                  <div className="w-16 h-16 rounded-xl bg-white border border-blue-200 flex items-center justify-center p-1 shadow-sm shrink-0">
+                  <div className="w-16 h-16 rounded-xl bg-white border border-ink-700 flex items-center justify-center p-1 shadow-sm shrink-0">
                     <QrCode className="w-12 h-12 text-zinc-900" />
                   </div>
                 </div>
@@ -235,15 +235,15 @@ export default function AppleMissionRecognition() {
             </div>
 
             {/* Bottom Link Action */}
-            <div className="pt-2 border-t border-zinc-100 flex items-center justify-between z-10">
+            <div className="pt-2 border-t border-ink-800 flex items-center justify-between z-10">
               <Link
                 href={card.linkHref}
-                className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all"
+                className="text-xs sm:text-sm font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1.5 group-hover:translate-x-0.5 transition-all"
               >
                 <span>{card.linkText}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
-              <span className="text-zinc-400 text-xs">InternVision ✦</span>
+              <span className="text-ink-500 text-xs">InternVision ✦</span>
             </div>
           </div>
         ))}

@@ -113,17 +113,17 @@ export default function AppleWhyChooseUs() {
         {APPLE_CARDS.map((card) => (
           <div
             key={card.id}
-            className="w-[320px] sm:w-[380px] md:w-[420px] shrink-0 snap-start bg-white text-neutral-900 rounded-[28px] p-7 sm:p-8 flex flex-col justify-between shadow-2xl transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] hover:-translate-y-1 relative group overflow-hidden min-h-[480px]"
+            className="w-[320px] sm:w-[380px] md:w-[420px] shrink-0 snap-start bg-ink-900/90 text-white rounded-[28px] p-7 sm:p-8 flex flex-col justify-between shadow-2xl transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:-translate-y-1 relative group overflow-hidden min-h-[480px] border border-ink-800 hover:border-brand-500/50"
           >
             {/* Top Text Content */}
             <div className="space-y-3 z-10">
-              <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500 block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ink-400 block">
                 {card.category}
               </span>
-              <h3 className="text-2xl sm:text-[26px] font-bold text-neutral-900 tracking-tight leading-[1.18]">
+              <h3 className="text-2xl sm:text-[26px] font-bold text-white tracking-tight leading-[1.18] group-hover:text-brand-400 transition-colors">
                 {card.title}
               </h3>
-              <p className="text-sm text-neutral-600 leading-relaxed pt-1">
+              <p className="text-sm text-ink-300 leading-relaxed pt-1">
                 {card.description}
               </p>
             </div>
@@ -131,18 +131,18 @@ export default function AppleWhyChooseUs() {
             {/* Visual Graphic Representation (Apple Aesthetic) */}
             <div className="my-6 py-4 flex items-center justify-center relative z-10">
               {card.graphicType === "stack" && (
-                <div className="w-full bg-neutral-900 text-neutral-100 rounded-2xl p-4 shadow-xl border border-neutral-800 space-y-3">
-                  <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
+                <div className="w-full bg-ink-950 text-neutral-100 rounded-2xl p-4 shadow-xl border border-ink-800 space-y-3">
+                  <div className="flex items-center justify-between border-b border-ink-800 pb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-red-500/80" />
                       <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                       <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                     </div>
-                    <span className="text-[10px] font-mono text-neutral-400">production_stack.ts</span>
+                    <span className="text-[10px] font-mono text-ink-400">production_stack.ts</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {["Next.js 15", "FastAPI", "Docker", "PostgreSQL", "Tailwind"].map((t) => (
-                      <span key={t} className="text-[10px] font-medium bg-neutral-800 text-brand-300 px-2 py-0.5 rounded border border-neutral-700">
+                      <span key={t} className="text-[10px] font-medium bg-ink-900 text-brand-300 px-2 py-0.5 rounded border border-ink-700">
                         {t}
                       </span>
                     ))}
@@ -151,47 +151,47 @@ export default function AppleWhyChooseUs() {
               )}
 
               {card.graphicType === "mentor" && (
-                <div className="w-full bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 shadow-md space-y-2.5">
+                <div className="w-full bg-ink-950 border border-ink-800 rounded-2xl p-4 shadow-md space-y-2.5">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
                       SR
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-neutral-900">Senior Staff Engineer</div>
-                      <div className="text-[10px] text-neutral-500">PR #42 Review Approved</div>
+                      <div className="text-xs font-bold text-white">Senior Staff Engineer</div>
+                      <div className="text-[10px] text-ink-400">PR #42 Review Approved</div>
                     </div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-neutral-200 text-[11px] text-neutral-700 font-mono">
+                  <div className="p-2.5 bg-ink-900 rounded-lg border border-ink-800 text-[11px] text-ink-200 font-mono">
                     ✨ &quot;Clean architecture &amp; optimal database indexing. Ready for deployment!&quot;
                   </div>
                 </div>
               )}
 
               {card.graphicType === "credential" && (
-                <div className="w-full bg-gradient-to-br from-neutral-900 via-neutral-950 to-brand-950 text-white rounded-2xl p-4 shadow-xl border border-neutral-800 flex items-center justify-between">
+                <div className="w-full bg-gradient-to-br from-ink-950 via-ink-900 to-brand-950 text-white rounded-2xl p-4 shadow-xl border border-ink-800 flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 uppercase tracking-wide">
                       <CheckCircle2 className="w-3 h-3" /> Verifiable
                     </div>
                     <div className="text-xs font-bold text-white">IVT Verified Certificate</div>
-                    <div className="text-[10px] text-neutral-400 font-mono">ID: IVT/2026/PROD</div>
+                    <div className="text-[10px] text-ink-400 font-mono">ID: IVT/2026/PROD</div>
                   </div>
-                  <div className="w-12 h-12 bg-white text-black rounded-xl flex items-center justify-center shadow-inner">
-                    <ShieldCheck className="w-7 h-7 text-brand-600" />
+                  <div className="w-12 h-12 bg-ink-900 border border-ink-700 text-brand-400 rounded-xl flex items-center justify-center shadow-inner">
+                    <ShieldCheck className="w-7 h-7 text-brand-400" />
                   </div>
                 </div>
               )}
 
               {card.graphicType === "deploy" && (
-                <div className="w-full bg-neutral-900 text-white rounded-2xl p-4 shadow-xl border border-neutral-800 space-y-2">
+                <div className="w-full bg-ink-950 text-white rounded-2xl p-4 shadow-xl border border-ink-800 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       Live in Production
                     </div>
-                    <span className="text-[10px] text-neutral-400 font-mono">99.9% Uptime</span>
+                    <span className="text-[10px] text-ink-400 font-mono">99.9% Uptime</span>
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-neutral-300 bg-neutral-950/80 p-2 rounded border border-neutral-800 font-mono">
+                  <div className="flex items-center gap-2 text-[11px] text-ink-300 bg-ink-900 p-2 rounded border border-ink-800 font-mono">
                     <Rocket className="w-3.5 h-3.5 text-brand-400" />
                     https://app.internvisiontech.me
                   </div>
@@ -200,10 +200,10 @@ export default function AppleWhyChooseUs() {
             </div>
 
             {/* Bottom Row: Link & Apple-style Circle Action */}
-            <div className="pt-2 border-t border-neutral-100 flex items-center justify-between z-10">
+            <div className="pt-2 border-t border-ink-800 flex items-center justify-between z-10">
               <Link
                 href={card.linkHref}
-                className="text-xs font-bold text-neutral-900 hover:text-brand-600 transition-colors inline-flex items-center gap-1"
+                className="text-xs font-bold text-brand-400 hover:text-brand-300 transition-colors inline-flex items-center gap-1"
               >
                 {card.linkText} <ArrowRight className="w-3 h-3" />
               </Link>
@@ -211,9 +211,9 @@ export default function AppleWhyChooseUs() {
               <Link
                 href={card.linkHref}
                 aria-label={`Open ${card.category}`}
-                className="w-9 h-9 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 flex items-center justify-center transition-all group-hover:scale-105 active:scale-95 shadow-sm"
+                className="w-9 h-9 rounded-full bg-ink-800 hover:bg-ink-700 text-ink-200 border border-ink-700 flex items-center justify-center transition-all group-hover:scale-105 active:scale-95 shadow-sm"
               >
-                <Plus className="w-4 h-4 text-neutral-700" />
+                <Plus className="w-4 h-4 text-ink-300" />
               </Link>
             </div>
           </div>
