@@ -10,10 +10,12 @@ class Settings(BaseSettings):
     # Database Settings
     DATABASE_URL: str = "sqlite:///./sql_app.db"
     
-    # JWT Auth Settings
+    # JWT Auth & Admin Settings
     SECRET_KEY: str = "super-secret-key-internvision-tech-2026-production-ready"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 24 hours
+    ADMIN_EMAIL: str = "admin@internvision.tech"
+    ADMIN_PASSWORD: str = "Admin@123456"
     
     # Cashfree Payment Gateway Settings (Sandbox / Production)
     CASHFREE_APP_ID: str = "TEST_CF_APP_ID_DEMO"
