@@ -233,25 +233,12 @@ export default function Navbar() {
 
             <Link
               href="/sessions"
-              className={`flex items-center gap-1.5 transition-colors relative ${
+              className={`flex items-center gap-1.5 transition-colors ${
                 isActive("/sessions") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
               }`}
             >
-              <Video className="w-4 h-4 text-emerald-400" />
-              <span>Sessions</span>
-              <span className="px-1.5 py-0.2 text-[9px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full animate-pulse">
-                LIVE
-              </span>
-            </Link>
-
-            <Link
-              href="/hall-of-fame"
-              className={`flex items-center gap-1.5 transition-colors ${
-                isActive("/hall-of-fame") ? "text-amber-400 font-semibold" : "text-ink-300 hover:text-white"
-              }`}
-            >
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <span>Hall of Fame</span>
+              <Video className="w-4 h-4 text-brand-400" />
+              <span>Book Session</span>
             </Link>
 
             {/* Student Portal Link (Prominent when logged in) */}
@@ -407,32 +394,14 @@ export default function Navbar() {
               <Link
                 href="/sessions"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center justify-between px-4 py-3 border border-ink-800 transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
                   isActive("/sessions")
                     ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
                     : "bg-ink-900 text-ink-300 hover:text-white"
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <Video className="w-4 h-4 text-emerald-400" />
-                  <span>Sessions</span>
-                </div>
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full">
-                  LIVE
-                </span>
-              </Link>
-
-              <Link
-                href="/hall-of-fame"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
-                  isActive("/hall-of-fame")
-                    ? "bg-amber-500/10 text-amber-400 font-semibold border-amber-500/20"
-                    : "bg-ink-900 text-ink-300 hover:text-white"
-                }`}
-              >
-                <Trophy className="w-4 h-4 text-amber-400" />
-                <span>Hall of Fame (Best Interns)</span>
+                <Video className="w-4 h-4 text-brand-400" />
+                <span>Book Session</span>
               </Link>
 
               {userEmail && (

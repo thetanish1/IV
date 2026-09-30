@@ -348,18 +348,18 @@ export default function BestInternsTab() {
             </h2>
           </div>
           <p className="text-xs text-gray-500 dark:text-ink-400">
-            Showcase top-performing students on the homepage and the dedicated public Hall of Fame page.
+            Showcase top-performing students on the homepage.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <a
-            href="/hall-of-fame"
+            href="/"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-ink-900 dark:hover:bg-ink-800 text-gray-700 dark:text-ink-300 border border-gray-200 dark:border-ink-700 flex items-center gap-1.5 transition"
           >
-            <ExternalLink className="w-3.5 h-3.5" /> View Public Page
+            <ExternalLink className="w-3.5 h-3.5" /> View on Homepage
           </a>
           <button
             onClick={handleOpenCreate}

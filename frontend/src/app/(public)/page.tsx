@@ -32,6 +32,7 @@ import {
   Building2,
   Zap,
   FileText,
+  Video,
 } from "lucide-react";
 import { Float } from "@/components/animations/Float";
 import ApplePreviewCarousel from "@/components/ApplePreviewCarousel";
@@ -358,13 +359,13 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Logo Card 1: Digital India */}
             <div className="p-6 rounded-2xl bg-ink-900/90 border border-ink-800 hover:border-brand-500/60 transition-all flex flex-col justify-between space-y-4 group shadow-lg hover:shadow-brand-500/10">
-              <div className="h-16 flex items-center justify-center bg-black/40 rounded-xl p-2 border border-ink-800/80">
+              <div className="h-20 flex items-center justify-center bg-white rounded-xl p-3 border border-ink-700/50 shadow-inner">
                 <Image
-                  src="/logos/digital-india.svg"
+                  src="/logos/digital-india.png"
                   alt="Digital India - Power To Empower"
-                  width={220}
-                  height={60}
-                  className="h-12 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform"
+                  width={240}
+                  height={70}
+                  className="h-14 w-auto object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
               <div className="space-y-1.5 text-center sm:text-left">
@@ -379,13 +380,13 @@ export default function HomePage() {
 
             {/* Logo Card 2: MSME */}
             <div className="p-6 rounded-2xl bg-ink-900/90 border border-ink-800 hover:border-amber-500/60 transition-all flex flex-col justify-between space-y-4 group shadow-lg hover:shadow-amber-500/10">
-              <div className="h-16 flex items-center justify-center bg-black/40 rounded-xl p-2 border border-ink-800/80">
+              <div className="h-20 flex items-center justify-center bg-white rounded-xl p-3 border border-ink-700/50 shadow-inner">
                 <Image
-                  src="/logos/msme.svg"
+                  src="/logos/msme.png"
                   alt="MSME - Ministry of Micro, Small & Medium Enterprises"
-                  width={220}
-                  height={60}
-                  className="h-12 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform"
+                  width={240}
+                  height={70}
+                  className="h-14 w-auto object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
               <div className="space-y-1.5 text-center sm:text-left">
@@ -400,13 +401,13 @@ export default function HomePage() {
 
             {/* Logo Card 3: AICTE */}
             <div className="p-6 rounded-2xl bg-ink-900/90 border border-ink-800 hover:border-blue-500/60 transition-all flex flex-col justify-between space-y-4 group shadow-lg hover:shadow-blue-500/10">
-              <div className="h-16 flex items-center justify-center bg-black/40 rounded-xl p-2 border border-ink-800/80">
+              <div className="h-20 flex items-center justify-center bg-white rounded-xl p-3 border border-ink-700/50 shadow-inner">
                 <Image
-                  src="/logos/aicte.svg"
+                  src="/logos/aicte.png"
                   alt="AICTE - All India Council for Technical Education"
-                  width={220}
-                  height={60}
-                  className="h-12 w-auto object-contain brightness-110 group-hover:scale-105 transition-transform"
+                  width={240}
+                  height={70}
+                  className="h-14 w-auto object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
               <div className="space-y-1.5 text-center sm:text-left">
@@ -471,10 +472,10 @@ export default function HomePage() {
                   Start 1-3 Month Internship <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
-                  href="/hall-of-fame"
+                  href="/sessions"
                   className="px-6 py-3.5 font-bold bg-ink-900/90 hover:bg-ink-800 text-ink-200 hover:text-white rounded-xl border border-ink-700 transition flex items-center gap-2 text-xs"
                 >
-                  <Trophy className="w-4 h-4 text-amber-400" /> View Hall of Fame
+                  <Video className="w-4 h-4 text-emerald-400" /> Book a Masterclass Session
                 </Link>
               </div>
             </div>
@@ -524,150 +525,115 @@ export default function HomePage() {
         </div>
       </motion.section>
 
-      {/* ─── BEST INTERN OF THE MONTH SPOTLIGHT SECTION ─────────────── */}
-      <motion.section
-        initial={{ opacity: 0, y: 35 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.65 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"
-      >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-l-4 border-blue-500 pl-6">
-          <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-blue-400" /> Student Hall of Fame
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight">
-              Best Intern of the Month
-            </h2>
-            <p className="text-ink-400 text-base sm:text-lg leading-relaxed">
-              Celebrating top-performing students who demonstrated outstanding engineering skill, delivered exemplary capstone projects, and achieved Grade A+ distinctions.
-            </p>
+      {/* ─── BEST INTERN OF THE MONTH SPOTLIGHT SECTION (SHOWN ONLY WHEN ADMIN ADDS DATA) ─── */}
+      {featuredInterns && featuredInterns.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.65 }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-l-4 border-blue-500 pl-6">
+            <div className="max-w-2xl space-y-2">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-blue-400" /> Student Hall of Fame
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black text-white uppercase tracking-tight">
+                Best Intern of the Month
+              </h2>
+              <p className="text-ink-400 text-base sm:text-lg leading-relaxed">
+                Celebrating top-performing students who demonstrated outstanding engineering skill, delivered exemplary capstone projects, and achieved Grade A+ distinctions.
+              </p>
+            </div>
           </div>
 
-          <Link
-            href="/hall-of-fame"
-            className="px-6 py-3 font-bold bg-blue-600 hover:bg-blue-500 text-white text-xs uppercase tracking-wider rounded-lg transition shrink-0 flex items-center gap-2 shadow-lg shadow-blue-600/25 border border-blue-400/30 hover:-translate-y-0.5"
-          >
-            <Trophy className="w-4 h-4" /> View Full Hall of Fame <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+          {/* Featured Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredInterns.map((intern) => {
+              const displayImg = intern.image_url ? getImageUrl(intern.image_url) : null;
+              return (
+                <motion.div
+                  key={intern.id}
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  className="glass-card p-7 rounded-2xl border border-blue-500/20 hover:border-blue-400 transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group shadow-xl"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3.5">
+                        <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-ink-900 border-2 border-blue-400 shrink-0 shadow-md">
+                          {displayImg ? (
+                            <Image
+                              src={displayImg}
+                              alt={intern.student_name}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center font-bold text-blue-300 text-xl bg-blue-600/20">
+                              {intern.student_name ? intern.student_name.charAt(0) : "★"}
+                            </div>
+                          )}
+                        </div>
 
-        {/* Featured Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(featuredInterns.length > 0 ? featuredInterns : [
-            {
-              id: 1,
-              student_name: "Alice",
-              course: "Full Stack Web Development",
-              month_year: "September 2026",
-              award_title: "⭐ Star Intern of the Month",
-              image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop",
-              college: "Institute of Engineering",
-              duration: "3 Months",
-              project_name: "AI-Powered Task Orchestration System",
-              achievement_summary: "Engineered full stack architecture with Next.js 15 and FastAPI asynchronous services. Delivered milestones ahead of schedule.",
-              grade: "Distinction (Grade A+)",
-            },
-            {
-              id: 2,
-              student_name: "Bob",
-              course: "AI & Machine Learning Engineering",
-              month_year: "September 2026",
-              award_title: "🏆 Best Technical Contributor",
-              image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop",
-              college: "University of Technology",
-              duration: "2 Months",
-              project_name: "Multimodal Medical Diagnostic AI Agent",
-              achievement_summary: "Fine-tuned open-source LLMs using PyTorch and built high-throughput inference microservices with LangChain vector embeddings.",
-              grade: "Distinction (Grade A+)",
-            },
-          ]).slice(0, 3).map((intern, idx) => {
-            const displayImg = intern.image_url ? getImageUrl(intern.image_url) : null;
-            return (
-              <motion.div
-                key={intern.id}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="glass-card p-7 rounded-2xl border border-blue-500/20 hover:border-blue-400 transition-all flex flex-col justify-between space-y-6 relative overflow-hidden group shadow-xl"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3.5">
-                      <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-ink-900 border-2 border-blue-400 shrink-0 shadow-md">
-                        {displayImg ? (
-                          <Image
-                            src={displayImg}
-                            alt={intern.student_name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-blue-300 text-xl bg-blue-600/20">
-                            {intern.student_name.charAt(0)}
-                          </div>
-                        )}
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-base text-white group-hover:text-blue-300 transition-colors truncate">
+                            {intern.student_name}
+                          </h3>
+                          <p className="text-xs text-blue-400 font-medium truncate">
+                            {intern.course}
+                          </p>
+                          <p className="text-[11px] text-ink-400 truncate flex items-center gap-1 mt-0.5">
+                            <GraduationCap className="w-3 h-3 shrink-0 text-blue-300" />
+                            <span className="truncate">{intern.college || "College / University"}</span>
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-base text-white group-hover:text-blue-300 transition-colors truncate">
-                          {intern.student_name}
-                        </h3>
-                        <p className="text-xs text-blue-400 font-medium truncate">
-                          {intern.course}
-                        </p>
-                        <p className="text-[11px] text-ink-400 truncate flex items-center gap-1 mt-0.5">
-                          <GraduationCap className="w-3 h-3 shrink-0 text-blue-300" />
-                          <span className="truncate">{intern.college || "College / University"}</span>
-                        </p>
-                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">
+                        {intern.month_year}
+                      </span>
                     </div>
 
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 shrink-0">
-                      {intern.month_year}
-                    </span>
-                  </div>
+                    <div className="px-3 py-1.5 rounded-lg bg-ink-900/90 border border-blue-500/20 text-xs font-semibold text-ink-200 flex items-center justify-between">
+                      <span className="truncate">{intern.award_title || "Star Intern of the Month"}</span>
+                      <span className="text-[10px] font-bold text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded border border-blue-400/20">
+                        {intern.grade || "Grade A+"}
+                      </span>
+                    </div>
 
-                  <div className="px-3 py-1.5 rounded-lg bg-ink-900/90 border border-blue-500/20 text-xs font-semibold text-ink-200 flex items-center justify-between">
-                    <span className="truncate">{intern.award_title || "Star Intern of the Month"}</span>
-                    <span className="text-[10px] font-bold text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded border border-blue-400/20">
-                      {intern.grade || "Grade A+"}
-                    </span>
-                  </div>
-
-                  {intern.project_name && (
-                    <div className="space-y-1">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
-                        Flagship Project
+                    {intern.project_name && (
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
+                          Flagship Project
+                        </div>
+                        <p className="text-xs font-semibold text-white line-clamp-2">
+                          {intern.project_name}
+                        </p>
                       </div>
-                      <p className="text-xs font-semibold text-white line-clamp-2">
-                        {intern.project_name}
+                    )}
+
+                    {intern.achievement_summary && (
+                      <p className="text-xs text-ink-300 line-clamp-2 leading-relaxed italic">
+                        "{intern.achievement_summary}"
                       </p>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {intern.achievement_summary && (
-                    <p className="text-xs text-ink-300 line-clamp-2 leading-relaxed italic">
-                      "{intern.achievement_summary}"
-                    </p>
-                  )}
-                </div>
-
-                <div className="pt-4 border-t border-blue-500/20 flex items-center justify-between">
-                  <span className="text-[11px] text-ink-400 font-medium">
-                    Duration: {intern.duration || "1-3 Months"}
-                  </span>
-                  <Link
-                    href="/hall-of-fame"
-                    className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition"
-                  >
-                    View Story <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.section>
+                  <div className="pt-4 border-t border-blue-500/20 flex items-center justify-between">
+                    <span className="text-[11px] text-ink-400 font-medium">
+                      Duration: {intern.duration || "1-3 Months"}
+                    </span>
+                    <span className="text-xs font-bold text-blue-400 flex items-center gap-1">
+                      Verified Honor ✦
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.section>
+      )}
 
       {/* ─── INTERNSHIP DOMAINS SHOWCASE ─────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
