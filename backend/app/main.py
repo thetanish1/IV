@@ -117,6 +117,13 @@ async def lifespan(app: FastAPI):
         except Exception:
             db.rollback()
 
+        # Remove any previously seeded mock/personal records from best_interns table in database
+        try:
+            db.execute(text("DELETE FROM best_interns WHERE student_name IN ('Neha Mahule', 'Tanish Dewase', 'Aarav Sharma', 'Jay Doble', 'Paridhi Kshirsagar', 'Alice', 'Bob')"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         # Seed all 7 standard bootcamps if not in database
         from app.courses.models import Course
         all_bootcamps = [

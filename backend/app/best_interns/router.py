@@ -73,18 +73,13 @@ def get_best_interns(
 @router.get("/featured", response_model=List[BestInternResponse])
 def get_featured_best_interns(db: Session = Depends(get_db)):
     """
-    Get all featured Best Interns for the Homepage Spotlight (or newest published if none explicitly featured).
+    Get all featured Best Interns for the Homepage Spotlight.
+    Returns only entries explicitly marked as featured and published by admin.
     """
     featured = db.query(BestIntern).filter(
         BestIntern.is_published == True,
         BestIntern.is_featured == True
     ).order_by(desc(BestIntern.id)).all()
-
-    if not featured:
-        # Fallback to latest 3 published records
-        featured = db.query(BestIntern).filter(
-            BestIntern.is_published == True
-        ).order_by(desc(BestIntern.id)).limit(3).all()
 
     return featured
 
