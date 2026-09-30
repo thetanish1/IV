@@ -142,6 +142,10 @@ export interface CertificateItem {
 export interface SiteSettings {
   show_courses: boolean;
   show_careers: boolean;
+  show_sessions?: boolean;
+  courses_enabled?: boolean;
+  careers_enabled?: boolean;
+  sessions_enabled?: boolean;
 }
 
 export interface TaskSubmissionDetails {

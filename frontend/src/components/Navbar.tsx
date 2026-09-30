@@ -18,37 +18,47 @@ export default function Navbar() {
   const [userName, setUserName] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  const [settings, setSettings] = useState<{ show_courses: boolean; show_careers: boolean }>({
+  const [settings, setSettings] = useState<{ show_courses: boolean; show_careers: boolean; show_sessions: boolean }>({
     show_courses: false,
     show_careers: false,
+    show_sessions: true,
   });
 
   const fetchSettings = async () => {
     if (typeof window !== "undefined") {
       const cachedCourses = localStorage.getItem("show_courses");
       const cachedCareers = localStorage.getItem("show_careers");
-      if (cachedCourses !== null || cachedCareers !== null) {
+      const cachedSessions = localStorage.getItem("show_sessions");
+      if (cachedCourses !== null || cachedCareers !== null || cachedSessions !== null) {
         setSettings({
           show_courses: cachedCourses === "true",
           show_careers: cachedCareers === "true",
+          show_sessions: cachedSessions !== "false",
         });
       }
     }
     try {
-      const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>(
+      const data = await apiRequest<{
+        show_courses?: boolean | string;
+        show_careers?: boolean | string;
+        show_sessions?: boolean | string;
+      }>(
         `/settings?_t=${Date.now()}`
       );
       if (data) {
         const cVal = data.show_courses === true || data.show_courses === "true";
         const carVal = data.show_careers === true || data.show_careers === "true";
+        const sVal = data.show_sessions !== false && data.show_sessions !== "false";
         setSettings({
           show_courses: cVal,
           show_careers: carVal,
+          show_sessions: sVal,
         });
         if (typeof window !== "undefined") {
           try {
             localStorage.setItem("show_courses", String(cVal));
             localStorage.setItem("show_careers", String(carVal));
+            localStorage.setItem("show_sessions", String(sVal));
           } catch {}
         }
       }
@@ -61,10 +71,11 @@ export default function Navbar() {
     fetchSettings();
     const handleSettingsEvent = (e: any) => {
       if (e?.detail) {
-        setSettings({
-          show_courses: Boolean(e.detail.show_courses),
-          show_careers: Boolean(e.detail.show_careers),
-        });
+        setSettings((prev) => ({
+          show_courses: typeof e.detail.show_courses !== "undefined" ? Boolean(e.detail.show_courses) : prev.show_courses,
+          show_careers: typeof e.detail.show_careers !== "undefined" ? Boolean(e.detail.show_careers) : prev.show_careers,
+          show_sessions: typeof e.detail.show_sessions !== "undefined" ? Boolean(e.detail.show_sessions) : prev.show_sessions,
+        }));
       } else {
         fetchSettings();
       }
@@ -231,15 +242,17 @@ export default function Navbar() {
               Internships
             </Link>
 
-            <Link
-              href="/sessions"
-              className={`flex items-center gap-1.5 transition-colors ${
-                isActive("/sessions") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
-              }`}
-            >
-              <Video className="w-4 h-4 text-brand-400" />
-              <span>Book Session</span>
-            </Link>
+            {settings.show_sessions && (
+              <Link
+                href="/sessions"
+                className={`flex items-center gap-1.5 transition-colors ${
+                  isActive("/sessions") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
+                }`}
+              >
+                <Video className="w-4 h-4 text-brand-400" />
+                <span>Book Session</span>
+              </Link>
+            )}
 
             {/* Student Portal Link (Prominent when logged in) */}
             {userEmail && (
@@ -391,18 +404,20 @@ export default function Navbar() {
                 Internships
               </Link>
 
-              <Link
-                href="/sessions"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
-                  isActive("/sessions")
-                    ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
-                    : "bg-ink-900 text-ink-300 hover:text-white"
-                }`}
-              >
-                <Video className="w-4 h-4 text-brand-400" />
-                <span>Book Session</span>
-              </Link>
+              {settings.show_sessions && (
+                <Link
+                  href="/sessions"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
+                    isActive("/sessions")
+                      ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
+                      : "bg-ink-900 text-ink-300 hover:text-white"
+                  }`}
+                >
+                  <Video className="w-4 h-4 text-brand-400" />
+                  <span>Book Session</span>
+                </Link>
+              )}
 
               {userEmail && (
                 <Link

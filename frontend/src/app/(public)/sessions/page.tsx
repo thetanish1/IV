@@ -141,6 +141,7 @@ export default function SessionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [filterType, setFilterType] = useState<"ALL" | "FREE" | "PAID">("ALL");
+  const [showSessions, setShowSessions] = useState<boolean | null>(null);
 
   // Booking modal state
   const [selectedSession, setSelectedSession] = useState<LiveSession | null>(null);
@@ -169,6 +170,48 @@ export default function SessionsPage() {
     }
   }, []);
 
+  const checkSettings = async () => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("show_sessions");
+      if (cached !== null) {
+        setShowSessions(cached !== "false");
+      }
+    }
+    try {
+      const data = await apiRequest<{ show_sessions?: boolean | string }>(`/settings?_t=${Date.now()}`);
+      if (data) {
+        const isEnabled = data.show_sessions !== false && data.show_sessions !== "false";
+        setShowSessions(isEnabled);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_sessions", String(isEnabled));
+          } catch {}
+        }
+      } else {
+        setShowSessions(true);
+      }
+    } catch {
+      setShowSessions(true);
+    }
+  };
+
+  useEffect(() => {
+    checkSettings();
+    const handleSettingsEvent = (e: any) => {
+      if (e?.detail && typeof e.detail.show_sessions !== "undefined") {
+        setShowSessions(Boolean(e.detail.show_sessions));
+      } else {
+        checkSettings();
+      }
+    };
+    window.addEventListener("site-settings-changed", handleSettingsEvent);
+    window.addEventListener("storage", checkSettings);
+    return () => {
+      window.removeEventListener("site-settings-changed", handleSettingsEvent);
+      window.removeEventListener("storage", checkSettings);
+    };
+  }, []);
+
   const fetchSessions = async () => {
     try {
       setLoading(true);
@@ -184,8 +227,12 @@ export default function SessionsPage() {
   };
 
   useEffect(() => {
-    fetchSessions();
-  }, []);
+    if (showSessions !== false) {
+      fetchSessions();
+    } else {
+      setLoading(false);
+    }
+  }, [showSessions]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -275,6 +322,38 @@ export default function SessionsPage() {
       return matchQuery && matchCategory && matchType;
     });
   }, [sessions, searchQuery, selectedCategory, filterType]);
+
+  if (showSessions === false) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-28 text-center space-y-6">
+        <div className="w-16 h-16 bg-ink-900 border border-ink-800 text-ink-400 flex items-center justify-center mx-auto rounded-2xl">
+          <Calendar className="w-8 h-8 text-brand-500" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-black text-white uppercase tracking-tight">
+            Session Booking Offline
+          </h1>
+          <p className="text-ink-400 text-sm max-w-lg mx-auto">
+            Live masterclass and workshop bookings are currently paused by the administrator. Please check back soon or explore our internships.
+          </p>
+        </div>
+        <div className="flex justify-center gap-4 pt-4">
+          <Link
+            href="/"
+            className="px-6 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold border border-ink-700 transition rounded-lg"
+          >
+            Return Home
+          </Link>
+          <Link
+            href="/apply"
+            className="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow-brand-600/30 rounded-lg"
+          >
+            Apply for Internship
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ink-950 text-white font-sans selection:bg-brand-500 selection:text-white pb-24">

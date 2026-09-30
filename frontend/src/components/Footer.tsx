@@ -7,37 +7,47 @@ import { Sparkles, ExternalLink, MessageCircle, Users, Mail } from "lucide-react
 import { apiRequest } from "@/lib/api-client";
 
 export default function Footer() {
-  const [settings, setSettings] = useState<{ show_courses: boolean; show_careers: boolean }>({
+  const [settings, setSettings] = useState<{ show_courses: boolean; show_careers: boolean; show_sessions: boolean }>({
     show_courses: false,
     show_careers: false,
+    show_sessions: true,
   });
 
   const fetchSettings = async () => {
     if (typeof window !== "undefined") {
       const cachedCourses = localStorage.getItem("show_courses");
       const cachedCareers = localStorage.getItem("show_careers");
-      if (cachedCourses !== null || cachedCareers !== null) {
+      const cachedSessions = localStorage.getItem("show_sessions");
+      if (cachedCourses !== null || cachedCareers !== null || cachedSessions !== null) {
         setSettings({
           show_courses: cachedCourses === "true",
           show_careers: cachedCareers === "true",
+          show_sessions: cachedSessions !== "false",
         });
       }
     }
     try {
-      const data = await apiRequest<{ show_courses?: boolean | string; show_careers?: boolean | string }>(
+      const data = await apiRequest<{
+        show_courses?: boolean | string;
+        show_careers?: boolean | string;
+        show_sessions?: boolean | string;
+      }>(
         `/settings?_t=${Date.now()}`
       );
       if (data) {
         const cVal = data.show_courses === true || data.show_courses === "true";
         const carVal = data.show_careers === true || data.show_careers === "true";
+        const sVal = data.show_sessions !== false && data.show_sessions !== "false";
         setSettings({
           show_courses: cVal,
           show_careers: carVal,
+          show_sessions: sVal,
         });
         if (typeof window !== "undefined") {
           try {
             localStorage.setItem("show_courses", String(cVal));
             localStorage.setItem("show_careers", String(carVal));
+            localStorage.setItem("show_sessions", String(sVal));
           } catch {}
         }
       }
@@ -50,10 +60,11 @@ export default function Footer() {
     fetchSettings();
     const handleSettingsEvent = (e: any) => {
       if (e?.detail) {
-        setSettings({
-          show_courses: Boolean(e.detail.show_courses),
-          show_careers: Boolean(e.detail.show_careers),
-        });
+        setSettings((prev) => ({
+          show_courses: typeof e.detail.show_courses !== "undefined" ? Boolean(e.detail.show_courses) : prev.show_courses,
+          show_careers: typeof e.detail.show_careers !== "undefined" ? Boolean(e.detail.show_careers) : prev.show_careers,
+          show_sessions: typeof e.detail.show_sessions !== "undefined" ? Boolean(e.detail.show_sessions) : prev.show_sessions,
+        }));
       } else {
         fetchSettings();
       }
@@ -116,7 +127,9 @@ export default function Footer() {
                 <li><Link href="/courses" className="hover:text-white transition text-brand-400 hover:text-brand-300">Course Catalog</Link></li>
               )}
               <li><Link href="/apply" className="hover:text-white transition">Internship Application</Link></li>
-              <li><Link href="/sessions" className="hover:text-white transition text-brand-400 font-medium">Book Session</Link></li>
+              {settings.show_sessions && (
+                <li><Link href="/sessions" className="hover:text-white transition text-brand-400 font-medium">Book Session</Link></li>
+              )}
               <li><Link href="/verify-certificate" className="hover:text-white transition flex items-center gap-1.5"><span className="text-brand-400">✓</span> Certificate Verification</Link></li>
               <li><Link href="/contact" className="hover:text-white transition">Contact Support</Link></li>
             </ul>

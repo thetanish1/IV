@@ -188,13 +188,17 @@ function AdminDashboardContent() {
   const [settings, setSettings] = useState<{
     show_courses?: boolean;
     show_careers?: boolean;
+    show_sessions?: boolean;
     courses_enabled?: boolean;
     careers_enabled?: boolean;
+    sessions_enabled?: boolean;
   }>({
     show_courses: false,
     show_careers: false,
+    show_sessions: true,
     courses_enabled: false,
     careers_enabled: false,
+    sessions_enabled: true,
   });
   const [subAdmins, setSubAdmins] = useState<any[]>([]);
 
@@ -415,11 +419,14 @@ function AdminDashboardContent() {
           const sData = data.settings || data || {};
           const isCourses = sData.show_courses === true || sData.show_courses === "true" || sData.courses_enabled === true;
           const isCareers = sData.show_careers === true || sData.show_careers === "true" || sData.careers_enabled === true;
+          const isSessions = sData.show_sessions !== false && sData.show_sessions !== "false" && sData.sessions_enabled !== false;
           setSettings({
             show_courses: isCourses,
             show_careers: isCareers,
+            show_sessions: isSessions,
             courses_enabled: isCourses,
             careers_enabled: isCareers,
+            sessions_enabled: isSessions,
           });
         }
         if (key === "admins") setSubAdmins(data.admins || data || []);
@@ -472,50 +479,62 @@ function AdminDashboardContent() {
         ? value
         : (settings.show_careers ?? settings.careers_enabled ?? false);
 
+    const isSessions =
+      key === "show_sessions" || key === "sessions_enabled" || key === "show_session_booking" || key === "session_booking_enabled"
+        ? value
+        : (settings.show_sessions ?? settings.sessions_enabled ?? true);
+
     // 1. Optimistically update local state immediately
     setSettings({
       show_courses: isCourses,
       show_careers: isCareers,
+      show_sessions: isSessions,
       courses_enabled: isCourses,
       careers_enabled: isCareers,
+      sessions_enabled: isSessions,
     });
 
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("show_courses", String(isCourses));
         localStorage.setItem("show_careers", String(isCareers));
+        localStorage.setItem("show_sessions", String(isSessions));
         localStorage.setItem("site_settings_updated", Date.now().toString());
       } catch {}
       window.dispatchEvent(new CustomEvent("site-settings-changed", {
-        detail: { show_courses: isCourses, show_careers: isCareers }
+        detail: { show_courses: isCourses, show_careers: isCareers, show_sessions: isSessions }
       }));
     }
 
     // 2. Persist to backend
     try {
-      const updated = await apiRequest<{ show_courses?: boolean; show_careers?: boolean }>(`/admin/settings`, {
+      const updated = await apiRequest<{ show_courses?: boolean; show_careers?: boolean; show_sessions?: boolean }>(`/admin/settings`, {
         method: "PATCH",
         body: JSON.stringify({ 
           [key]: value,
-          [key === "show_courses" ? "courses_enabled" : "careers_enabled"]: value 
+          [key === "show_courses" ? "courses_enabled" : key === "show_careers" ? "careers_enabled" : "sessions_enabled"]: value 
         }),
       });
       if (updated) {
         const finalCourses = updated.show_courses === true || updated.show_courses === ("true" as any);
         const finalCareers = updated.show_careers === true || updated.show_careers === ("true" as any);
+        const finalSessions = updated.show_sessions !== false && updated.show_sessions !== ("false" as any);
         setSettings({
           show_courses: finalCourses,
           show_careers: finalCareers,
+          show_sessions: finalSessions,
           courses_enabled: finalCourses,
           careers_enabled: finalCareers,
+          sessions_enabled: finalSessions,
         });
         if (typeof window !== "undefined") {
           try {
             localStorage.setItem("show_courses", String(finalCourses));
             localStorage.setItem("show_careers", String(finalCareers));
+            localStorage.setItem("show_sessions", String(finalSessions));
           } catch {}
           window.dispatchEvent(new CustomEvent("site-settings-changed", {
-            detail: { show_courses: finalCourses, show_careers: finalCareers }
+            detail: { show_courses: finalCourses, show_careers: finalCareers, show_sessions: finalSessions }
           }));
         }
       }
@@ -862,7 +881,12 @@ function AdminDashboardContent() {
                     />
                   )}
 
-                  {activeTab === "sessions" && <SessionsTab />}
+                  {activeTab === "sessions" && (
+                    <SessionsTab
+                      sessionsEnabled={settings.show_sessions ?? settings.sessions_enabled ?? true}
+                      onToggleSessionsEnabled={(val) => handleUpdateSetting("show_sessions", val)}
+                    />
+                  )}
                   {activeTab === "best_interns" && <BestInternsTab />}
 
                   {activeTab === "applicants" && (

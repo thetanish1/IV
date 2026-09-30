@@ -11,6 +11,7 @@ router = APIRouter(prefix="/admin/settings", tags=["admin-settings"])
 DEFAULT_SETTINGS = {
     "show_courses": "false",
     "show_careers": "false",
+    "show_sessions": "true",
 }
 
 @router.get("")
@@ -30,12 +31,15 @@ def get_site_settings(response: Response, db: Session = Depends(get_db)):
 
     show_courses_val = str(settings_dict.get("show_courses", "false")).lower() == "true"
     show_careers_val = str(settings_dict.get("show_careers", "false")).lower() == "true"
+    show_sessions_val = str(settings_dict.get("show_sessions", "true")).lower() == "true"
 
     return {
         "show_courses": show_courses_val,
         "show_careers": show_careers_val,
+        "show_sessions": show_sessions_val,
         "courses_enabled": show_courses_val,
         "careers_enabled": show_careers_val,
+        "sessions_enabled": show_sessions_val,
     }
 
 
@@ -69,6 +73,15 @@ def update_site_settings(
                 setting_row.value = str_val
             else:
                 db.add(SiteSetting(key="show_careers", value=str_val))
+
+        # Handle sessions / session book toggle
+        if key in ("show_sessions", "sessions_enabled", "show_session_booking", "session_booking_enabled"):
+            str_val = "true" if val is True or str(val).lower() == "true" else "false"
+            setting_row = db.query(SiteSetting).filter(SiteSetting.key == "show_sessions").first()
+            if setting_row:
+                setting_row.value = str_val
+            else:
+                db.add(SiteSetting(key="show_sessions", value=str_val))
 
     db.commit()
     return get_site_settings(response, db)

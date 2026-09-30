@@ -12,15 +12,19 @@ import {
   Database,
   Activity,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  Calendar,
+  Video
 } from "lucide-react";
 
 interface SettingsIAMTabProps {
   settings: {
     show_courses?: boolean;
     show_careers?: boolean;
+    show_sessions?: boolean;
     courses_enabled?: boolean;
     careers_enabled?: boolean;
+    sessions_enabled?: boolean;
   };
   onUpdateSetting: (key: string, value: boolean) => Promise<void>;
   currentAdmin: {
@@ -46,6 +50,7 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
 
   const isCoursesEnabled = settings.show_courses ?? settings.courses_enabled ?? false;
   const isCareersEnabled = settings.show_careers ?? settings.careers_enabled ?? false;
+  const isSessionsEnabled = settings.show_sessions ?? settings.sessions_enabled ?? true;
 
   const handleToggle = async (key: string, currentValue: boolean) => {
     try {
@@ -101,7 +106,34 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          {/* Session Booking Toggle */}
+          <div className="bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded-lg text-purple-600 dark:text-purple-400">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-white">Session Booking</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Controls navbar & footer &ldquo;Book Session&rdquo; link &amp; live booking page.
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => handleToggle("show_sessions", isSessionsEnabled)}
+              disabled={togglingKey === "show_sessions" || togglingKey === "sessions_enabled"}
+              className="text-purple-600 dark:text-purple-400 hover:opacity-80 transition-opacity p-1 cursor-pointer shrink-0"
+              title={isSessionsEnabled ? "Disable Session Booking" : "Enable Session Booking"}
+            >
+              {isSessionsEnabled ? (
+                <ToggleRight className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              ) : (
+                <ToggleLeft className="w-8 h-8 text-gray-400 dark:text-gray-600" />
+              )}
+            </button>
+          </div>
+
           {/* Courses Toggle */}
           <div className="bg-gray-50 dark:bg-[#1F1F23] border border-gray-200 dark:border-[#2E2E33] rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -111,14 +143,15 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
               <div>
                 <div className="text-sm font-semibold text-gray-900 dark:text-white">Public Courses Catalog</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  Controls navbar & footer link, homepage section, and `/courses` route access.
+                  Controls navbar &amp; footer link, homepage section, and /courses route.
                 </div>
               </div>
             </div>
             <button
               onClick={() => handleToggle("show_courses", isCoursesEnabled)}
               disabled={togglingKey === "show_courses" || togglingKey === "courses_enabled"}
-              className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity p-1 cursor-pointer"
+              className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity p-1 cursor-pointer shrink-0"
+              title={isCoursesEnabled ? "Disable Courses" : "Enable Courses"}
             >
               {isCoursesEnabled ? (
                 <ToggleRight className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -135,7 +168,7 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
                 <Briefcase className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-gray-900 dark:text-white">Careers & Hiring Board</div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-white">Careers &amp; Hiring Board</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   Controls careers page visibility and job applicant forms.
                 </div>
@@ -144,10 +177,11 @@ export const SettingsIAMTab: React.FC<SettingsIAMTabProps> = ({
             <button
               onClick={() => handleToggle("show_careers", isCareersEnabled)}
               disabled={togglingKey === "show_careers" || togglingKey === "careers_enabled"}
-              className="text-blue-600 dark:text-blue-400 hover:opacity-80 transition-opacity p-1 cursor-pointer"
+              className="text-emerald-600 dark:text-emerald-400 hover:opacity-80 transition-opacity p-1 cursor-pointer shrink-0"
+              title={isCareersEnabled ? "Disable Careers" : "Enable Careers"}
             >
               {isCareersEnabled ? (
-                <ToggleRight className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <ToggleRight className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
               ) : (
                 <ToggleLeft className="w-8 h-8 text-gray-400 dark:text-gray-600" />
               )}

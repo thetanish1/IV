@@ -24,6 +24,8 @@ import {
   Eye,
   Layers,
   ChevronRight,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { apiRequest, getImageUrl } from "@/lib/api-client";
 import { AdminSearchBar, StatusBadge, Pagination } from "../common";
@@ -72,13 +74,67 @@ interface SessionBookingItem {
   meeting_platform?: string;
 }
 
-export default function SessionsTab() {
+interface SessionsTabProps {
+  sessionsEnabled?: boolean;
+  onToggleSessionsEnabled?: (enabled: boolean) => Promise<void>;
+}
+
+export default function SessionsTab({
+  sessionsEnabled: propSessionsEnabled,
+  onToggleSessionsEnabled,
+}: SessionsTabProps = {}) {
   const [sessions, setSessions] = useState<LiveSessionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<"ALL" | "FREE" | "PAID">("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  // Session Booking switch state
+  const [internalSessionsEnabled, setInternalSessionsEnabled] = useState<boolean>(
+    propSessionsEnabled ?? true
+  );
+  const [isTogglingBookingSwitch, setIsTogglingBookingSwitch] = useState(false);
+
+  const isBookingActive = propSessionsEnabled !== undefined ? propSessionsEnabled : internalSessionsEnabled;
+
+  useEffect(() => {
+    if (propSessionsEnabled !== undefined) {
+      setInternalSessionsEnabled(propSessionsEnabled);
+    }
+  }, [propSessionsEnabled]);
+
+  const handleToggleBookingSwitch = async () => {
+    const nextVal = !isBookingActive;
+    setIsTogglingBookingSwitch(true);
+    try {
+      if (onToggleSessionsEnabled) {
+        await onToggleSessionsEnabled(nextVal);
+      } else {
+        await apiRequest("/admin/settings", {
+          method: "PATCH",
+          body: JSON.stringify({ show_sessions: nextVal }),
+        });
+        setInternalSessionsEnabled(nextVal);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("show_sessions", String(nextVal));
+          } catch {}
+          window.dispatchEvent(
+            new CustomEvent("site-settings-changed", {
+              detail: { show_sessions: nextVal },
+            })
+          );
+        }
+      }
+      setActionMessage(nextVal ? "Session Booking is now enabled publicly." : "Session Booking is now disabled publicly.");
+      setTimeout(() => setActionMessage(null), 3500);
+    } catch (err: any) {
+      alert("Failed to toggle session booking status: " + (err.message || err));
+    } finally {
+      setIsTogglingBookingSwitch(false);
+    }
+  };
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -497,6 +553,29 @@ export default function SessionsTab() {
               }`}
             >
               Paid ({paidCount})
+            </button>
+          </div>
+
+          {/* Session Booking Public Toggle Switch */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-ink-900 rounded-lg border border-gray-200 dark:border-ink-800 text-xs">
+            <span className="text-gray-500 dark:text-ink-400 font-medium">Booking Status:</span>
+            <button
+              onClick={handleToggleBookingSwitch}
+              disabled={isTogglingBookingSwitch}
+              className="flex items-center gap-1.5 font-bold transition cursor-pointer hover:opacity-85"
+              title={isBookingActive ? "Click to disable public session booking" : "Click to enable public session booking"}
+            >
+              {isBookingActive ? (
+                <>
+                  <span className="text-emerald-600 dark:text-emerald-400">ONLINE</span>
+                  <ToggleRight className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </>
+              ) : (
+                <>
+                  <span className="text-gray-400 dark:text-gray-500">PAUSED</span>
+                  <ToggleLeft className="w-6 h-6 text-gray-400 dark:text-gray-600" />
+                </>
+              )}
             </button>
           </div>
 
