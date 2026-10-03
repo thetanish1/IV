@@ -159,6 +159,7 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Quick Links</h4>
             <ul className="space-y-2 text-xs">
               <li><Link href="/" className="hover:text-white transition">Home</Link></li>
+              <li><Link href="/about" className="hover:text-white transition text-brand-300 hover:text-brand-200 font-medium">About Us</Link></li>
               {settings.show_courses && (
                 <li><Link href="/courses" className="hover:text-white transition text-brand-400 hover:text-brand-300">Course Catalog</Link></li>
               )}

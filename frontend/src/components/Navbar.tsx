@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn, Video, Trophy } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn, Video, Trophy, ChevronDown, Building2, MapPin, Mail, Info, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserAuthModal from "@/components/UserAuthModal";
 import { apiRequest } from "@/lib/api-client";
@@ -13,6 +13,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isContactDropdownOpen, setIsContactDropdownOpen] = useState(false);
+  const contactDropdownRef = useRef<HTMLDivElement | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -305,15 +307,95 @@ export default function Navbar() {
               Verify Certificate
             </Link>
 
-            <Link
-              href="/contact"
-              className={`flex items-center gap-1.5 transition-colors ${
-                isActive("/contact") ? "text-brand-400 font-semibold" : "text-ink-300 hover:text-white"
-              }`}
+            {/* Contact & About Us Dropdown */}
+            <div
+              className="relative"
+              ref={contactDropdownRef}
+              onMouseEnter={() => setIsContactDropdownOpen(true)}
+              onMouseLeave={() => setIsContactDropdownOpen(false)}
             >
-              <Phone className="w-4 h-4" />
-              Contact
-            </Link>
+              <button
+                type="button"
+                onClick={() => setIsContactDropdownOpen((prev) => !prev)}
+                className={`flex items-center gap-1.5 py-1.5 transition-colors cursor-pointer ${
+                  isActive("/contact") || isActive("/about")
+                    ? "text-brand-400 font-semibold"
+                    : "text-ink-300 hover:text-white"
+                }`}
+              >
+                <Phone className="w-4 h-4" />
+                <span>Contact</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    isContactDropdownOpen ? "rotate-180 text-brand-400" : "text-ink-400"
+                  }`}
+                />
+              </button>
+
+              <AnimatePresence>
+                {isContactDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-1.5 w-80 rounded-2xl bg-ink-950/95 border border-ink-800 shadow-2xl p-2.5 backdrop-blur-xl z-50 space-y-1.5"
+                  >
+                    {/* Item 1: About Us */}
+                    <Link
+                      href="/about"
+                      onClick={() => setIsContactDropdownOpen(false)}
+                      className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-ink-900 transition group border border-transparent hover:border-brand-500/30"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                        <Building2 className="w-4 h-4" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-white group-hover:text-brand-300 transition-colors">
+                            About Us
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                            Est. 2022
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-ink-400 leading-tight">
+                          Client software projects, fresher mentorship & Mumbai/Nagpur branches.
+                        </p>
+                      </div>
+                    </Link>
+
+                    {/* Item 2: Contact Support Desk */}
+                    <Link
+                      href="/contact"
+                      onClick={() => setIsContactDropdownOpen(false)}
+                      className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-ink-900 transition group border border-transparent hover:border-emerald-500/30"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors block">
+                          Contact & Support Desk
+                        </span>
+                        <p className="text-[11px] text-ink-400 leading-tight">
+                          Student queries, HR email & inquiries form.
+                        </p>
+                      </div>
+                    </Link>
+
+                    {/* Dropdown Footer */}
+                    <div className="pt-2 px-2 border-t border-ink-900 flex items-center justify-between text-[10px] text-ink-500">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-brand-400" />
+                        Mumbai HQ & Nagpur
+                      </span>
+                      <span className="text-emerald-400 font-semibold">Online Operations</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -476,6 +558,18 @@ export default function Navbar() {
                 Verify Certificate
               </Link>
               <Link
+                href="/about"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
+                  isActive("/about")
+                    ? "bg-brand-500/10 text-brand-400 font-semibold border-brand-500/20"
+                    : "bg-ink-900 text-ink-300 hover:text-white"
+                }`}
+              >
+                <Building2 className="w-4 h-4 text-brand-400" />
+                <span>About Us (Est. 2022)</span>
+              </Link>
+              <Link
                 href="/contact"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-2 px-4 py-3 border border-ink-800 transition-colors ${
@@ -485,7 +579,7 @@ export default function Navbar() {
                 }`}
               >
                 <Phone className="w-4 h-4" />
-                Contact
+                <span>Contact & Support</span>
               </Link>
 
               <div className="grid grid-cols-1 gap-3 pt-1">
