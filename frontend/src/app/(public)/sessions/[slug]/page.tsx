@@ -395,6 +395,43 @@ export default function SingleSessionSharablePage({
               </div>
             </div>
 
+            {/* InternVision Parent Course Upgrade Card */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-brand-950/80 via-ink-900 to-indigo-950/70 border-2 border-brand-500/40 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-400">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Comprehensive Course Track &bull; Parent Organization</span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-500/20 text-brand-300 border border-brand-500/40">
+                  InternVision.com
+                </span>
+              </div>
+              <h3 className="text-xl font-extrabold text-white">
+                Want the Full Certified Course & Industry Diploma?
+              </h3>
+              <p className="text-xs sm:text-sm text-ink-300 leading-relaxed">
+                This live session is a preview module of our complete technical curriculum on parent company <strong className="text-white">InternVision</strong>. Enroll in the multi-week certified track to get end-to-end project modules, 1-on-1 code reviews, and guaranteed portfolio evaluation.
+              </p>
+              <div className="pt-2 flex flex-wrap items-center gap-3">
+                <a
+                  href="https://www.internvision.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-extrabold transition shadow-lg shadow-brand-600/30 flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Buy Full Course on InternVision</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+                <Link
+                  href="/sessions"
+                  className="px-4 py-3 rounded-xl bg-ink-900 hover:bg-ink-800 text-ink-300 hover:text-white text-xs font-semibold border border-ink-800 transition"
+                >
+                  Explore Other Sessions
+                </Link>
+              </div>
+            </div>
+
             {/* Perks Included */}
             <div className="p-6 sm:p-8 rounded-3xl bg-ink-900/40 border border-ink-800 space-y-4">
               <h3 className="text-base font-bold text-white flex items-center gap-2">

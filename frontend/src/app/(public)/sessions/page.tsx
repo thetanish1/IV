@@ -46,6 +46,8 @@ interface LiveSession {
   tags?: string[];
   is_published: boolean;
   booking_count?: number;
+  parent_course_title?: string;
+  parent_course_url?: string;
 }
 
 const DEFAULT_SESSIONS: LiveSession[] = [
@@ -76,6 +78,8 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     tags: ["GitHub", "Git", "Open Source", "CI/CD", "DevOps"],
     is_published: true,
     booking_count: 84,
+    parent_course_title: "Git, DevOps & CI/CD Pro Track",
+    parent_course_url: "https://www.internvision.com/",
   },
   {
     id: 2,
@@ -104,6 +108,8 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     tags: ["Docker", "Kubernetes", "DevOps", "Microservices", "Containers"],
     is_published: true,
     booking_count: 112,
+    parent_course_title: "Cloud DevOps & Kubernetes Mastery Course",
+    parent_course_url: "https://www.internvision.com/",
   },
   {
     id: 3,
@@ -132,6 +138,98 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     tags: ["Next.js 15", "FastAPI", "React", "TypeScript", "PostgreSQL"],
     is_published: true,
     booking_count: 67,
+    parent_course_title: "Full Stack Web Development Bootcamp",
+    parent_course_url: "https://www.internvision.com/",
+  },
+  {
+    id: 4,
+    title: "Python AI & Generative AI Engineering Masterclass",
+    slug: "python-ai-generative-ai-masterclass",
+    description:
+      "Learn to construct production-ready AI pipelines, LangChain integrations, OpenAI APIs, vector databases, and custom Retrieval-Augmented Generation (RAG) agents.",
+    key_takeaways: [
+      "Building multi-modal AI agents with Python & LangChain",
+      "Vector embeddings & retrieval using Pinecone and ChromaDB",
+      "Prompt engineering and automated tool calling workflows",
+      "Deploying scalable AI microservices on cloud infrastructure",
+    ],
+    session_date: "Sunday, 02 Nov 2026",
+    session_time: "06:30 PM IST",
+    duration: "2 Hours",
+    is_free: false,
+    price_inr: 149,
+    thumbnail_url:
+      "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1000&auto=format&fit=crop",
+    instructor_name: "InternVision Mentorship Team",
+    instructor_role: "AI & Machine Learning Lead",
+    meeting_platform: "Google Meet",
+    max_seats: 120,
+    category: "AI & Data Science",
+    tags: ["Python", "Generative AI", "LangChain", "OpenAI", "RAG"],
+    is_published: true,
+    booking_count: 95,
+    parent_course_title: "AI & Machine Learning Engineering Program",
+    parent_course_url: "https://www.internvision.com/",
+  },
+  {
+    id: 5,
+    title: "High-Performance Backend System Design & Microservices",
+    slug: "backend-system-design-microservices",
+    description:
+      "Master distributed system concepts, Redis caching tiers, Kafka event-driven architectures, database sharding, and high-availability design for tech interviews.",
+    key_takeaways: [
+      "Designing high-scale distributed systems from scratch",
+      "Redis caching patterns, cache invalidation & write strategies",
+      "Asynchronous message broker architecture using Apache Kafka",
+      "Database partitioning, replication, and CAP theorem trade-offs",
+    ],
+    session_date: "Saturday, 08 Nov 2026",
+    session_time: "06:00 PM IST",
+    duration: "2.5 Hours",
+    is_free: false,
+    price_inr: 199,
+    thumbnail_url:
+      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000&auto=format&fit=crop",
+    instructor_name: "InternVision Mentorship Team",
+    instructor_role: "Enterprise Systems Architect",
+    meeting_platform: "Google Meet",
+    max_seats: 80,
+    category: "Backend & System Design",
+    tags: ["System Design", "Microservices", "Redis", "Kafka", "Databases"],
+    is_published: true,
+    booking_count: 53,
+    parent_course_title: "Enterprise Backend & System Design Master Track",
+    parent_course_url: "https://www.internvision.com/",
+  },
+  {
+    id: 6,
+    title: "Cyber Security, Ethical Hacking & Web App Defense",
+    slug: "cyber-security-ethical-hacking-defense",
+    description:
+      "Explore OWASP Top 10 web vulnerabilities, SQL injection, XSS defense, penetration testing methodologies, and secure cloud infrastructure hardening.",
+    key_takeaways: [
+      "Practical identification & exploitation of OWASP Top 10 flaws",
+      "Network scanning, traffic analysis, and Burp Suite techniques",
+      "Securing APIs and implementing defense-in-depth protocols",
+      "Live vulnerability assessment walkthrough on demo applications",
+    ],
+    session_date: "Sunday, 09 Nov 2026",
+    session_time: "05:00 PM IST",
+    duration: "2 Hours",
+    is_free: true,
+    price_inr: 0,
+    thumbnail_url:
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop",
+    instructor_name: "InternVision Mentorship Team",
+    instructor_role: "Information Security Specialist",
+    meeting_platform: "Google Meet",
+    max_seats: 180,
+    category: "Cyber Security",
+    tags: ["Cyber Security", "Ethical Hacking", "OWASP", "Network Security"],
+    is_published: true,
+    booking_count: 140,
+    parent_course_title: "Cyber Security & Ethical Hacking Certified Course",
+    parent_course_url: "https://www.internvision.com/",
   },
 ];
 
@@ -440,6 +538,41 @@ export default function SessionsPage() {
 
       {/* Filters & Catalog Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12">
+        {/* Parent Company Course Promo Banner */}
+        <div className="mb-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-brand-950/80 via-ink-900 to-indigo-950/80 border border-brand-500/40 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 shrink-0">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div className="space-y-1 text-center sm:text-left">
+              <div className="flex items-center gap-2 justify-center sm:justify-start">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-400">
+                  Parent Company Curriculum & Certifications
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                  InternVision.com
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-white">
+                Looking for In-Depth Certified Programs? Buy Directly from InternVision
+              </h3>
+              <p className="text-xs text-ink-300">
+                These live sessions are preview workshops. You can purchase complete certified multi-week bootcamps directly from our parent entity.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href="https://www.internvision.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs font-extrabold transition shadow-lg shadow-brand-600/30 flex items-center gap-2"
+          >
+            <span>Explore & Buy Courses</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+
         {/* Search & Filter Controls */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-8 pb-6 border-b border-ink-800/80">
           {/* Search Bar */}
@@ -621,10 +754,28 @@ export default function SessionsPage() {
                         ))}
                       </div>
                     )}
+
+                    {/* Parent Course Redirection Link Box */}
+                    <div className="mt-4 p-2.5 rounded-xl bg-brand-950/30 border border-brand-500/20 flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-ink-300 truncate">
+                        <span className="text-brand-400 font-bold block text-[10px] uppercase">Full Course on InternVision</span>
+                        <span className="text-white font-medium truncate block">{session.parent_course_title || "Full Certified Track"}</span>
+                      </div>
+                      <a
+                        href={session.parent_course_url || "https://www.internvision.com/"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-brand-600/30 hover:bg-brand-600 text-brand-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 shrink-0 border border-brand-500/30"
+                        title="Buy Full Course on Parent Company InternVision"
+                      >
+                        <span>Buy Course</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
                   </div>
 
                   {/* Footer & Actions */}
-                  <div className="pt-4 border-t border-ink-800/80 space-y-3">
+                  <div className="pt-3 border-t border-ink-800/80 space-y-3">
                     <div className="flex items-center justify-between text-xs text-ink-400">
                       <div className="flex items-center gap-1.5">
                         <div className="w-6 h-6 rounded-full bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-300 text-[10px] font-bold">
