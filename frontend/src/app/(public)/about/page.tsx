@@ -83,8 +83,8 @@ export default function AboutPage() {
               <div className="text-xs text-ink-400 mt-1 font-medium">Happy Clients & Projects</div>
             </div>
             <div className="p-4 rounded-2xl bg-ink-900/60 border border-ink-800 text-center">
-              <div className="text-2xl sm:text-3xl font-black text-purple-400">2 Branches</div>
-              <div className="text-xs text-ink-400 mt-1 font-medium">Mumbai HQ & Nagpur</div>
+              <div className="text-2xl sm:text-3xl font-black text-purple-400">100% Virtual</div>
+              <div className="text-xs text-ink-400 mt-1 font-medium">Remote Operations</div>
             </div>
           </motion.div>
         </div>
@@ -330,63 +330,63 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Corporate Locations & Branches */}
+        {/* Remote-First Operational Model */}
         <section className="space-y-8">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-400">
-              <MapPin className="w-4 h-4" />
-              <span>Our Presence</span>
+              <Globe className="w-4 h-4" />
+              <span>How We Operate</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Headquarters & Operating Branches</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">100% Virtual & Remote Delivery Model</h2>
             <p className="text-xs sm:text-sm text-ink-400">
-              Serving students and commercial clients across India and globally.
+              Serving students, freshers, and commercial enterprise clients across all regions seamlessly online.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Main HQ - Mumbai */}
+            {/* Card 1: Virtual Internship Sprints */}
             <div className="p-7 rounded-3xl bg-ink-900/80 border-2 border-brand-500/40 relative overflow-hidden space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400">
-                  <Building2 className="w-6 h-6" />
+                  <GraduationCap className="w-6 h-6" />
                 </div>
                 <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                  Primary Headquarters
+                  Virtual Learning
                 </span>
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-white">Mumbai Headquarters</h3>
-                <p className="text-xs text-brand-400 font-semibold mt-0.5">Corporate & Engineering Hub</p>
+                <h3 className="text-xl font-extrabold text-white">Online Task & Mentorship Hub</h3>
+                <p className="text-xs text-brand-400 font-semibold mt-0.5">Interactive Student Portal & Code Review</p>
               </div>
               <p className="text-xs text-ink-300 leading-relaxed">
-                Our main headquarters in Mumbai oversees client product deliveries, curriculum design, partnership governance, and nationwide student certifications.
+                Our virtual engineering platform coordinates task distribution, automated milestones, live doubt resolution, and portfolio evaluations for students nationwide.
               </p>
               <div className="pt-2 text-xs text-ink-400 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-brand-400" />
-                <span>Mumbai, Maharashtra, India</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Accessible 24/7 from anywhere</span>
               </div>
             </div>
 
-            {/* Second Branch - Nagpur */}
+            {/* Card 2: Commercial Project Delivery */}
             <div className="p-7 rounded-3xl bg-ink-900/80 border border-ink-800 hover:border-purple-500/40 transition relative overflow-hidden space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
-                  <Globe className="w-6 h-6" />
+                  <Briefcase className="w-6 h-6" />
                 </div>
                 <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  Online Operating Branch
+                  Client Engineering
                 </span>
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-white">Nagpur Branch</h3>
-                <p className="text-xs text-purple-400 font-semibold mt-0.5">Virtual Operations & Mentorship</p>
+                <h3 className="text-xl font-extrabold text-white">Client Project Engineering</h3>
+                <p className="text-xs text-purple-400 font-semibold mt-0.5">Enterprise Software & Product Milestones</p>
               </div>
               <p className="text-xs text-ink-300 leading-relaxed">
-                Initially operated online, our Nagpur branch coordinates student doubts, project evaluation submissions, and virtual task management.
+                We manage full lifecycle client software deliveries, fulfilling custom architectural requirements and providing real business-oriented production solutions.
               </p>
               <div className="pt-2 text-xs text-ink-400 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-purple-400" />
-                <span>Nagpur, Maharashtra, India</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                <span>Production-grade deliverables</span>
               </div>
             </div>
           </div>

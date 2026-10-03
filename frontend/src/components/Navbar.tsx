@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn, Video, Trophy, ChevronDown, Building2, MapPin, Mail, Info, ArrowRight } from "lucide-react";
+import { Sparkles, BookOpen, GraduationCap, Phone, Shield, ShieldCheck, Menu, X, Home, Briefcase, User, LogOut, LogIn, Video, Trophy, ChevronDown, Building2, MapPin, Mail, Info, ArrowRight, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserAuthModal from "@/components/UserAuthModal";
 import { apiRequest } from "@/lib/api-client";
@@ -360,7 +360,7 @@ export default function Navbar() {
                           </span>
                         </div>
                         <p className="text-[11px] text-ink-400 leading-tight">
-                          Client software projects, fresher mentorship & Mumbai/Nagpur branches.
+                          Client software solutions, task sprints & fresher mentorship.
                         </p>
                       </div>
                     </Link>
@@ -387,10 +387,10 @@ export default function Navbar() {
                     {/* Dropdown Footer */}
                     <div className="pt-2 px-2 border-t border-ink-900 flex items-center justify-between text-[10px] text-ink-500">
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-brand-400" />
-                        Mumbai HQ & Nagpur
+                        <Globe className="w-3 h-3 text-brand-400" />
+                        Virtual Engineering Platform
                       </span>
-                      <span className="text-emerald-400 font-semibold">Online Operations</span>
+                      <span className="text-emerald-400 font-semibold">100% Online</span>
                     </div>
                   </motion.div>
                 )}

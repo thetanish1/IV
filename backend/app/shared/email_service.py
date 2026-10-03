@@ -194,7 +194,7 @@ def _build_base_email_template(
                 InternVision Tech Inc. • Virtual Pre-Hire Engineering Programs 2026
               </p>
               <p style="margin: 0; color: #64748b; font-size: 11px;">
-                Headquarters: Nagpur, Maharashtra, India • 100% Remote Engineering Tracks<br/>
+                InternVision Tech Inc. • 100% Remote & Virtual Engineering Tracks<br/>
                 All credentials, task submissions, and completion certificates are verifiable 24/7 online.
               </p>
             </td>

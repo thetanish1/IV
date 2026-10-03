@@ -362,7 +362,7 @@ function CertificateVerifierContent() {
                   <p className="text-white font-semibold flex items-center gap-1.5">
                     <Building2 className="w-3.5 h-3.5 text-brand-400" /> {certificate.instructor_name}
                   </p>
-                  <p className="text-ink-500">InternVision Tech Inc. · Headquartered in Nagpur, India</p>
+                  <p className="text-ink-500">InternVision Tech Inc. · Global Virtual Engineering & Mentorship</p>
                 </div>
 
                 <div className="space-y-1 sm:text-right">

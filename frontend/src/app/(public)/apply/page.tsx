@@ -998,7 +998,7 @@ export default function InternshipApplyPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Nagpur, Mumbai, or Remote / Virtual"
+                  placeholder="e.g. Remote / Virtual or Your City"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
@@ -1021,7 +1021,7 @@ export default function InternshipApplyPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Indian Institute of Technology / VNIT Nagpur"
+                  placeholder="e.g. National Institute of Technology / University"
                   value={formData.college}
                   onChange={(e) => setFormData({ ...formData, college: e.target.value })}
                   className="w-full bg-ink-900 border border-ink-700 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition"
