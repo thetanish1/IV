@@ -21,7 +21,7 @@ class LiveSession(Base):
     
     thumbnail_url = Column(Text, nullable=True)         # Uploaded image path or external URL
     
-    instructor_name = Column(String(255), nullable=True, default="InternVision Tech Team")
+    instructor_name = Column(String(255), nullable=True, default="InternVision Mentorship Team")
     instructor_role = Column(String(255), nullable=True, default="Senior Technical Mentor")
     instructor_avatar = Column(Text, nullable=True)
     

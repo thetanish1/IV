@@ -68,7 +68,7 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     price_inr: 0,
     thumbnail_url:
       "https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=1000&auto=format&fit=crop",
-    instructor_name: "InternVision Lead Mentors",
+    instructor_name: "InternVision Mentorship Team",
     instructor_role: "Senior Engineering Lead & Mentor",
     meeting_platform: "Google Meet",
     max_seats: 200,
@@ -96,7 +96,7 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     price_inr: 0,
     thumbnail_url:
       "https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=1000&auto=format&fit=crop",
-    instructor_name: "Senior Cloud Architect",
+    instructor_name: "InternVision Mentorship Team",
     instructor_role: "Cloud DevOps Architect",
     meeting_platform: "Google Meet",
     max_seats: 150,
@@ -124,7 +124,7 @@ const DEFAULT_SESSIONS: LiveSession[] = [
     price_inr: 99,
     thumbnail_url:
       "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop",
-    instructor_name: "InternVision Tech Team",
+    instructor_name: "InternVision Mentorship Team",
     instructor_role: "Principal Full Stack Architect",
     meeting_platform: "Google Meet",
     max_seats: 100,

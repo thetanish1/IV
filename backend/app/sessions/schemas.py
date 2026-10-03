@@ -13,7 +13,7 @@ class SessionBase(BaseModel):
     is_free: bool = True
     price_inr: int = 0
     thumbnail_url: Optional[str] = None
-    instructor_name: Optional[str] = "InternVision Tech Team"
+    instructor_name: Optional[str] = "InternVision Mentorship Team"
     instructor_role: Optional[str] = "Senior Technical Mentor"
     instructor_avatar: Optional[str] = None
     meeting_platform: Optional[str] = "Google Meet"

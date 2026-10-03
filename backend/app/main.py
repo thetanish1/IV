@@ -205,6 +205,19 @@ async def lifespan(app: FastAPI):
             else:
                 existing.price_inr = 1
 
+        # Standardize live session and certificate mentor/instructor names
+        try:
+            db.execute(text("UPDATE live_sessions SET instructor_name = 'InternVision Mentorship Team'"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
+        try:
+            db.execute(text("UPDATE certificates SET instructor_name = 'InternVision Mentorship Team' WHERE instructor_name ILIKE '%tanish%' OR instructor_name ILIKE '%suraj%'"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         db.commit()
     finally:
         db.close()

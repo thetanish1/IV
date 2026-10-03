@@ -160,7 +160,7 @@ export default function SessionsTab({
   const [formIsFree, setFormIsFree] = useState(true);
   const [formPrice, setFormPrice] = useState(0);
   const [formThumbnail, setFormThumbnail] = useState("");
-  const [formInstructorName, setFormInstructorName] = useState("InternVision Lead Mentors");
+  const [formInstructorName, setFormInstructorName] = useState("InternVision Mentorship Team");
   const [formInstructorRole, setFormInstructorRole] = useState("Senior Technical Mentor");
   const [formMeetingPlatform, setFormMeetingPlatform] = useState("Google Meet");
   const [formMeetingLink, setFormMeetingLink] = useState("");
@@ -201,7 +201,7 @@ export default function SessionsTab({
     setFormIsFree(true);
     setFormPrice(0);
     setFormThumbnail("https://images.unsplash.com/photo-1618401471353-b98aedd04e11?q=80&w=1000&auto=format&fit=crop");
-    setFormInstructorName("InternVision Lead Mentors");
+    setFormInstructorName("InternVision Mentorship Team");
     setFormInstructorRole("Senior Technical Mentor");
     setFormMeetingPlatform("Google Meet");
     setFormMeetingLink("https://meet.google.com/ivt-live");
@@ -224,7 +224,7 @@ export default function SessionsTab({
     setFormIsFree(session.is_free);
     setFormPrice(session.price_inr || 0);
     setFormThumbnail(session.thumbnail_url || "");
-    setFormInstructorName(session.instructor_name || "InternVision Team");
+    setFormInstructorName(session.instructor_name || "InternVision Mentorship Team");
     setFormInstructorRole(session.instructor_role || "Senior Mentor");
     setFormMeetingPlatform(session.meeting_platform || "Google Meet");
     setFormMeetingLink(session.meeting_link || "");
