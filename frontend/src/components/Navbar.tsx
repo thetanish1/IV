@@ -360,7 +360,7 @@ export default function Navbar() {
                           </span>
                         </div>
                         <p className="text-[11px] text-ink-400 leading-tight">
-                          Client software solutions, task sprints & fresher mentorship.
+                          Child company of InternVision. Task sprints & client tech.
                         </p>
                       </div>
                     </Link>

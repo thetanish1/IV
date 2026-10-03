@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, ExternalLink, MessageCircle, Users, Mail, Globe } from "lucide-react";
+import { Sparkles, ExternalLink, MessageCircle, Users, Mail, Globe, Building2 } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
 
 export default function Footer() {
@@ -98,7 +98,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-ink-400 text-xs leading-relaxed">
-              Empowering students with industry-grade software engineering bootcamps, hands-on internships, and career placement mentorship.
+              InternVision Tech is a specialized child tech company of parent entity <a href="https://www.internvision.com/" target="_blank" rel="noopener noreferrer" className="text-brand-400 hover:underline font-medium inline-flex items-center gap-0.5">InternVision <ExternalLink className="w-2.5 h-2.5" /></a>, providing task-based virtual internships and commercial client engineering.
             </p>
             {/* Social Media & Contact Icons */}
             <div className="flex items-center gap-2 pt-1 flex-wrap">
@@ -195,8 +195,15 @@ export default function Footer() {
 
           {/* Col 5: Official Contacts & Social */}
           <div className="lg:col-span-1">
-            <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Official Contacts</h4>
+            <h4 className="font-semibold text-white mb-4 text-xs uppercase tracking-wider">Corporate & Contacts</h4>
             <div className="space-y-2.5 text-xs text-ink-300">
+              <div className="flex flex-col">
+                <span className="text-[11px] text-ink-500 uppercase tracking-wide">Parent Organization</span>
+                <a href="https://www.internvision.com/" target="_blank" rel="noopener noreferrer" className="text-brand-300 hover:underline font-medium text-xs flex items-center gap-1">
+                  <Building2 className="w-3 h-3 text-brand-400 shrink-0" />
+                  InternVision (Parent Co.)
+                </a>
+              </div>
               <div className="flex flex-col">
                 <span className="text-[11px] text-ink-500 uppercase tracking-wide">HR & Internships</span>
                 <a href="mailto:hr@internvisiontech.me" className="text-brand-400 hover:underline font-mono text-xs flex items-center gap-1">
@@ -205,7 +212,7 @@ export default function Footer() {
                 </a>
               </div>
               <div className="flex flex-col">
-                <span className="text-[11px] text-ink-500 uppercase tracking-wide">Official Website</span>
+                <span className="text-[11px] text-ink-500 uppercase tracking-wide">Official Tech Portal</span>
                 <a href="https://www.internvisiontech.me/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline font-mono text-xs flex items-center gap-1">
                   <Globe className="w-3 h-3 shrink-0" />
                   internvisiontech.me

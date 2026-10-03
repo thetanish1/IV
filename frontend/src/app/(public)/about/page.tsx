@@ -97,15 +97,24 @@ export default function AboutPage() {
           <div className="lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-400">
               <Compass className="w-4 h-4" />
-              <span>Who We Are</span>
+              <span>Who We Are & Corporate Structure</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white leading-snug">
               Transforming Academic Knowledge into Production-Grade Engineering
             </h2>
-            <p className="text-sm sm:text-base text-ink-300 leading-relaxed">
-              InternVision Tech is a forward-thinking engineering and career development firm committed to bridging the gap between academic learning and industry demands.
-            </p>
-            <p className="text-sm sm:text-base text-ink-300 leading-relaxed">
+            
+            {/* Parent Company Architecture Badge */}
+            <div className="p-4 rounded-2xl bg-brand-950/40 border border-brand-500/30 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-brand-300">
+                <Building2 className="w-4 h-4 text-brand-400" />
+                <span>Parent Organization: InternVision</span>
+              </div>
+              <p className="text-xs text-ink-300 leading-relaxed">
+                <strong className="text-white">InternVision Tech</strong> is the dedicated technical subsidiary and child company of parent entity <a href="https://www.internvision.com/" target="_blank" rel="noopener noreferrer" className="text-brand-400 font-semibold hover:underline inline-flex items-center gap-1">InternVision (internvision.com) <Globe className="w-3 h-3" /></a>. As the tech division, we deliver task-based virtual engineering internships and commercial software development.
+              </p>
+            </div>
+
+            <p className="text-sm text-ink-300 leading-relaxed">
               We partner with businesses to build robust software systems while empowering college students and fresh graduates who have zero prior experience in the tech sector. Through structured task sprints, continuous code review, and expert guidance, we prepare young engineers for enterprise-level careers.
             </p>
           </div>
