@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, MapPin, Send, CheckCircle2, Sparkles, Loader2, AlertCircle, Globe } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle2, Sparkles, Loader2, AlertCircle, Globe, Phone, Building2, ExternalLink } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
 
 export default function ContactPage() {
@@ -63,6 +63,71 @@ export default function ContactPage() {
         <p className="text-ink-400 text-sm leading-relaxed">
           Have questions about our bootcamps, virtual internship structure, final year projects, or custom software solutions? Send us a message!
         </p>
+      </div>
+
+      {/* Parent Organization Official Corporate Contact Card */}
+      <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-br from-brand-950/70 via-ink-900 to-indigo-950/60 border-2 border-brand-500/40 p-6 sm:p-8 shadow-2xl space-y-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-ink-800 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 shrink-0">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-400">Parent Organization</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-500/20 text-brand-300 border border-brand-500/30">Official Entity</span>
+              </div>
+              <h3 className="text-xl font-extrabold text-white">InternVision (Parent Company)</h3>
+            </div>
+          </div>
+
+          <a
+            href="https://www.internvision.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-brand-600/30 shrink-0"
+          >
+            <span>Visit internvision.com</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          {/* Phone */}
+          <div className="p-4 rounded-2xl bg-ink-950/70 border border-ink-800 space-y-1.5">
+            <div className="flex items-center gap-2 text-brand-400 font-bold">
+              <Phone className="w-4 h-4" />
+              <span>Direct Phone</span>
+            </div>
+            <a href="tel:+916362065185" className="text-white hover:text-brand-300 transition font-mono font-semibold text-sm block">
+              +91 63620 65185
+            </a>
+            <p className="text-[11px] text-ink-500">Corporate & support helpline</p>
+          </div>
+
+          {/* Email */}
+          <div className="p-4 rounded-2xl bg-ink-950/70 border border-ink-800 space-y-1.5">
+            <div className="flex items-center gap-2 text-emerald-400 font-bold">
+              <Mail className="w-4 h-4" />
+              <span>Official Support Email</span>
+            </div>
+            <a href="mailto:support@internvision.com" className="text-white hover:text-emerald-300 transition font-mono font-semibold text-sm block break-all">
+              support@internvision.com
+            </a>
+            <p className="text-[11px] text-ink-500">Parent organization customer desk</p>
+          </div>
+
+          {/* Headquarters Location */}
+          <div className="p-4 rounded-2xl bg-ink-950/70 border border-ink-800 space-y-1.5">
+            <div className="flex items-center gap-2 text-rose-400 font-bold">
+              <MapPin className="w-4 h-4" />
+              <span>Registered Headquarters</span>
+            </div>
+            <p className="text-white text-xs leading-snug font-medium">
+              3rd Floor, Srinidhi Pearl, Plot no10/81, Street Number 1, Patrika Nagar, Madhapur, Hyderabad, Telangana 500081
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">

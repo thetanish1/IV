@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, ExternalLink, MessageCircle, Users, Mail, Globe, Building2 } from "lucide-react";
+import { Sparkles, ExternalLink, MessageCircle, Users, Mail, Globe, Building2, Phone, MapPin } from "lucide-react";
 import { apiRequest } from "@/lib/api-client";
 
 export default function Footer() {
@@ -205,7 +205,21 @@ export default function Footer() {
                 </a>
               </div>
               <div className="flex flex-col">
-                <span className="text-[11px] text-ink-500 uppercase tracking-wide">HR & Internships</span>
+                <span className="text-[11px] text-ink-500 uppercase tracking-wide">Parent Phone</span>
+                <a href="tel:+916362065185" className="text-white hover:text-brand-300 font-mono text-xs flex items-center gap-1">
+                  <Phone className="w-3 h-3 text-brand-400 shrink-0" />
+                  +91 63620 65185
+                </a>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] text-ink-500 uppercase tracking-wide">Parent Email</span>
+                <a href="mailto:support@internvision.com" className="text-white hover:text-emerald-400 font-mono text-xs flex items-center gap-1 break-all">
+                  <Mail className="w-3 h-3 text-emerald-400 shrink-0" />
+                  support@internvision.com
+                </a>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] text-ink-500 uppercase tracking-wide">Tech HR & Internships</span>
                 <a href="mailto:hr@internvisiontech.me" className="text-brand-400 hover:underline font-mono text-xs flex items-center gap-1">
                   <Mail className="w-3 h-3 shrink-0" />
                   hr@internvisiontech.me

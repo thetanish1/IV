@@ -23,6 +23,7 @@ import {
   Globe,
   Mail,
   Compass,
+  Phone,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -42,7 +43,7 @@ export default function AboutPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-xs font-bold uppercase tracking-wider"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Founded in 2022 &bull; Bridging Academia & Industry</span>
+            <span>Founded in 2025 &bull; Bridging Academia & Industry</span>
           </motion.div>
 
           <motion.h1
@@ -71,7 +72,7 @@ export default function AboutPage() {
             className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto pt-6"
           >
             <div className="p-4 rounded-2xl bg-ink-900/60 border border-ink-800 text-center">
-              <div className="text-2xl sm:text-3xl font-black text-brand-400">2022</div>
+              <div className="text-2xl sm:text-3xl font-black text-brand-400">2025</div>
               <div className="text-xs text-ink-400 mt-1 font-medium">Year Established</div>
             </div>
             <div className="p-4 rounded-2xl bg-ink-900/60 border border-ink-800 text-center">
@@ -93,7 +94,7 @@ export default function AboutPage() {
       {/* Main Content Sections */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 space-y-16 sm:space-y-24">
         {/* Who We Are & Dual Mission */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-6 space-y-5">
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-400">
               <Compass className="w-4 h-4" />
@@ -103,15 +104,43 @@ export default function AboutPage() {
               Transforming Academic Knowledge into Production-Grade Engineering
             </h2>
             
-            {/* Parent Company Architecture Badge */}
-            <div className="p-4 rounded-2xl bg-brand-950/40 border border-brand-500/30 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-brand-300">
-                <Building2 className="w-4 h-4 text-brand-400" />
-                <span>Parent Organization: InternVision</span>
+            {/* Parent Company Architecture & Contact Box */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-brand-950/60 via-ink-900 to-indigo-950/50 border border-brand-500/40 space-y-3 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold text-brand-300">
+                  <Building2 className="w-4 h-4 text-brand-400" />
+                  <span>Parent Company: InternVision</span>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                  internvision.com
+                </span>
               </div>
               <p className="text-xs text-ink-300 leading-relaxed">
                 <strong className="text-white">InternVision Tech</strong> is the dedicated technical subsidiary and child company of parent entity <a href="https://www.internvision.com/" target="_blank" rel="noopener noreferrer" className="text-brand-400 font-semibold hover:underline inline-flex items-center gap-1">InternVision (internvision.com) <Globe className="w-3 h-3" /></a>. As the tech division, we deliver task-based virtual engineering internships and commercial software development.
               </p>
+
+              {/* Parent Company Contact Details */}
+              <div className="pt-2 border-t border-ink-800 space-y-2 text-xs text-ink-300">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-brand-400">
+                  Parent Company Contact & Headquarters:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5 text-brand-400 shrink-0" />
+                    <a href="tel:+916362065185" className="hover:text-white transition font-mono">+91 63620 65185</a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <a href="mailto:support@internvision.com" className="hover:text-white transition font-mono">support@internvision.com</a>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 pt-1">
+                  <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                  <span className="text-[11px] text-ink-400 leading-tight">
+                    3rd Floor, Srinidhi Pearl, Plot no10/81, Street Number 1, Patrika Nagar, Madhapur, Hyderabad, Telangana 500081
+                  </span>
+                </div>
+              </div>
             </div>
 
             <p className="text-sm text-ink-300 leading-relaxed">

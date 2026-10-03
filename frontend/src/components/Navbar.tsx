@@ -356,7 +356,7 @@ export default function Navbar() {
                             About Us
                           </span>
                           <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                            Est. 2022
+                            Est. 2025
                           </span>
                         </div>
                         <p className="text-[11px] text-ink-400 leading-tight">
@@ -567,7 +567,7 @@ export default function Navbar() {
                 }`}
               >
                 <Building2 className="w-4 h-4 text-brand-400" />
-                <span>About Us (Est. 2022)</span>
+                <span>About Us (Est. 2025)</span>
               </Link>
               <Link
                 href="/contact"
